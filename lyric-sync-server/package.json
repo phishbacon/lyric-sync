@@ -1,0 +1,32 @@
+{
+  "name": "lyric-sync-server",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "tsx watch src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint --fix"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.2",
+    "@hono/zod-openapi": "^0.16.4",
+    "@libsql/client": "^0.14.0",
+    "@scalar/hono-api-reference": "^0.5.156",
+    "dotenv": "^16.4.5",
+    "dotenv-expand": "^11.0.6",
+    "drizzle-orm": "^0.35.3",
+    "hono": "^4.6.6",
+    "hono-pino": "^0.4.0",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.8.0",
+    "@types/node": "^20.11.17",
+    "drizzle-kit": "^0.26.2",
+    "eslint": "^9.12.0",
+    "tsx": "^4.7.1"
+  }
+}
