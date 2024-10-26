@@ -1,9 +1,9 @@
-import { createRoute, z } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 
-import * as StatusCodes from "@/http-status-codes.js"
-import { createRouter } from "@/lib/create-app.js";
-import jsonContent from "@/openapi/helpers/json-content.js"
-import createMessageObjectSchema from "@/openapi/schemas/create-message-object.js";
+import * as StatusCodes from "@/http-status-codes";
+import { createRouter } from "@/lib/create-app";
+import jsonContent from "@/openapi/helpers/json-content";
+import createMessageObjectSchema from "@/openapi/schemas/create-message-object";
 
 const tags = ["Index"];
 
@@ -18,12 +18,10 @@ const router = createRouter()
         "lyric-sync API Index",
       ),
     },
-  }),
-  (c) => {
+  }), (c) => {
     return c.json({
       message: "lyric-sync API",
-    }, StatusCodes.OK)
-  },
-);
+    }, StatusCodes.OK);
+  });
 
 export default router;

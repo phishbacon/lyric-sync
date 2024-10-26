@@ -1,15 +1,18 @@
-import type { UsersRoute } from "./auth.routes.js";
-import type { AppRouteHandler } from "@/lib/types.js";
+import type { AppRouteHandler } from "@/lib/types";
 
-export const users: AppRouteHandler<UsersRoute> = (c) => {
-  return c.json([
-    {
-      username: "user1",
-      pass_hash: "1234567",
-    },
-    {
-      username: "user2",
-      pass_hash: "1234563",
-    },
-  ]);
+import db from "@/db";
+import { users } from "@/db/schema";
+import * as StatusCodes from "@/http-status-codes";
+
+import type { GetAllRoute, InsertRoute } from "./auth.routes";
+
+export const getAll: AppRouteHandler<GetAllRoute> = async (c) => {
+  const users = await db.query.users.findMany();
+  return c.json(users);
+};
+
+export const insert: AppRouteHandler<InsertRoute> = async (c) => {
+  const user = c.req.valid("json");
+  const [inserted] = await db.insert(users).values(user).returning();
+  return c.json(inserted, StatusCodes.OK);
 };

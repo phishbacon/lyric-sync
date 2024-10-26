@@ -1,8 +1,10 @@
-import { createRouter } from "@/lib/create-app.js";
-import * as handlers from "./auth.handlers.js";
-import * as routes from "./auth.routes.js";
+import { createRouter } from "@/lib/create-app";
+
+import * as handlers from "./auth.handlers";
+import * as routes from "./auth.routes";
 
 const router = createRouter()
-  .openapi(routes.users, handlers.users);
+  .openapi(routes.getAll, handlers.getAll)
+  .openapi(routes.insert, handlers.insert);
 
 export default router;

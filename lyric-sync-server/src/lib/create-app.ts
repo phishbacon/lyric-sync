@@ -1,12 +1,12 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { pinoLogger } from "hono-pino";
 
-import defaultHook from "@/openapi/default-hook.js";
-import notFound from "@/middlewares/not-found.js";
-import onError from "@/middlewares/on-error.js";
-import serveEmojiFavicon from "@/middlewares/serve-emoji-favicon.js";
+import notFound from "@/middlewares/not-found";
+import onError from "@/middlewares/on-error";
+import serveEmojiFavicon from "@/middlewares/serve-emoji-favicon";
+import defaultHook from "@/openapi/default-hook";
 
-import type { AppBindings } from "./types.js";
+import type { AppBindings } from "./types";
 
 export function createRouter() {
   return new OpenAPIHono<AppBindings>({
