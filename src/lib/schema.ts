@@ -55,7 +55,10 @@ export const selectServerSchema = createSelectSchema(servers);
 export const insertServerSchema = createInsertSchema(
   servers,
   {
-    serverName: schema => schema.serverName.min(1),
+    serverName: schema => schema.serverName.min(1, "Server name is required"),
+    url: schema => schema.url.min(1, "Hostname is required"),
+    port: schema => schema.port.min(1, "Use a better port"),
+    token: schema => schema.token.min(1, "Token is required"),
   },
 )
   .omit({

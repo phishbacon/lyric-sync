@@ -6,6 +6,13 @@ import { expand } from "dotenv-expand";
 import path from "node:path";
 import { z } from "zod";
 
+expand(config({
+  path: path.resolve(
+    process.cwd(),
+    ".env",
+  ),
+}));
+
 const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(9999),
