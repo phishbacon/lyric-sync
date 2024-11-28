@@ -1,9 +1,10 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import { CircleX } from "lucide-svelte";
-  import type { ServerConfigFormState, ServerConfigInputState, ServerConfigValidationErrors } from "$lib/types";
+  import { CircleX, Info, SquareCheck, type Icon } from "lucide-svelte";
+  import type { GoodOrBadInput, ServerConfigFormState, ServerConfigInputState, ServerConfigValidationErrors } from "$lib/types";
+  import { PlexAuthTokenURL } from "$lib/external-links";
 
-  let { label, placeholder, field, type = "text", errors, inputFocused, className = "", updateForm }: {
+  let { label, placeholder, field, type = "text", errors, inputFocused, className = "", updateForm, info }: {
     label: string,
     placeholder: string,
     field: keyof ServerConfigFormState,
@@ -11,6 +12,7 @@
     errors: ServerConfigValidationErrors,
     inputFocused: ServerConfigInputState,
     className?: string,
+    info: string,
     updateForm: (field: keyof ServerConfigFormState, value: string | number) => void,
   } = $props();
 
@@ -18,6 +20,26 @@
     (e: Event) => updateForm(field, Number((e.target as HTMLInputElement).value)) :
     (e: Event) => updateForm(field, (e.target as HTMLInputElement).value)
   );
+
+  let errorOrSuccess: GoodOrBadInput = $derived.by(() => {
+    if (inputFocused[field]) {
+      if (errors[field]) {
+        return {
+          class: "input-error",
+          icon: CircleX,
+          title: errors[field][0],
+        };
+      }
+      return {
+        class: "input-success",
+        icon: SquareCheck,
+      };
+    }
+    return {
+      icon: Info,
+      title: info
+    };
+  });
 </script>
 
 <label class="label {className}">
@@ -26,16 +48,25 @@
     <input
       type="text" 
       {placeholder} 
-      class="form-input {errors[field] && inputFocused[field] ? 'input-error' : ''}" oninput={value}/>
-    {#if errors[field] && inputFocused[field]}
-      <!-- svelte-ignore a11y_missing_attribute -->
-      <a transition:fade title="{errors[field][0]}"><CircleX /></a> 
-    {/if}
+      class="form-input {errorOrSuccess.class}"
+      oninput={value}/>
+      {#if true}
+        {@const Icon = errorOrSuccess.icon}
+        {#key errorOrSuccess.icon}
+          {#if field === "token"}
+            <a href="{PlexAuthTokenURL}" target="_blank" in:fade title="{errorOrSuccess.title}"><Icon /></a> 
+          {:else}
+            <!-- svelte-ignore a11y_missing_attribute -->
+            <a in:fade title="{errorOrSuccess.title}"><Icon /></a> 
+          {/if}
+        {/key}
+      {/if}
   </div>
 </label>
 
 <style>
   label:not(.header) > p {
     margin-top: 1rem;
+    width: 25rem;
   }
 </style>

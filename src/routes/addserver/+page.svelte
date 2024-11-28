@@ -3,6 +3,7 @@
   import type { ServerConfigFormState, ServerConfigInputState, ServerConfigValidationErrors } from "$lib/types";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
 
+
   // Form state
   let form: ServerConfigFormState = $state({
     serverName: "",
@@ -39,7 +40,7 @@
 
 <div class="h-full flex justify-center items-center">
   <div class="space-y-10 flex">
-    <div class="card p-4">
+    <div class="card p-6">
 
       <AddServerInput
         label="Host"
@@ -49,6 +50,7 @@
         {inputFocused}
         {updateForm}
         className="header"
+        info="The URL of your plex server. Maybe localhost?"
       />
       
       <AddServerInput
@@ -59,6 +61,7 @@
         {errors}
         {inputFocused}
         {updateForm}
+        info="Typically 32400"
       />
       
       <AddServerInput
@@ -68,6 +71,7 @@
         {errors}
         {inputFocused}
         {updateForm}
+        info="Click me to find out where to find this"
       />
       
       <AddServerInput
@@ -77,6 +81,7 @@
         {errors}
         {inputFocused}
         {updateForm}
+        info="A memorable name for this server configuration. We may support more in the future"
       />
 
       <div class="btn-group variant-filled-primary">
