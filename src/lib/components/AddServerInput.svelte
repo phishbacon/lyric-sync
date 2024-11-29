@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
   import { CircleX, Info, SquareCheck, type Icon } from "lucide-svelte";
-  import type { GoodOrBadInput, ServerConfigFormState, ServerConfigInputState, ServerConfigValidationErrors } from "$lib/types";
+  import type { InpuClassIconAndTitle, ServerConfigFormState, ServerConfigInputState, ServerConfigValidationErrors } from "$lib/types";
   import { PlexAuthTokenURL } from "$lib/external-links";
 
   let { label, placeholder, field, type = "text", errors, inputFocused, className = "", updateForm, info }: {
@@ -21,7 +21,7 @@
     (e: Event) => updateForm(field, (e.target as HTMLInputElement).value)
   );
 
-  let errorOrSuccess: GoodOrBadInput = $derived.by(() => {
+  let inputClassIconAndTitle: InpuClassIconAndTitle = $derived.by(() => {
     if (inputFocused[field]) {
       if (errors[field]) {
         return {
@@ -46,18 +46,19 @@
   <p>{label}</p>
   <div class="input-group input-group-divider grid-cols-[1fr_auto]">
     <input
+      name="field"
       type="text" 
       {placeholder} 
-      class="form-input {errorOrSuccess.class}"
+      class="form-input {inputClassIconAndTitle.class}"
       oninput={value}/>
       {#if true}
-        {@const Icon = errorOrSuccess.icon}
-        {#key errorOrSuccess.icon}
-          {#if field === "token"}
-            <a href="{PlexAuthTokenURL}" target="_blank" in:fade title="{errorOrSuccess.title}"><Icon /></a> 
+        {@const Icon = inputClassIconAndTitle.icon}
+        {#key inputClassIconAndTitle.icon}
+          {#if field === "xPlexToken"}
+            <a href="{PlexAuthTokenURL}" target="_blank" in:fade title="{inputClassIconAndTitle.title}"><Icon /></a> 
           {:else}
             <!-- svelte-ignore a11y_missing_attribute -->
-            <a in:fade title="{errorOrSuccess.title}"><Icon /></a> 
+            <a in:fade title="{inputClassIconAndTitle.title}"><Icon /></a> 
           {/if}
         {/key}
       {/if}

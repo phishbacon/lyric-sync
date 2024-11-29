@@ -7,7 +7,7 @@ export const users = sqliteTable("users", {
   username: text()
     .notNull()
     .unique(),
-  passHash: text()
+  password: text()
     .notNull(),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
@@ -22,7 +22,7 @@ export const insertUserSchema = createInsertSchema(
   users,
   {
     username: schema => schema.username.min(1),
-    passHash: schema => schema.passHash.min(1),
+    password: schema => schema.password.min(1),
   },
 )
   .omit({
@@ -37,11 +37,11 @@ export const servers = sqliteTable("servers", {
   serverName: text()
     .notNull()
     .unique(),
-  url: text()
+  hostname: text()
     .notNull(),
   port: integer({ mode: "number" })
     .notNull(),
-  token: text()
+  xPlexToken: text()
     .notNull(),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
@@ -56,9 +56,9 @@ export const insertServerSchema = createInsertSchema(
   servers,
   {
     serverName: schema => schema.serverName.min(1, "Server name is required"),
-    url: schema => schema.url.min(1, "Hostname is required"),
+    hostname: schema => schema.hostname.min(1, "Hostname is required"),
     port: schema => schema.port.min(1, "Use a better port"),
-    token: schema => schema.token.min(1, "Token is required"),
+    xPlexToken: schema => schema.xPlexToken.min(1, "Token is required"),
   },
 )
   .omit({

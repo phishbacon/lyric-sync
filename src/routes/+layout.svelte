@@ -26,7 +26,7 @@
             View Library
           </a>
         {:else}
-          <a class="btn btn-sm variant-ghost-surface" href="/addserver" rel="noreferrer">
+          <a class="btn btn-sm variant-ghost-surface" href="/add-server" rel="noreferrer">
             Add Server
           </a>
         {/if}
