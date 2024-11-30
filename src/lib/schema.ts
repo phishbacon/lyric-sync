@@ -67,4 +67,4 @@ export const insertServerSchema = createInsertSchema(
     updatedAt: true,
   });
 
-export const patchServerSchema = insertServerSchema.partial();
+export const updateServerSchema = insertServerSchema.partial();

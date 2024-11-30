@@ -20,7 +20,11 @@
     xPlexToken: false,
   });
 
-  let errors: ServerConfigValidationErrors = $state({});
+  let errors: ServerConfigValidationErrors = $derived.by(() => {
+    // Validate the form
+    const validate =  insertServerSchema.safeParse(form);
+    return validate.success ? {} : validate.error.flatten().fieldErrors;
+  });
 
   // Test button state
   let testState = $state({
@@ -71,9 +75,6 @@
       ...inputFocused,
       [field]: true,
     };
-    // Validate the form
-    const validate =  insertServerSchema.safeParse(form);
-    errors = validate.success ? {} : validate.error.flatten().fieldErrors;
   }
 
   // Ensure our server can talk to the server defined by the user entered information

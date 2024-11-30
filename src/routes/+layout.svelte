@@ -25,6 +25,9 @@
           <a class="btn btn-sm variant-ghost-surface" href="/" rel="noreferrer">
             View Library
           </a>
+          <a class="btn btn-sm variant-ghost-surface" href="/add-server" rel="noreferrer">
+            Connection Settings
+          </a>
         {:else}
           <a class="btn btn-sm variant-ghost-surface" href="/add-server" rel="noreferrer">
             Add Server
