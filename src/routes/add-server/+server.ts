@@ -1,5 +1,5 @@
 import type { RequestHandler } from "@sveltejs/kit";
-import type { ServerConfigFormState } from "$lib/types";
+import type { AddServerFormValues } from "$lib/types";
 
 import { insertServerSchema, servers } from "$lib/schema";
 import db from "$lib/server/db";
@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 
   // Might as well validate everything again
-  const serverConfig: ServerConfigFormState = await request.json();
+  const serverConfig: AddServerFormValues = await request.json();
   const validate = insertServerSchema.safeParse(serverConfig);
   const errors = validate.success ? null : validate.error.flatten().fieldErrors;
 

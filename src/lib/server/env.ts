@@ -1,5 +1,4 @@
 /* eslint-disable node/no-process-env */
-import type { ZodError } from "zod";
 
 import { config } from "dotenv";
 import { expand } from "dotenv-expand";

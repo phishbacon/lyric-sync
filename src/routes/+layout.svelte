@@ -1,11 +1,14 @@
 <script lang="ts">
   import "../app.css";
   import "../app.postcss";
-  import { AppShell, AppBar } from "@skeletonlabs/skeleton";
-  import type { LayoutServerData } from "./$types";
+
   import type { Snippet } from "svelte";
 
-  let { data, children }: { data: LayoutServerData, children: Snippet } = $props()
+  import { AppBar, AppShell } from "@skeletonlabs/skeleton";
+
+  import type { LayoutServerData } from "./$types";
+
+  const { data, children }: { data: LayoutServerData; children: Snippet } = $props();
 </script>
 
 <!-- App Shell -->

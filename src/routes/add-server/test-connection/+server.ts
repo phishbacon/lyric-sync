@@ -25,7 +25,8 @@ export const GET: RequestHandler = async ({ url }) => {
     else {
       connection = false;
     }
-  } catch {
+  }
+  catch {
     connection = false;
   }
 
