@@ -125,7 +125,7 @@
       body: JSON.stringify(addServerFormState.formValues),
     });
 
-    const responseJSON = await response.json();
+    const _responseJSON = await response.json();
   }
 </script>
 

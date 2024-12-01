@@ -13,6 +13,7 @@ export default antfu({
   ignores: ["**/migrations/*"],
 }, {
   rules: {
+    "no-unused-vars": ["off"],
     "no-console": ["warn"],
     "antfu/no-top-level-await": ["off"],
     "node/prefer-global/process": ["off"],
