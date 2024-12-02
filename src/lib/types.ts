@@ -1,7 +1,7 @@
 import type { Icon as IconType } from "lucide-svelte";
 import type { z } from "zod";
 
-import type { insertServerSchema } from "./schema";
+import type { insertServerSchema, selectLibrarySchema, selectServerSchema } from "./schema";
 
 // types for add-server
 
@@ -12,6 +12,7 @@ export interface InputClassIconAndTitle {
   class?: string;
   icon?: typeof IconType;
   title?: string;
+  color?: string;
 };
 
 export interface AddServerButtonsState {
@@ -28,4 +29,12 @@ export interface AddServerFormState {
   formValues: AddServerFormValues;
   inputFocused: AddServerInputFocused;
   formUpdated: boolean;
+}
+
+// server load default types
+export type inferredSelectServerSchema = z.infer<typeof selectServerSchema>;
+export type inferredSelectLibarySchema = z.infer<typeof selectLibrarySchema>;
+export interface ServerLoadDefaultValues {
+  serverConfiguration: inferredSelectServerSchema | undefined;
+  currentLibary: inferredSelectLibarySchema | undefined;
 }

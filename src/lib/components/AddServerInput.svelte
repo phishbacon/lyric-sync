@@ -5,14 +5,13 @@
   import { CircleX, Info, SquareCheck } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
-  const { label, placeholder, field, type = "text", errors, inputFocused, className = "", updateForm, info }: {
+  const { label, placeholder, field, type = "text", errors, inputFocused, updateForm, info }: {
     label: string;
     placeholder: string;
     field: keyof AddServerFormValues;
     type?: "text" | "number";
     errors: string[] | undefined;
     inputFocused: boolean;
-    className?: string;
     info: string;
     updateForm: (field: keyof AddServerFormValues, value: string | number) => void;
   } = $props();
@@ -21,7 +20,7 @@
     ? (e: Event) => updateForm(field, Number((e.target as HTMLInputElement).value))
     : (e: Event) => updateForm(field, (e.target as HTMLInputElement).value),
   );
-
+  // #d41976
   const inputClassIconAndTitle: InputClassIconAndTitle = $derived.by(() => {
     if (inputFocused) {
       if (errors) {
@@ -29,6 +28,7 @@
           class: "input-error",
           icon: CircleX,
           title: errors[0],
+          color: "#d41976",
         };
       }
       return {
@@ -37,29 +37,40 @@
       };
     }
     return {
+      class: "border border-primary-500",
       icon: Info,
       title: info,
     };
   });
 </script>
 
-<label class="label {className}">
-  <p>{label}</p>
-  <div class="input-group input-group-divider grid-cols-[1fr_auto]">
+<label class="label">
+  <span class="label-text">{label}</span>
+  <div class="input-group grid-cols-[auto_1fr_auto]">
     <input
       name={field}
       type="text"
       {placeholder}
-      class="form-input {inputClassIconAndTitle.class}"
+      class="input {inputClassIconAndTitle.class}"
       oninput={value} />
     {#if true}
       {@const Icon = inputClassIconAndTitle.icon}
       {#key inputClassIconAndTitle.icon}
         {#if field === "xPlexToken"}
-          <a href={PlexAuthTokenURL} target="_blank" in:fade title={inputClassIconAndTitle.title}><Icon /></a>
+          <a
+            href={PlexAuthTokenURL}
+            target="_blank"
+            in:fade
+            title={inputClassIconAndTitle.title}>
+            <Icon color={inputClassIconAndTitle.color} />
+          </a>
         {:else}
           <!-- svelte-ignore a11y_missing_attribute -->
-          <a in:fade title={inputClassIconAndTitle.title}><Icon /></a>
+          <a
+            in:fade
+            title={inputClassIconAndTitle.title}>
+            <Icon color={inputClassIconAndTitle.color} />
+          </a>
         {/if}
       {/key}
     {/if}
@@ -67,8 +78,10 @@
 </label>
 
 <style>
-  label:not(.header) > p {
-    margin-top: 1rem;
-    width: 25rem;
+  a {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    margin-right: .75rem;
   }
 </style>

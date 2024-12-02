@@ -22,6 +22,13 @@
       "when": 1732891127374,
       "tag": "0002_married_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1733095433611,
+      "tag": "0003_new_alice",
+      "breakpoints": true
     }
   ]
 }
