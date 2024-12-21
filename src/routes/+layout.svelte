@@ -11,7 +11,7 @@
 </script>
 
 <!-- App Bar -->
-<AppBar>
+<AppBar classes="fixed z-50">
   {#snippet lead()}
     <strong class="text-xl uppercase">
       <a href="/">
@@ -25,6 +25,9 @@
         <a class="btn btn-sm variant-ghost-surface" href="/view-library" rel="noreferrer">
           View Library
         </a>
+        <a class="btn btn-sm variant-ghost-surface" href="/select-library" rel="noreferrer">
+          Change Library
+        </a>
       {:else}
         <a class="btn btn-sm variant-ghost-surface" href="/select-library" rel="noreferrer">
           Select Library
@@ -37,5 +40,10 @@
     {/if}
   {/snippet}
 </AppBar>
-<!-- Page Route Content -->
-{@render children()}
+<div class="p-24 container h-full mx-auto flex justify-center items-center">
+  <!-- Page Route Content -->
+  {@render children()}
+</div>
+
+<style>
+</style>

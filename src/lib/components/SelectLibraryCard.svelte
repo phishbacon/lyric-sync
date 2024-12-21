@@ -4,10 +4,16 @@
   const { directory, serverConfiguration }: { directory: Directory; serverConfiguration: inferredSelectServerSchema | undefined } = $props();
   const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
+  let hovered: boolean = $state(false);
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-  class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 card-hover divide-surface-200-800 divide-y"
+  class="card border-[1px] border-surface-200-800 card-hover divide-surface-200-800 divide-y"
+  class:preset-filled-surface-100-900={!hovered}
+  class:preset-filled-surface-900-100={hovered}
+  onmouseenter={() => { hovered = true; }}
+  onmouseleave={() => { hovered = false; }}
 >
   <!-- {/* Header */} -->
   <header>
