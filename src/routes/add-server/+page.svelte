@@ -1,8 +1,13 @@
 <script lang="ts">
-  import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors } from "$lib/types";
+  import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
+  import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, TestConnectionResponse } from "$lib/types";
 
+  import { goto, invalidate, invalidateAll } from "$app/navigation";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
   import { insertServerSchema } from "$lib/schema";
+  import { getContext } from "svelte";
+
+  export const toast: ToastContext = getContext("toast");
 
   // Form state
   const addServerFormState: AddServerFormState = $state({
@@ -31,6 +36,7 @@
   const testState = $state({
     testPerformed: false,
     testSuccessful: false,
+    testInProgress: false,
   });
 
   const buttonsState: AddServerButtonsState = $derived.by(() => {
@@ -44,7 +50,7 @@
       },
     };
 
-    if (testState.testPerformed) {
+    if (testState.testPerformed && !testState.testInProgress) {
       if (testState.testSuccessful) {
         // if we have a successful test and the form hasn't been
         // updated since then disable the test button and enabel the submit button
@@ -80,12 +86,10 @@
           };
         }
       }
-    // We haven't performed the test yet, but there are validation errors or
-    // the form just hasn't been interacted with disable the test button and submit button
     }
-    else if (Object.keys(formValidationErrors).length !== 0 || !addServerFormState.formUpdated) {
-    // We haven't performed the test yet, but there are validation errors
-    // or the form hasn't been interacted with enable the test button
+    else if (Object.keys(formValidationErrors).length !== 0 || !addServerFormState.formUpdated || testState.testInProgress) {
+    // We haven't performed the test yet, but there are validation errors or we're in the process of testing the connection
+    // or the form hasn't been interacted with disable the test button
     }
     else {
       baseButtonsState.testButton.disabled = false;
@@ -111,9 +115,25 @@
   // Ensure our server can talk to the server defined by the user entered information
   async function testServer() {
     testState.testPerformed = true;
+    testState.testInProgress = true;
     const response = await fetch(`/add-server/test-connection?hostname=${encodeURI(addServerFormState.formValues.hostname)}&port=${addServerFormState.formValues.port}&X-Plex-Token=${addServerFormState.formValues.xPlexToken}`);
-    const res = await response.json();
+    const res: TestConnectionResponse = await response.json();
     testState.testSuccessful = res.connection;
+    if (res.connection) {
+      toast.create({
+        title: "Connection Success",
+        description: res.message,
+        type: "success",
+      });
+    }
+    else {
+      toast.create({
+        title: "Connection Error",
+        description: res.message,
+        type: "error",
+      });
+    }
+    testState.testInProgress = false;
     // Set formUpdated to false, so the test button is disabled until input is modified
     addServerFormState.formUpdated = false;
   }
@@ -125,7 +145,9 @@
       body: JSON.stringify(addServerFormState.formValues),
     });
 
-    const _responseJSON = await response.json();
+    if (response.ok) {
+      goto("/select-library", { invalidateAll: true });
+    }
   }
 </script>
 

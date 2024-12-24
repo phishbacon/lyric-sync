@@ -31,6 +31,12 @@ export interface AddServerFormState {
   formUpdated: boolean;
 }
 
+// types for test-connection
+export interface TestConnectionResponse {
+  connection: boolean;
+  message: string;
+}
+
 // server load default types
 export type inferredSelectServerSchema = z.infer<typeof selectServerSchema>;
 export type inferredSelectLibarySchema = z.infer<typeof selectLibrarySchema>;
