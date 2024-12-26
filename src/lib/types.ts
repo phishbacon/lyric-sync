@@ -1,7 +1,7 @@
 import type { Icon as IconType } from "lucide-svelte";
 import type { z } from "zod";
 
-import type { insertServerSchema, selectLibrarySchema, selectServerSchema } from "./schema";
+import type { insertLibrarySchema, insertServerSchema, selectLibrarySchema, selectServerSchema } from "./schema";
 
 // types for add-server
 
@@ -38,11 +38,12 @@ export interface TestConnectionResponse {
 }
 
 // server load default types
-export type inferredSelectServerSchema = z.infer<typeof selectServerSchema>;
-export type inferredSelectLibarySchema = z.infer<typeof selectLibrarySchema>;
+export type InferredSelectServerSchema = z.infer<typeof selectServerSchema>;
+export type InferredSelectLibarySchema = z.infer<typeof selectLibrarySchema>;
 export interface ServerLoadDefaultValues {
-  serverConfiguration: inferredSelectServerSchema | undefined;
-  currentLibary: inferredSelectLibarySchema | undefined;
+  serverConfiguration: InferredSelectServerSchema | undefined;
+  libraries: Array<InferredSelectLibarySchema> | [];
+  currentLibrary: InferredSelectLibarySchema | undefined;
 }
 
 // library/sections plex types
@@ -85,3 +86,6 @@ export interface Location {
   id: number;
   path: string;
 }
+
+// types for select-library
+export type InferredInsertLibrarySchema = z.infer<typeof insertLibrarySchema>;

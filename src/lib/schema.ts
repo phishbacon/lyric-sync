@@ -70,17 +70,23 @@ export const insertServerSchema = createInsertSchema(
 export const updateServerSchema = insertServerSchema.partial();
 
 export const libraries = sqliteTable("libaries", {
-  id: integer({ mode: "number" })
-    .primaryKey({ autoIncrement: true }),
   title: text()
     .notNull(),
   uuid: text()
+    .primaryKey(),
+  image: text()
     .notNull(),
   path: text()
+    .notNull(),
+  key: text()
+    .unique()
     .notNull(),
   currentLibrary: integer({ mode: "boolean" })
     .default(false)
     .notNull(),
+  serverName: text()
+    .notNull()
+    .references(() => servers.serverName),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -90,16 +96,18 @@ export const libraries = sqliteTable("libaries", {
 
 export const selectLibrarySchema = createSelectSchema(libraries);
 
-export const insertLibarySchema = createInsertSchema(
+export const insertLibrarySchema = createInsertSchema(
   libraries,
   {
     title: schema => schema.title.min(1, "Title is required"),
     uuid: schema => schema.uuid.min(1, "UUID is required"),
+    image: schema => schema.image.min(1, "Image is required"),
     path: schema => schema.path.min(1, "Path is required"),
+    key: schema => schema.key.min(1, "Key is required"),
+    serverName: schema => schema.serverName.min(1, "Server name is required"),
   },
 )
   .omit({
-    id: true,
     createdAt: true,
     updatedAt: true,
   });

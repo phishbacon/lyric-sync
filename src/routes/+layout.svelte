@@ -30,7 +30,7 @@
     {/snippet}
     {#snippet trail()}
       {#if data.serverConfiguration}
-        {#if data.currentLibary}
+        {#if data.currentLibrary}
           <a class="btn btn-sm variant-ghost-surface" href="/view-library" rel="noreferrer">
             View Library
           </a>

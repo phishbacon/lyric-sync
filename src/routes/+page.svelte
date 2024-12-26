@@ -16,7 +16,7 @@
     });
   }
   // server configuration defined but no currentLibrary is set
-  else if (!data.currentLibary) {
+  else if (!data.currentLibrary) {
     toast.create({
       title: "No Library Selected",
       description: "Fix this by clicking Select Library up top",

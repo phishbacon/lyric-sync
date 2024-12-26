@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Directory, inferredSelectServerSchema } from "$lib/types";
+  import type { InferredSelectLibarySchema, InferredSelectServerSchema } from "$lib/types";
 
-  const { directory, serverConfiguration }: { directory: Directory; serverConfiguration: inferredSelectServerSchema | undefined } = $props();
+  const { library, serverConfiguration }: { library: InferredSelectLibarySchema; serverConfiguration: InferredSelectServerSchema | undefined } = $props();
   const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
   let hovered: boolean = $state(false);
@@ -17,17 +17,17 @@
 >
   <!-- {/* Header */} -->
   <header>
-    <img src={baseURL + directory.composite + plexAuthToken} alt="Library Artwork" />
+    <img src={baseURL + library.image + plexAuthToken} alt="Library Artwork" />
   </header>
   <!-- {/* Article */} -->
   <article class="space-y-4 p-4">
     <div>
-      <h4 class="h4">{directory.title}</h4>
+      <h4 class="h4">{library.title}</h4>
     </div>
   </article>
   <!-- {/* Footer */} -->
   <footer class="flex items-center justify-between gap-4 p-4">
-    <small class="opacity-60">{directory.Location[0].path}</small>
+    <small class="opacity-60">{library.path}</small>
   </footer>
 </div>
 

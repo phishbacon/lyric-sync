@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1732739542799,
-      "tag": "0000_mixed_medusa",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1732890940971,
-      "tag": "0001_tiresome_tomas",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1732891127374,
-      "tag": "0002_married_blink",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1733095433611,
-      "tag": "0003_new_alice",
+      "when": 1735190778627,
+      "tag": "0000_deep_tiger_shark",
       "breakpoints": true
     }
   ]

@@ -1,9 +1,105 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "92ba4203-7059-4fab-b43f-6a60b72597f1",
+  "id": "c962db86-634f-4046-9e4a-63efd52c58b4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "libaries": {
+      "name": "libaries",
+      "columns": {
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "current_library": {
+          "name": "current_library",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "server_name": {
+          "name": "server_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "libaries_key_unique": {
+          "name": "libaries_key_unique",
+          "columns": [
+            "key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "libaries_server_name_servers_server_name_fk": {
+          "name": "libaries_server_name_servers_server_name_fk",
+          "tableFrom": "libaries",
+          "tableTo": "servers",
+          "columnsFrom": [
+            "server_name"
+          ],
+          "columnsTo": [
+            "server_name"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "servers": {
       "name": "servers",
       "columns": {
@@ -21,8 +117,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "url": {
-          "name": "url",
+        "hostname": {
+          "name": "hostname",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -35,8 +131,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "token": {
-          "name": "token",
+        "x_plex_token": {
+          "name": "x_plex_token",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -88,8 +184,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "pass_hash": {
-          "name": "pass_hash",
+        "password": {
+          "name": "password",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
