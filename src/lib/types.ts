@@ -8,7 +8,7 @@ import type { insertLibrarySchema, insertServerSchema, selectLibrarySchema, sele
 export type AddServerFormValues = z.infer<typeof insertServerSchema>;
 export type AddServerValidationErrors = Partial<Record<keyof AddServerFormValues, string[]>>;
 export type AddServerInputFocused = Record<keyof AddServerFormValues, boolean>;
-export interface InputClassIconAndTitle {
+export interface ClassIconAndTitle {
   class?: string;
   icon?: typeof IconType;
   title?: string;
@@ -89,3 +89,8 @@ export interface Location {
 
 // types for select-library
 export type InferredInsertLibrarySchema = z.infer<typeof insertLibrarySchema>;
+
+export interface SelectLibraryResponse {
+  selected: boolean;
+  message: string;
+};

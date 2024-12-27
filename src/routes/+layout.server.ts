@@ -95,6 +95,7 @@ export const load: LayoutServerLoad = async () => {
           serverName: sql.raw(`excluded.${toSnakeCase(libraries.serverName.name)}`),
           path: sql.raw(`excluded.${toSnakeCase(libraries.path.name)}`),
           title: sql.raw(`excluded.${toSnakeCase(libraries.title.name)}`),
+          image: sql.raw(`excluded.${toSnakeCase(libraries.image.name)}`),
         },
       }).returning();
 

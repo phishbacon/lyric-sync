@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { AddServerFormValues, InputClassIconAndTitle } from "$lib/types";
+  import type { AddServerFormValues, ClassIconAndTitle } from "$lib/types";
 
   import { PlexAuthTokenURL } from "$lib/external-links";
-  import { CircleX, Info, SquareCheck } from "lucide-svelte";
+  import { CircleCheck, CircleX, Info } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
   const { label, placeholder, field, type = "text", errors, inputFocused, updateForm, info }: {
@@ -21,7 +21,7 @@
     : (e: Event) => updateForm(field, (e.target as HTMLInputElement).value),
   );
   // #d41976
-  const inputClassIconAndTitle: InputClassIconAndTitle = $derived.by(() => {
+  const inputClassIconAndTitle: ClassIconAndTitle = $derived.by(() => {
     if (inputFocused) {
       if (errors) {
         return {
@@ -33,7 +33,8 @@
       }
       return {
         class: "input-success",
-        icon: SquareCheck,
+        icon: CircleCheck,
+        color: "#00ff00",
       };
     }
     return {
