@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
   import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, TestConnectionResponse } from "$lib/types";
+  import type { SafeParseReturnType } from "zod";
 
   import { goto, invalidate, invalidateAll } from "$app/navigation";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
@@ -28,12 +29,12 @@
 
   const formValidationErrors: AddServerValidationErrors = $derived.by(() => {
     // Validate the form
-    const validate = insertServerSchema.safeParse(addServerFormState.formValues);
+    const validate: SafeParseReturnType<AddServerFormValues, AddServerFormValues> = insertServerSchema.safeParse(addServerFormState.formValues);
     return validate.success ? {} : validate.error.flatten().fieldErrors;
   });
 
   // Test button state
-  const testState = $state({
+  const testState: Record<string, boolean> = $state({
     testPerformed: false,
     testSuccessful: false,
     testInProgress: false,
@@ -116,7 +117,7 @@
   async function testServer() {
     testState.testPerformed = true;
     testState.testInProgress = true;
-    const response = await fetch(`/add-server/test-connection?hostname=${encodeURI(addServerFormState.formValues.hostname)}&port=${addServerFormState.formValues.port}&X-Plex-Token=${addServerFormState.formValues.xPlexToken}`);
+    const response: Response = await fetch(`/add-server/test-connection?hostname=${encodeURI(addServerFormState.formValues.hostname)}&port=${addServerFormState.formValues.port}&X-Plex-Token=${addServerFormState.formValues.xPlexToken}`);
     const res: TestConnectionResponse = await response.json();
     testState.testSuccessful = res.connection;
     if (res.connection) {
@@ -140,7 +141,7 @@
 
   // Send config to the db
   async function addServer() {
-    const response = await fetch("/add-server", {
+    const response: Response = await fetch("/add-server", {
       method: "POST",
       body: JSON.stringify(addServerFormState.formValues),
     });
@@ -151,69 +152,71 @@
   }
 </script>
 
-<form class="card border-[1px] border-surface-200-800 preset-filled-surface-100-900 w-full max-w-md space-y-4 p-4">
-  <fieldset class="space-y-4">
-    <AddServerInput
-      label="Host"
-      placeholder="Hostname"
-      field="hostname"
-      errors={formValidationErrors.hostname}
-      inputFocused={addServerFormState.inputFocused.hostname}
-      {updateForm}
-      info="The URL of your plex server. Maybe localhost?"
-    />
+<div class="p-24 container h-full mx-auto flex justify-center items-center">
+  <form class="card border-[1px] border-surface-200-800 preset-filled-surface-100-900 w-full max-w-md space-y-4 p-4">
+    <fieldset class="space-y-4">
+      <AddServerInput
+        label="Host"
+        placeholder="Hostname"
+        field="hostname"
+        errors={formValidationErrors.hostname}
+        inputFocused={addServerFormState.inputFocused.hostname}
+        {updateForm}
+        info="The URL of your plex server. Maybe localhost?"
+      />
 
-    <AddServerInput
-      label="Port"
-      placeholder="Port"
-      field="port"
-      type="number"
-      errors={formValidationErrors.port}
-      inputFocused={addServerFormState.inputFocused.port}
-      {updateForm}
-      info="Typically 32400"
-    />
+      <AddServerInput
+        label="Port"
+        placeholder="Port"
+        field="port"
+        type="number"
+        errors={formValidationErrors.port}
+        inputFocused={addServerFormState.inputFocused.port}
+        {updateForm}
+        info="Typically 32400"
+      />
 
-    <AddServerInput
-      label="X-Plex-Token"
-      placeholder="X-Plex-Token"
-      field="xPlexToken"
-      errors={formValidationErrors.xPlexToken}
-      inputFocused={addServerFormState.inputFocused.xPlexToken}
-      {updateForm}
-      info="Click me to find out where to find this"
-    />
+      <AddServerInput
+        label="X-Plex-Token"
+        placeholder="X-Plex-Token"
+        field="xPlexToken"
+        errors={formValidationErrors.xPlexToken}
+        inputFocused={addServerFormState.inputFocused.xPlexToken}
+        {updateForm}
+        info="Click me to find out where to find this"
+      />
 
-    <AddServerInput
-      label="Server Name"
-      placeholder="Something memorable"
-      field="serverName"
-      errors={formValidationErrors.serverName}
-      inputFocused={addServerFormState.inputFocused.serverName}
-      {updateForm}
-      info="A memorable name for this server configuration. We may support more in the future"
-    />
-  </fieldset>
+      <AddServerInput
+        label="Server Name"
+        placeholder="Something memorable"
+        field="serverName"
+        errors={formValidationErrors.serverName}
+        inputFocused={addServerFormState.inputFocused.serverName}
+        {updateForm}
+        info="A memorable name for this server configuration. We may support more in the future"
+      />
+    </fieldset>
 
-  <fieldset class="flex justify-end">
-    <button
-      type="button"
-      disabled={buttonsState.testButton.disabled}
-      onclick={testServer}
-      class="btn {buttonsState.testButton.class}"
-    >
-      Test
-    </button>
-    <button
-      type="button"
-      disabled={buttonsState.submitButton.disabled}
-      onclick={addServer}
-      class="btn margin-left preset-outlined-primary-500"
-    >
-      Submit
-    </button>
-  </fieldset>
-</form>
+    <fieldset class="flex justify-end">
+      <button
+        type="button"
+        disabled={buttonsState.testButton.disabled}
+        onclick={testServer}
+        class="btn {buttonsState.testButton.class}"
+      >
+        Test
+      </button>
+      <button
+        type="button"
+        disabled={buttonsState.submitButton.disabled}
+        onclick={addServer}
+        class="btn margin-left preset-outlined-primary-500"
+      >
+        Submit
+      </button>
+    </fieldset>
+  </form>
+</div>
 
 <style>
   .btn-group {

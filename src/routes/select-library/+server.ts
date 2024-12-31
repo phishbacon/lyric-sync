@@ -1,11 +1,11 @@
 import type { RequestHandler } from "@sveltejs/kit";
-import type { InferredInsertLibrarySchema, SelectLibraryResponse } from "$lib/types";
+import type { InferredInsertLibrarySchema, InferredSelectLibrarySchema, SelectLibraryResponse } from "$lib/types";
 
-import { insertLibrarySchema, libraries, selectServerSchema } from "$lib/schema";
+import { insertLibrarySchema, libraries } from "$lib/schema";
 import db from "$lib/server/db";
 import { updateAllCurrentLibraryValuesToFalseExceptOne } from "$lib/server/db/query-utils";
 import { inArray } from "drizzle-orm";
-import { z } from "zod";
+import { type SafeParseReturnType, type typeToFlattenedError, z, type ZodArray } from "zod";
 
 export const POST: RequestHandler = async ({ request }) => {
   const selectLibraryResponse: SelectLibraryResponse = {
@@ -14,9 +14,9 @@ export const POST: RequestHandler = async ({ request }) => {
   };
   // validate everything
   const requestLibraries: Array<InferredInsertLibrarySchema> = await request.json();
-  const validateLibrariesArraySchema = z.array(insertLibrarySchema);
-  const validate = validateLibrariesArraySchema.safeParse(requestLibraries);
-  const errors = validate.success ? null : validate.error.flatten().fieldErrors;
+  const validateLibrariesArraySchema: ZodArray<typeof insertLibrarySchema> = z.array(insertLibrarySchema);
+  const validate: SafeParseReturnType<Array<InferredInsertLibrarySchema>, Array<InferredInsertLibrarySchema>> = validateLibrariesArraySchema.safeParse(requestLibraries);
+  const errors: typeToFlattenedError<Array<InferredInsertLibrarySchema>>["fieldErrors"] | undefined = validate.success ? undefined : validate.error.flatten().fieldErrors;
 
   if (errors) {
     return new Response(JSON.stringify(selectLibraryResponse));
@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
   const { sql, uuids } = updateAllCurrentLibraryValuesToFalseExceptOne(requestLibraries);
 
-  const updatedLibraries = await db.update(libraries).set({
+  const updatedLibraries: Array<InferredSelectLibrarySchema> = await db.update(libraries).set({
     currentLibrary: sql,
   }).where(inArray(libraries.uuid, uuids)).returning();
 

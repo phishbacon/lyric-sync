@@ -1,3 +1,4 @@
+/* eslint-disable ts/typedef */
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
@@ -105,6 +106,90 @@ export const insertLibrarySchema = createInsertSchema(
     path: schema => schema.path.min(1, "Path is required"),
     key: schema => schema.key.min(1, "Key is required"),
     serverName: schema => schema.serverName.min(1, "Server name is required"),
+  },
+)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  });
+
+export const artists = sqliteTable("artists", {
+  title: text()
+    .notNull(),
+  uuid: text()
+    .primaryKey(),
+  image: text()
+    .notNull(),
+  key: text()
+    .unique()
+    .notNull(),
+  synced: integer({ mode: "boolean" })
+    .default(false)
+    .notNull(),
+  library: text()
+    .notNull()
+    .references(() => libraries.uuid),
+  createdAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date()),
+  updatedAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date())
+    .$onUpdate(() => new Date()),
+});
+
+export const selectArtistSchema = createSelectSchema(artists);
+
+export const insertArtistSchema = createInsertSchema(
+  artists,
+  {
+    title: schema => schema.title.min(1, "Title is required"),
+    uuid: schema => schema.uuid.min(1, "UUID is required"),
+    image: schema => schema.image.min(1, "Image is required"),
+    key: schema => schema.key.min(1, "Key is required"),
+    library: schema => schema.library.min(1, "Library uuid is required"),
+  },
+)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  });
+
+export const albums = sqliteTable("albums", {
+  title: text()
+    .notNull(),
+  uuid: text()
+    .primaryKey(),
+  image: text()
+    .notNull(),
+  key: text()
+    .unique()
+    .notNull(),
+  synced: integer({ mode: "boolean" })
+    .default(false)
+    .notNull(),
+  library: text()
+    .notNull()
+    .references(() => libraries.uuid),
+  artist: text()
+    .notNull()
+    .references(() => artists.uuid),
+  createdAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date()),
+  updatedAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date())
+    .$onUpdate(() => new Date()),
+});
+
+export const selectAlbumSchema = createSelectSchema(albums);
+
+export const insertAlbumSchema = createInsertSchema(
+  albums,
+  {
+    title: schema => schema.title.min(1, "Title is required"),
+    uuid: schema => schema.uuid.min(1, "UUID is required"),
+    image: schema => schema.image.min(1, "Image is required"),
+    key: schema => schema.key.min(1, "Key is required"),
+    library: schema => schema.library.min(1, "Library uuid is required"),
+    artist: schema => schema.artist.min(1, "Artist uuid is required"),
   },
 )
   .omit({

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { InferredSelectLibarySchema, InferredSelectServerSchema } from "$lib/types";
+  import type { InferredSelectLibrarySchema, InferredSelectServerSchema } from "$lib/types";
 
   import { CircleCheck, CircleX } from "lucide-svelte";
 
-  const selectedColor = "#00ff00";
+  const selectedColor: string = "#00ff00";
   const { library, serverConfiguration, updateSelected }: {
-    library: InferredSelectLibarySchema;
+    library: InferredSelectLibrarySchema;
     serverConfiguration: InferredSelectServerSchema | undefined;
     updateSelected: (uuid: string) => void;
   } = $props();

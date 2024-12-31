@@ -1,7 +1,7 @@
 import type { Icon as IconType } from "lucide-svelte";
 import type { z } from "zod";
 
-import type { insertLibrarySchema, insertServerSchema, selectLibrarySchema, selectServerSchema } from "./schema";
+import type { insertAlbumSchema, insertArtistSchema, insertLibrarySchema, insertServerSchema, selectAlbumSchema, selectArtistSchema, selectLibrarySchema, selectServerSchema } from "./schema";
 
 // types for add-server
 
@@ -39,52 +39,11 @@ export interface TestConnectionResponse {
 
 // server load default types
 export type InferredSelectServerSchema = z.infer<typeof selectServerSchema>;
-export type InferredSelectLibarySchema = z.infer<typeof selectLibrarySchema>;
+export type InferredSelectLibrarySchema = z.infer<typeof selectLibrarySchema>;
 export interface ServerLoadDefaultValues {
   serverConfiguration: InferredSelectServerSchema | undefined;
-  libraries: Array<InferredSelectLibarySchema> | [];
-  currentLibrary: InferredSelectLibarySchema | undefined;
-}
-
-// library/sections plex types
-export interface LibrarySectionsResponse {
-  MediaContainer: MediaContainer;
-}
-
-export interface MediaContainer {
-  size: number;
-  allowSync: boolean;
-  title1: string;
-  Directory: Directory[];
-}
-
-export interface Directory {
-  allowSync: boolean;
-  art: string;
-  composite: string;
-  filters: boolean;
-  refreshing: boolean;
-  thumb: string;
-  key: string;
-  type: string;
-  title: string;
-  agent: string;
-  scanner: string;
-  language: string;
-  uuid: string;
-  updatedAt: number;
-  createdAt: number;
-  scannedAt: number;
-  content: boolean;
-  directory: boolean;
-  contentChangedAt: number;
-  hidden: number;
-  Location: Location[];
-}
-
-export interface Location {
-  id: number;
-  path: string;
+  libraries: Array<InferredSelectLibrarySchema> | [];
+  currentLibrary: InferredSelectLibrarySchema | undefined;
 }
 
 // types for select-library
@@ -94,3 +53,11 @@ export interface SelectLibraryResponse {
   selected: boolean;
   message: string;
 };
+
+// types for artists
+export type InferredSelectArtistSchema = z.infer<typeof selectArtistSchema>;
+export type InferredInsertArtistSchema = z.infer<typeof insertArtistSchema>;
+
+// types for albums
+export type InferredSelectAlbumSchema = z.infer<typeof selectAlbumSchema>;
+export type InferredInsertAlbumSchema = z.infer<typeof insertAlbumSchema>;

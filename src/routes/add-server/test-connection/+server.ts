@@ -1,25 +1,26 @@
 import type { RequestHandler } from "@sveltejs/kit";
+import type { Root } from "$lib/plex-api-types";
 import type { TestConnectionResponse } from "$lib/types";
 
 export const GET: RequestHandler = async ({ url }) => {
-  const hostname = url.searchParams.get("hostname");
-  const port = url.searchParams.get("port");
-  const xPlexToken = url.searchParams.get("X-Plex-Token");
-  const URL = `${hostname}:${port}/?X-Plex-Token=${xPlexToken}`;
+  const hostname: string = url.searchParams.get("hostname") ?? "http://localhost";
+  const port: string = url.searchParams.get("port") ?? "32400";
+  const xPlexToken: string = url.searchParams.get("X-Plex-Token") ?? "1234";
+  const URL: string = `${hostname}:${port}/?X-Plex-Token=${xPlexToken}`;
   const testConnectionResponse: TestConnectionResponse = {
     connection: false,
     message: "",
   };
 
   try {
-    const response = await fetch(URL, {
+    const response: Response = await fetch(URL, {
       headers: {
         Accept: "application/json",
       },
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const data: Root = await response.json();
       if (data.MediaContainer) {
         testConnectionResponse.connection = true;
         testConnectionResponse.message = "Connection Established";

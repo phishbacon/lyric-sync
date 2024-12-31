@@ -13,6 +13,9 @@ export default antfu({
   ignores: ["**/migrations/*"],
 }, {
   rules: {
+    "ts/typedef": ["error", {
+      variableDeclaration: true,
+    }],
     "no-unused-vars": ["off"],
     "no-console": ["warn"],
     "antfu/no-top-level-await": ["off"],

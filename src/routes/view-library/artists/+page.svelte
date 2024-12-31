@@ -1,0 +1,1 @@
+<p>Artists page</p>
