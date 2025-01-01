@@ -2,6 +2,8 @@ import type { RequestHandler } from "@sveltejs/kit";
 import type { Root } from "$lib/plex-api-types";
 import type { TestConnectionResponse } from "$lib/types";
 
+import { logger } from "$lib/logger";
+
 export const GET: RequestHandler = async ({ url }) => {
   const hostname: string = url.searchParams.get("hostname") ?? "http://localhost";
   const port: string = url.searchParams.get("port") ?? "32400";
@@ -12,6 +14,8 @@ export const GET: RequestHandler = async ({ url }) => {
     message: "",
   };
 
+  logger.info(`Testing Plex Connection with ${URL}`);
+
   try {
     const response: Response = await fetch(URL, {
       headers: {
@@ -20,6 +24,7 @@ export const GET: RequestHandler = async ({ url }) => {
     });
 
     if (response.ok) {
+      logger.debug(response);
       const data: Root = await response.json();
       if (data.MediaContainer) {
         testConnectionResponse.connection = true;
@@ -29,6 +34,7 @@ export const GET: RequestHandler = async ({ url }) => {
         testConnectionResponse.connection = false;
         testConnectionResponse.message = "No MediaContainers returned from server";
       }
+      logger.info(testConnectionResponse.message);
     }
     else {
       throw new Error(`${response.status}: ${response.statusText}`, { cause: "HTTP ERROR" });
@@ -44,6 +50,7 @@ export const GET: RequestHandler = async ({ url }) => {
         testConnectionResponse.message = error.stack;
       }
     }
+    logger.error(testConnectionResponse.message);
   }
 
   return new Response(JSON.stringify(testConnectionResponse));
