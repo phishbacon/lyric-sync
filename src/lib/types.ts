@@ -1,7 +1,7 @@
 import type { Icon as IconType } from "lucide-svelte";
 import type { z } from "zod";
 
-import type { insertAlbumSchema, insertArtistSchema, insertLibrarySchema, insertServerSchema, selectAlbumSchema, selectArtistSchema, selectLibrarySchema, selectServerSchema } from "./schema";
+import type { insertAlbumSchema, insertArtistSchema, insertLibrarySchema, insertServerSchema, insertTrackSchema, selectAlbumSchema, selectArtistSchema, selectLibrarySchema, selectServerSchema, selectTrackSchema } from "./schema";
 
 // types for add-server
 
@@ -61,3 +61,7 @@ export type InferredInsertArtistSchema = z.infer<typeof insertArtistSchema>;
 // types for albums
 export type InferredSelectAlbumSchema = z.infer<typeof selectAlbumSchema>;
 export type InferredInsertAlbumSchema = z.infer<typeof insertAlbumSchema>;
+
+// types for tracks
+export type InferredSelectTrackSchema = z.infer<typeof selectTrackSchema>;
+export type InferredInsertTrackSchema = z.infer<typeof insertTrackSchema>;

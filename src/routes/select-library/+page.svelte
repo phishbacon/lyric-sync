@@ -40,7 +40,7 @@
       goto("/view-library", { invalidateAll: true });
       toast.create({
         title: "Library Selected",
-        description: res.message + data.currentLibrary?.title,
+        description: res.message,
         type: "success",
       });
     }

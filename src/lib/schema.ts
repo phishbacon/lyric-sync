@@ -197,3 +197,54 @@ export const insertAlbumSchema = createInsertSchema(
     createdAt: true,
     updatedAt: true,
   });
+
+export const tracks = sqliteTable("tracks", {
+  title: text()
+    .notNull(),
+  uuid: text()
+    .primaryKey(),
+  key: text()
+    .unique()
+    .notNull(),
+  path: text()
+    .notNull(),
+  duration: integer()
+    .notNull(),
+  synced: integer({ mode: "boolean" })
+    .default(false)
+    .notNull(),
+  library: text()
+    .notNull()
+    .references(() => libraries.uuid),
+  artist: text()
+    .notNull()
+    .references(() => artists.uuid),
+  album: text()
+    .notNull()
+    .references(() => albums.uuid),
+  createdAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date()),
+  updatedAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date())
+    .$onUpdate(() => new Date()),
+});
+
+export const selectTrackSchema = createSelectSchema(tracks);
+
+export const insertTrackSchema = createInsertSchema(
+  tracks,
+  {
+    title: schema => schema.title.min(1, "Title is required"),
+    uuid: schema => schema.uuid.min(1, "UUID is required"),
+    key: schema => schema.key.min(1, "Key is required"),
+    path: schema => schema.path.min(1, "Path is required"),
+    duration: schema => schema.duration.min(1, "Duration is required"),
+    library: schema => schema.library.min(1, "Library uuid is required"),
+    artist: schema => schema.artist.min(1, "Artist uuid is required"),
+    album: schema => schema.album.min(1, "Album uuid is required"),
+  },
+)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  });

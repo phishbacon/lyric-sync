@@ -25,10 +25,10 @@ export interface MediaContainer {
   title1: string;
   title2: string;
   viewGroup: string;
-  Metadata: Metadaum[];
+  Metadata: Metadata[];
 }
 
-export interface Metadaum {
+export interface Metadata {
   ratingKey: string;
   key: string;
   parentRatingKey: string;
@@ -60,11 +60,11 @@ export interface Metadaum {
   addedAt: number;
   updatedAt: number;
   musicAnalysisVersion: string;
-  Media: Medum[];
+  Media: Media[];
   Image: Image[];
 }
 
-export interface Medum {
+export interface Media {
   id: number;
   duration: number;
   bitrate: number;
