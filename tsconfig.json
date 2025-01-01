@@ -7,11 +7,27 @@
     "checkJs": true,
     "strict": true,
     "noImplicitAny": true,
+    "noImplicitReturns": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
-  }
+  },
+  "include": [
+    "./svelte-kit/ambient.d.ts",
+    "./svelte-kit/non-ambient.d.ts",
+    "./svelte-kit/types/**/$types.d.ts",
+    "./vite.config.js",
+    "./vite.config.ts",
+    "./tailwind.config.ts",
+    "./drizzle.config.ts",
+    "./src/**/*.js",
+    "./src/**/*.ts",
+    "./src/**/*.svelte",
+    "./tests/**/*.js",
+    "./tests/**/*.ts",
+    "./tests/**/*.svelte"
+  ]
   // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
   // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
   //

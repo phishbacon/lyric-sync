@@ -3,7 +3,19 @@ import antfu from "@antfu/eslint-config";
 export default antfu({
   type: "app",
   svelte: true,
-  typescript: true,
+  typescript: {
+    parserOptions: {
+      projectService: true,
+      tsconfigRootDir: import.meta.dirname,
+    },
+    overrides: {
+      "ts/no-unnecessary-type-arguments": ["error"],
+      "ts/typedef": ["error", {
+        variableDeclaration: true,
+        parameter: true,
+      }],
+    },
+  },
   formatters: true,
   stylistic: {
     indent: 2,
@@ -13,9 +25,6 @@ export default antfu({
   ignores: ["**/migrations/*"],
 }, {
   rules: {
-    "ts/typedef": ["error", {
-      variableDeclaration: true,
-    }],
     "no-unused-vars": ["off"],
     "no-console": ["warn"],
     "antfu/no-top-level-await": ["off"],

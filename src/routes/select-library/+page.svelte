@@ -2,7 +2,7 @@
   import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
   import type { InferredSelectLibrarySchema, SelectLibraryResponse } from "$lib/types";
 
-  import { goto, invalidateAll } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import SelectLibraryCard from "$lib/components/SelectLibraryCard.svelte";
   import { getContext } from "svelte";
 

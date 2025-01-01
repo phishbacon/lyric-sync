@@ -31,7 +31,7 @@ export const GET: RequestHandler = async ({ url }) => {
       }
     }
     else {
-      throw new Error(`${response.status}: ${await response.statusText}`, { cause: "HTTP ERROR" });
+      throw new Error(`${response.status}: ${response.statusText}`, { cause: "HTTP ERROR" });
     }
   }
   catch (error: unknown) {

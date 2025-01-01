@@ -3,7 +3,7 @@
   import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, TestConnectionResponse } from "$lib/types";
   import type { SafeParseReturnType } from "zod";
 
-  import { goto, invalidate, invalidateAll } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
   import { insertServerSchema } from "$lib/schema";
   import { getContext } from "svelte";

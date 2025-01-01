@@ -1,4 +1,3 @@
-import type { Metadata as AlbumMetadata, Root as AlbumRoot } from "$lib/plex-api-types/library-metadata-key-children-album";
 import type { Metadata as ArtistMetadata, Root as ArtistRoot } from "$lib/plex-api-types/library-metadata-key-children-artist";
 import type { Metadata, Root } from "$lib/plex-api-types/library-sections-key-all";
 import type { InferredInsertAlbumSchema, InferredInsertArtistSchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, ServerLoadDefaultValues } from "$lib/types";
@@ -100,7 +99,7 @@ export const load: LayoutServerLoad = async ({ parent }) => {
       }));
 
       // now we get every album relating to each artists from plex
-      const albumsResponse: Array<Response> = await Promise.all(plexLibraryArtists.map((artist) => {
+      const albumsResponse: Array<PromiseSettledResult<Response>> = await Promise.allSettled(plexLibraryArtists.map((artist) => {
         return fetch(`${baseURL}${artist.key}${plexAuthToken}`, {
           method: "GET",
           headers: {
@@ -110,14 +109,19 @@ export const load: LayoutServerLoad = async ({ parent }) => {
       }));
 
       // here we get the children of each artist which contains an Array of Metadata, each element being an album
-      const artistAlbumsRoot: Array<ArtistRoot> = await Promise.all(albumsResponse.reduce((acc: Array<ArtistRoot>, response: Response) => {
-        if (response.ok) {
-          acc.push(response.json() as unknown as ArtistRoot); // this is stupid
+      const artistAlbumsRoot: Array<PromiseSettledResult<ArtistRoot>> = await Promise.allSettled(albumsResponse.reduce((acc: Array<ArtistRoot>, response: PromiseSettledResult<Response>) => {
+        if (response.status === "fulfilled") {
+          acc.push(response.value.json() as unknown as ArtistRoot); // this is stupid
         }
         return acc;
       }, []));
 
-      const plexAlbums: Array<ArtistMetadata> = artistAlbumsRoot.flatMap(root => root.MediaContainer.Metadata);
+      const plexAlbums: Array<ArtistMetadata> = artistAlbumsRoot.reduce((acc: Array<Array<ArtistMetadata>>, albums) => {
+        if (albums.status === "fulfilled") {
+          acc.push(albums.value.MediaContainer.Metadata);
+        }
+        return acc;
+      }, []).flat();
 
       // TODO: Use zod to validate
       plexArtistAlbums = plexAlbums.map((album) => {
