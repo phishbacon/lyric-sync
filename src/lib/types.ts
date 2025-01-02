@@ -65,3 +65,11 @@ export type InferredInsertAlbumSchema = z.infer<typeof insertAlbumSchema>;
 // types for tracks
 export type InferredSelectTrackSchema = z.infer<typeof selectTrackSchema>;
 export type InferredInsertTrackSchema = z.infer<typeof insertTrackSchema>;
+
+// types for view-library
+
+export interface LibraryItems {
+  returnedArtists: Array<InferredSelectArtistSchema> | undefined;
+  returnedAlbums: Array<InferredSelectAlbumSchema> | undefined;
+  returnedTracks: Array<InferredSelectTrackSchema> | undefined;
+};

@@ -24,7 +24,7 @@
   <AppBar classes="fixed z-50">
     {#snippet lead()}
       <strong class="text-xl uppercase">
-        <a href={data.currentLibrary ? "/view-library" : "/"}>
+        <a href={data.currentLibrary ? "/view-library/artists" : "/"}>
           Lyric-Sync
         </a>
       </strong>
@@ -36,7 +36,7 @@
             Syncing: {data.currentLibrary.title}
           </a>
           {#if !$page.url.pathname.includes("/view-library")}
-            <a class="btn btn-sm variant-ghost-surface" href="/view-library" rel="noreferrer">
+            <a class="btn btn-sm variant-ghost-surface" href="/view-library/artists" rel="noreferrer">
               View Library
             </a>
           {/if}

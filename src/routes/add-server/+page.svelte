@@ -117,7 +117,10 @@
   async function testServer() {
     testState.testPerformed = true;
     testState.testInProgress = true;
-    const response: Response = await fetch(`/add-server/test-connection?hostname=${encodeURI(addServerFormState.formValues.hostname)}&port=${addServerFormState.formValues.port}&X-Plex-Token=${addServerFormState.formValues.xPlexToken}`);
+    const response: Response = await fetch("/add-server/test-connection", {
+      method: "POST",
+      body: JSON.stringify(addServerFormState.formValues),
+    });
     const res: TestConnectionResponse = await response.json();
     testState.testSuccessful = res.connection;
     if (res.connection) {

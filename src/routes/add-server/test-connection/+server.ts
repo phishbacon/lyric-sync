@@ -4,10 +4,12 @@ import type { TestConnectionResponse } from "$lib/types";
 
 import { logger } from "$lib/logger";
 
-export const GET: RequestHandler = async ({ url }) => {
-  const hostname: string = url.searchParams.get("hostname") ?? "http://localhost";
-  const port: string = url.searchParams.get("port") ?? "32400";
-  const xPlexToken: string = url.searchParams.get("X-Plex-Token") ?? "1234";
+export const POST: RequestHandler = async ({ request }) => {
+  const { hostname, port, xPlexToken }: {
+    hostname: string;
+    port: string;
+    xPlexToken: string;
+  } = await request.json();
   const URL: string = `${hostname}:${port}/?X-Plex-Token=${xPlexToken}`;
   const testConnectionResponse: TestConnectionResponse = {
     connection: false,
