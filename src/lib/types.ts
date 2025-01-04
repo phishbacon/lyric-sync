@@ -40,7 +40,7 @@ export interface TestConnectionResponse {
 // server load default types
 export type InferredSelectServerSchema = z.infer<typeof selectServerSchema>;
 export type InferredSelectLibrarySchema = z.infer<typeof selectLibrarySchema>;
-export interface ServerLoadDefaultValues {
+export interface ServerLoadValues {
   serverConfiguration: InferredSelectServerSchema | undefined;
   libraries: Array<InferredSelectLibrarySchema> | [];
   currentLibrary: InferredSelectLibrarySchema | undefined;
@@ -72,4 +72,8 @@ export interface LibraryItems {
   returnedArtists: Array<InferredSelectArtistSchema> | undefined;
   returnedAlbums: Array<InferredSelectAlbumSchema> | undefined;
   returnedTracks: Array<InferredSelectTrackSchema> | undefined;
+};
+
+export interface ViewLibraryServerLoadValues extends ServerLoadValues, LibraryItems {
+
 };

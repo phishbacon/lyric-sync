@@ -26,7 +26,10 @@
     "./src/**/*.svelte",
     "./tests/**/*.js",
     "./tests/**/*.ts",
-    "./tests/**/*.svelte"
+    "./tests/**/*.svelte",
+    "src/lib/types",
+    "src/lib/plex-api-types/library-sections/type-8",
+    "src/lib/plex-api-types/library-sections/type-8"
   ]
   // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
   // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files

@@ -10,15 +10,15 @@
 
 <div class="pt-15 card border-surface-100-900 grid h-full w-full grid-cols-[auto_1fr] border-[1px]">
   <!-- Component -->
-  <Navigation.Rail width="25rem">
+  <Navigation.Rail width="25rem" classes="fixed">
     {#snippet tiles()}
-      <Navigation.Tile id="0" label="Artists" href="/view-library/artists" selected={$page.url.pathname === ("/artists")}>
+      <Navigation.Tile id="0" label="Artists" href="/view-library/artists" selected={$page.url.pathname === ("/view-library/artists")}>
         <Music />
       </Navigation.Tile>
-      <Navigation.Tile id="1" label="Albums" href="/view-library/albums" selected={$page.url.pathname.includes("/albums")}>
+      <Navigation.Tile id="1" label="Albums" href="/view-library/albums" selected={$page.url.pathname === ("/view-library/albums")}>
         <DiscAlbum />
       </Navigation.Tile>
-      <Navigation.Tile id="2" label="Tracks" href="/view-library/tracks" selected={$page.url.pathname.includes("/tracks")}>
+      <Navigation.Tile id="2" label="Tracks" href="/view-library/tracks" selected={$page.url.pathname === ("/view-library/tracks")}>
         <FileMusic />
       </Navigation.Tile>
     {/snippet}
@@ -27,7 +27,7 @@
     {/snippet}
   </Navigation.Rail>
   <!-- Content -->
-  <div class="flex items-center justify-center">
+  <div class="pt-16 pb-3 pl-20 flex items-center justify-center">
     {@render children()}
   </div>
 </div>

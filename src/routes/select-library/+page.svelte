@@ -37,6 +37,7 @@
 
     const res: SelectLibraryResponse = await response.json();
     if (res.selected) {
+      await fetch("/view-library/get-latest-plex-data");
       goto("/view-library", { invalidateAll: true });
       toast.create({
         title: "Library Selected",

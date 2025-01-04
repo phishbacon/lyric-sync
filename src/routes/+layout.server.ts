@@ -1,5 +1,5 @@
 import type { Directory, Root } from "$lib/plex-api-types/library-sections";
-import type { InferredInsertLibrarySchema, InferredSelectLibrarySchema, InferredSelectServerSchema, ServerLoadDefaultValues } from "$lib/types";
+import type { InferredInsertLibrarySchema, InferredSelectLibrarySchema, InferredSelectServerSchema, ServerLoadValues } from "$lib/types";
 
 import { libraries } from "$lib/schema";
 import db from "$lib/server/db";
@@ -9,7 +9,7 @@ import { toSnakeCase } from "drizzle-orm/casing";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async () => {
-  const defaultValues: ServerLoadDefaultValues = {
+  const defaultValues: ServerLoadValues = {
     serverConfiguration: undefined,
     libraries: [],
     currentLibrary: undefined,

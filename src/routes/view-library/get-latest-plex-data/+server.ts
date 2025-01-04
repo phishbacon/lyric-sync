@@ -1,17 +1,17 @@
 import type { RequestHandler } from "@sveltejs/kit";
-import type { Metadata as AlbumMetadata, Root as AlbumRoot } from "$lib/plex-api-types/library-metadata-key-children-album";
-import type { Metadata as ArtistMetadata, Root as ArtistRoot } from "$lib/plex-api-types/library-metadata-key-children-artist";
-import type { Metadata, Root } from "$lib/plex-api-types/library-sections-key-all";
-import type { InferredInsertAlbumSchema, InferredInsertArtistSchema, InferredInsertTrackSchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSelectLibrarySchema, InferredSelectServerSchema, InferredSelectTrackSchema, ServerLoadDefaultValues, TestConnectionResponse } from "$lib/types";
+import type { Metadata as Tracks, Root as TracksResponse } from "$lib/plex-api-types/library-sections-key-all-type-10";
+import type { Metadata as Artists, Root as ArtistsResposne } from "$lib/plex-api-types/library-sections-key-all-type-8";
+import type { Metadata as Albums, Root as AlbumsResponse } from "$lib/plex-api-types/library-sections-key-all-type-9";
+import type { InferredInsertAlbumSchema, InferredInsertArtistSchema, InferredInsertTrackSchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSelectLibrarySchema, InferredSelectServerSchema, InferredSelectTrackSchema } from "$lib/types";
 
 import { logger } from "$lib/logger";
-import { albums, artists, libraries, servers, tracks } from "$lib/schema";
+import { albums, artists, libraries, tracks } from "$lib/schema";
 import db from "$lib/server/db";
 import { getAristsAlbumsTracksForLibrary } from "$lib/server/db/query-utils";
 import { eq, sql } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
 
-export const POST: RequestHandler = async () => {
+export const GET: RequestHandler = async () => {
   const serverConfiguration: InferredSelectServerSchema | undefined = await db.query.servers.findFirst();
 
   if (serverConfiguration) {
@@ -19,7 +19,6 @@ export const POST: RequestHandler = async () => {
       where: eq(libraries.currentLibrary, true),
     });
 
-    let librarySectionUUID: string;
     let libraryArtists: Array<InferredInsertArtistSchema> = [];
     let plexLibraryArtists: Array<InferredInsertArtistSchema> = [];
     let artistAlbums: Array<InferredInsertAlbumSchema> = [];
@@ -85,8 +84,8 @@ export const POST: RequestHandler = async () => {
       }
       // get artists from plex
       const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
-      const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
-      const artistsResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all${plexAuthToken}`, {
+      const plexAuthToken: string = `X-Plex-Token=${serverConfiguration?.xPlexToken}`;
+      const artistsResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=8&${plexAuthToken}`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -94,9 +93,8 @@ export const POST: RequestHandler = async () => {
       });
 
       if (artistsResponse.ok) {
-        const LibrarySectionsKeyAllResponse: Root = await artistsResponse.json();
-        const plexArtists: Array<Metadata> = LibrarySectionsKeyAllResponse.MediaContainer.Metadata;
-        librarySectionUUID = LibrarySectionsKeyAllResponse.MediaContainer.librarySectionUUID;
+        const artistsJSON: ArtistsResposne = await artistsResponse.json();
+        const plexArtists: Array<Artists> = artistsJSON.MediaContainer.Metadata;
 
         // TODO: Use zod to validate
         plexLibraryArtists = plexArtists.map((artist) => {
@@ -105,7 +103,7 @@ export const POST: RequestHandler = async () => {
             uuid: artist.guid,
             image: (artist.art ? artist.art : artist.thumb) ?? "replace-with-default-asset",
             key: artist.key,
-            library: librarySectionUUID,
+            library: artistsJSON.MediaContainer.librarySectionUUID,
           };
         });
 
@@ -122,105 +120,82 @@ export const POST: RequestHandler = async () => {
         }));
       }
 
-      // now we get every album relating to each artists from plex
-      const albumsResponse: Array<PromiseSettledResult<Response>> = await Promise.allSettled(plexLibraryArtists.map((artist) => {
-        return fetch(`${baseURL}${artist.key}${plexAuthToken}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
-        });
-      }));
-
-      // here we get the children of each artist which contains an Array of Metadata, each element being an album
-      const artistAlbumsRoot: Array<PromiseSettledResult<ArtistRoot>> = await Promise.allSettled(albumsResponse.reduce((acc: Array<ArtistRoot>, response: PromiseSettledResult<Response>) => {
-        if (response.status === "fulfilled" && response.value.ok) {
-          acc.push(response.value.json() as unknown as ArtistRoot); // this is stupid
-        }
-        return acc;
-      }, []));
-
-      const plexAlbums: Array<ArtistMetadata> = artistAlbumsRoot.reduce((acc: Array<Array<ArtistMetadata>>, albums) => {
-        if (albums.status === "fulfilled") {
-          acc.push(albums.value.MediaContainer.Metadata);
-        }
-        return acc;
-      }, []).flat();
-
-      // TODO: Use zod to validate
-      plexArtistAlbums = plexAlbums.map((album) => {
-        return {
-          title: album.title,
-          uuid: album.guid,
-          image: album.art ? album.art : album.thumb,
-          key: album.key,
-          library: librarySectionUUID,
-          artist: album.parentGuid,
-        };
+      // now we get every album from plex
+      const albumsResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=9&${plexAuthToken}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
       });
 
-      // if uuid in artistAlbums doesn't exist in plexArtistsAlbums
-      // delete it
-      await Promise.all(artistAlbums.map((artistAlbum) => {
-        const doesUUIDExistInPlexArtistAlbums: InferredInsertAlbumSchema | undefined = plexArtistAlbums.find(plexArtistAlbum => plexArtistAlbum.uuid === artistAlbum.uuid);
-        if (doesUUIDExistInPlexArtistAlbums) {
-          return null;
-        }
-        else {
-          return db.delete(albums).where(eq(albums.uuid, artistAlbum.uuid));
-        }
-      }));
+      if (albumsResponse.ok) {
+        const albumsJSON: AlbumsResponse = await albumsResponse.json();
+        const plexAlbums: Array<Albums> = albumsJSON.MediaContainer.Metadata;
 
-      // now we get every track relating to each album from plex
-      const tracksResponse: Array<PromiseSettledResult<Response>> = await Promise.allSettled(plexArtistAlbums.map((album) => {
-        return fetch(`${baseURL}${album.key}${plexAuthToken}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
+        // TODO: Use zod to validate
+        plexArtistAlbums = plexAlbums.map((album) => {
+          return {
+            title: album.title,
+            uuid: album.guid,
+            image: album.art ? album.art : album.thumb,
+            key: album.key,
+            library: albumsJSON.MediaContainer.librarySectionUUID,
+            artist: album.parentGuid,
+          };
         });
-      }));
 
-      // here we get the children of each album which contains an Array of Metadata, each element being a track
-      const albumTracksRoot: Array<PromiseSettledResult<AlbumRoot>> = await Promise.allSettled(tracksResponse.reduce((acc: Array<AlbumRoot>, response: PromiseSettledResult<Response>) => {
-        if (response.status === "fulfilled" && response.value.ok) {
-          acc.push(response.value.json() as unknown as AlbumRoot); // this is stupid
-        }
-        return acc;
-      }, []));
+        // if uuid in artistAlbums doesn't exist in plexArtistsAlbums
+        // delete it
+        await Promise.all(artistAlbums.map((artistAlbum) => {
+          const doesUUIDExistInPlexArtistAlbums: InferredInsertAlbumSchema | undefined = plexArtistAlbums.find(plexArtistAlbum => plexArtistAlbum.uuid === artistAlbum.uuid);
+          if (doesUUIDExistInPlexArtistAlbums) {
+            return null;
+          }
+          else {
+            return db.delete(albums).where(eq(albums.uuid, artistAlbum.uuid));
+          }
+        }));
+      }
 
-      const plexTracks: Array<AlbumMetadata> = albumTracksRoot.reduce((acc: Array<Array<AlbumMetadata>>, tracks) => {
-        if (tracks.status === "fulfilled") {
-          acc.push(tracks.value.MediaContainer.Metadata);
-        }
-        return acc;
-      }, []).flat();
-
-      // TODO: Use zod to validate
-      plexAlbumTracks = plexTracks.map((track) => {
-        return {
-          title: track.title,
-          uuid: track.guid,
-          key: track.key,
-          path: track.Media[0].Part[0].file,
-          library: librarySectionUUID,
-          artist: track.grandparentGuid,
-          album: track.parentGuid,
-          duration: track.Media[0].Part[0].duration,
-        };
+      // now we get every track from plex
+      const tracksResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=10&${plexAuthToken}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
       });
 
-      // if uuid in albumTracks doesn't exist in plexAlbumTracks
-      // delete it
-      await Promise.all(albumTracks.map((albumTrack) => {
-        const doesUUIDExistInPlexAlbumTracks: InferredInsertTrackSchema | undefined = plexAlbumTracks.find(plexAlbumTrack => plexAlbumTrack.uuid === albumTrack.uuid);
-        if (doesUUIDExistInPlexAlbumTracks) {
-          return null;
-        }
-        else {
-          return db.delete(tracks).where(eq(tracks.uuid, albumTrack.uuid));
-        }
-      }));
+      if (tracksResponse.ok) {
+        const tracksJSON: TracksResponse = await tracksResponse.json();
+        const plexTracks: Array<Tracks> = tracksJSON.MediaContainer.Metadata;
+
+        // TODO: Use zod to validate
+        plexAlbumTracks = plexTracks.map((track) => {
+          return {
+            title: track.title,
+            uuid: track.guid,
+            key: track.key,
+            path: track.Media[0].Part[0].file,
+            library: tracksJSON.MediaContainer.librarySectionUUID,
+            artist: track.grandparentGuid,
+            album: track.parentGuid,
+            duration: track.Media[0].Part[0].duration,
+          };
+        });
+
+        // if uuid in albumTracks doesn't exist in plexAlbumTracks
+        // delete it
+        await Promise.all(albumTracks.map((albumTrack) => {
+          const doesUUIDExistInPlexAlbumTracks: InferredInsertTrackSchema | undefined = plexAlbumTracks.find(plexAlbumTrack => plexAlbumTrack.uuid === albumTrack.uuid);
+          if (doesUUIDExistInPlexAlbumTracks) {
+            return null;
+          }
+          else {
+            return db.delete(tracks).where(eq(tracks.uuid, albumTrack.uuid));
+          }
+        }));
+      }
+
       // TODO: only update artists/albums in the db that actually differ from what plex has
       // instead of upserting everything everytime
 
