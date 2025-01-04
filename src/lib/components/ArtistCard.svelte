@@ -15,23 +15,24 @@
 </script>
 
 <!-- TODO: Make all cards the same size no matter what -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
+<a
   class="card border-[1px] border-surface-200-800 card-hover divide-surface-200-800 divide-y"
   class:preset-filled-surface-100-900={!hovered}
-  class:preset-filled-surface-900-100={hovered}
+  class:preset-filled-surface-700-100={hovered}
   onmouseenter={() => { hovered = true; }}
   onmouseleave={() => { hovered = false; }}
+  href="#{artist.title}"
 >
   <!-- {/* Header */} -->
   <header>
-    <img src={baseURL + artist.image + plexAuthToken} alt="Artist Artwork" />
+    <img src={baseURL + artist.image + plexAuthToken} class="h-40" alt="Artist Artwork" />
   </header>
   <!-- {/* Article */} -->
   <article class="space-y-4 p-4">
     <div>
       <h4 class="h4">{artist.title}</h4>
     </div>
+
   </article>
   <!-- {/* Footer */} -->
   <footer class="flex items-center justify-between gap-4 p-4">
@@ -48,7 +49,7 @@
       <button type="button" class="btn preset-filled-primary-500">Sync</button>
     {/if}
   </footer>
-</div>
+</a>
 
 <style>
   img {

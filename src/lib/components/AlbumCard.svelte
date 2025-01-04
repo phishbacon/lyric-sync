@@ -1,13 +1,12 @@
 <script lang="ts">
-  import type { InferredSelectLibrarySchema, InferredSelectServerSchema } from "$lib/types";
+  import type { InferredSelectAlbumSchema, InferredSelectServerSchema } from "$lib/types";
 
   import { CircleCheck, CircleX } from "lucide-svelte";
 
   const selectedColor: string = "#00ff00";
-  const { library, serverConfiguration, updateSelected }: {
-    library: InferredSelectLibrarySchema;
+  const { album, serverConfiguration }: {
+    album: InferredSelectAlbumSchema;
     serverConfiguration: InferredSelectServerSchema | undefined;
-    updateSelected: (uuid: string) => void;
   } = $props();
 
   const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
@@ -16,36 +15,41 @@
 </script>
 
 <!-- TODO: Make all cards the same size no matter what -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<div
+<a
   class="card border-[1px] border-surface-200-800 card-hover divide-surface-200-800 divide-y"
   class:preset-filled-surface-100-900={!hovered}
   class:preset-filled-surface-700-100={hovered}
   onmouseenter={() => { hovered = true; }}
   onmouseleave={() => { hovered = false; }}
-  onclick={() => updateSelected(library.uuid)}
+  href="#{album.title}"
 >
   <!-- {/* Header */} -->
   <header>
-    <img src={baseURL + library.image + plexAuthToken} alt="Library Artwork" />
+    <img src={baseURL + album.image + plexAuthToken} class="h-40" alt="Artist Artwork" />
   </header>
   <!-- {/* Article */} -->
   <article class="space-y-4 p-4">
     <div>
-      <h4 class="h4">{library.title}</h4>
+      <h4 class="h4">{album.title}</h4>
     </div>
+
   </article>
   <!-- {/* Footer */} -->
   <footer class="flex items-center justify-between gap-4 p-4">
-    <small class="opacity-60">{library.path}</small>
-    {#if library.currentLibrary}
-      <CircleCheck color={selectedColor}></CircleCheck>
+    {#if album.synced}
+      <div class="flex gap-4">
+        <small class="opacity-60">Synced</small>
+        <CircleCheck color={selectedColor}></CircleCheck>
+      </div>
     {:else}
-      <CircleX></CircleX>
+      <div class="flex gap-4">
+        <small class="opacity-60">Lyrics Missing</small>
+        <CircleX></CircleX>
+      </div>
+      <button type="button" class="btn preset-filled-primary-500">Sync</button>
     {/if}
   </footer>
-</div>
+</a>
 
 <style>
   img {

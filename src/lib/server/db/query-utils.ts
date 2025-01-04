@@ -33,7 +33,7 @@ export function updateAllCurrentLibraryValuesToFalseExceptOne(inputs: Array<Infe
   };
 };
 
-export async function getAristsAlbumsTracksForLibrary(library: InferredSelectLibrarySchema): Promise<LibraryItems> {
+export async function getArtistsAlbumsTracksForLibrary(library: InferredSelectLibrarySchema): Promise<LibraryItems> {
   const returnedArtists: Array<InferredSelectArtistSchema> | undefined = await db.query.artists.findMany({
     where: eq(artists.library, library.uuid),
   });

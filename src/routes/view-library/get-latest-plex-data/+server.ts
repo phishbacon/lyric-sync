@@ -7,7 +7,7 @@ import type { InferredInsertAlbumSchema, InferredInsertArtistSchema, InferredIns
 import { logger } from "$lib/logger";
 import { albums, artists, libraries, tracks } from "$lib/schema";
 import db from "$lib/server/db";
-import { getAristsAlbumsTracksForLibrary } from "$lib/server/db/query-utils";
+import { getArtistsAlbumsTracksForLibrary } from "$lib/server/db/query-utils";
 import { eq, sql } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
 
@@ -29,7 +29,7 @@ export const GET: RequestHandler = async () => {
     if (currentLibrary) {
       logger.info("Updating db with latest data from plex");
 
-      const { returnedArtists, returnedAlbums, returnedTracks } = await getAristsAlbumsTracksForLibrary(currentLibrary);
+      const { returnedArtists, returnedAlbums, returnedTracks } = await getArtistsAlbumsTracksForLibrary(currentLibrary);
 
       if (returnedArtists) {
       // create array of InferredInsertLibrarySchema
@@ -137,7 +137,7 @@ export const GET: RequestHandler = async () => {
           return {
             title: album.title,
             uuid: album.guid,
-            image: album.art ? album.art : album.thumb,
+            image: album.thumb ? album.thumb : album.art,
             key: album.key,
             library: albumsJSON.MediaContainer.librarySectionUUID,
             artist: album.parentGuid,

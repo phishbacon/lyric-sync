@@ -1,6 +1,6 @@
 import type { ServerLoadValues, ViewLibraryServerLoadValues } from "$lib/types";
 
-import { getAristsAlbumsTracksForLibrary } from "$lib/server/db/query-utils";
+import { getArtistsAlbumsTracksForLibrary } from "$lib/server/db/query-utils";
 
 import type { LayoutServerLoad } from "./$types";
 
@@ -21,7 +21,7 @@ export const load: LayoutServerLoad = async ({ parent }) => {
   returnData.currentLibrary = currentLibrary;
 
   if (returnData.currentLibrary) {
-    const { returnedArtists, returnedAlbums, returnedTracks } = await getAristsAlbumsTracksForLibrary(returnData.currentLibrary);
+    const { returnedArtists, returnedAlbums, returnedTracks } = await getArtistsAlbumsTracksForLibrary(returnData.currentLibrary);
 
     returnData.returnedArtists = returnedArtists;
     returnData.returnedAlbums = returnedAlbums;

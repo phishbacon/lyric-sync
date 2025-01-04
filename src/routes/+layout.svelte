@@ -21,7 +21,7 @@
 
 <ToastProvider>
   <!-- App Bar -->
-  <AppBar classes="fixed z-50">
+  <AppBar classes="fixed h-16">
     {#snippet lead()}
       <strong class="text-xl uppercase">
         <a href={data.currentLibrary ? "/view-library/artists" : "/"}>
@@ -49,7 +49,9 @@
     {/snippet}
   </AppBar>
   <!-- Page Route Content -->
-  {@render children()}
+  <div class="py-16">
+    {@render children()}
+  </div>
 </ToastProvider>
 
 <style>
