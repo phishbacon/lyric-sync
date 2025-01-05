@@ -2,9 +2,8 @@
 
 A free and open source self hosted solution for grabbing lyrics for your Plex Music Libraries.
 
-Built with
-
 <div align="center">
+  <h2>Powered By</h2>
   <a href="https://svelte.dev/">
     <img src="https://github.com/sveltejs/branding/blob/master/svelte-horizontal.png?raw=true" width="300"/>
   </a>
