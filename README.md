@@ -17,7 +17,7 @@ Built with
 <div align="center">
 <a href="https://orm.drizzle.team/">
   <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-dark.svg#gh-dark-mode-only" width="300" />
-  <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg" width="300" />
+  <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg#gh-light-mode-only" width="300" />
 </a>
 </div>
 
