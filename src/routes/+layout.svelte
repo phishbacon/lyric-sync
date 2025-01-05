@@ -21,7 +21,7 @@
 
 <ToastProvider>
   <!-- App Bar -->
-  <AppBar classes="fixed h-16">
+  <AppBar classes="fixed z-10 h-16">
     {#snippet lead()}
       <strong class="text-xl uppercase">
         <a href={data.currentLibrary ? "/view-library/artists" : "/"}>

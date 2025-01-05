@@ -130,6 +130,7 @@ export const artists = sqliteTable("artists", {
   library: text()
     .notNull()
     .references(() => libraries.uuid),
+  summary: text(),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -167,6 +168,7 @@ export const albums = sqliteTable("albums", {
   synced: integer({ mode: "boolean" })
     .default(false)
     .notNull(),
+  summary: text(),
   library: text()
     .notNull()
     .references(() => libraries.uuid),

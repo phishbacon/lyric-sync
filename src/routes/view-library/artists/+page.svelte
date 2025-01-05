@@ -11,7 +11,7 @@
   const { data }: { data: LayoutServerData } = $props();
 </script>
 
-<div class="px-5 py-1 grid grid-cols-1 w-full space-x-1 space-y-3">
+<div class="px-5 py-1 grid grid-cols-1 w-full space-y-3">
   {#if data.returnedArtists}
     {#each data.returnedArtists as artist}
       <ArtistCard {artist} serverConfiguration={data.serverConfiguration} />

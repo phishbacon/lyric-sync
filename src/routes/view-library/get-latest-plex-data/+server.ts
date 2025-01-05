@@ -35,12 +35,13 @@ export const GET: RequestHandler = async () => {
       // create array of InferredInsertLibrarySchema
       // from the db response so we can merge that with
       // whatever we got from plex
-        libraryArtists = returnedArtists.map(({ title, uuid, image, key, synced, library }) => {
+        libraryArtists = returnedArtists.map(({ title, uuid, image, key, summary, synced, library }) => {
           return {
             title,
             uuid,
             image,
             key,
+            summary,
             synced,
             library,
           };
@@ -51,12 +52,13 @@ export const GET: RequestHandler = async () => {
       // create array of InferredInsertAlbumSchema
       // from the db response so we can merge that with
       // whatever we got from plex
-        artistAlbums = returnedAlbums.map(({ title, uuid, image, key, synced, library, artist }) => {
+        artistAlbums = returnedAlbums.map(({ title, uuid, image, key, summary, synced, library, artist }) => {
           return {
             title,
             uuid,
             image,
             key,
+            summary,
             synced,
             library,
             artist,
@@ -101,8 +103,9 @@ export const GET: RequestHandler = async () => {
           return {
             title: artist.title,
             uuid: artist.guid,
-            image: (artist.art ? artist.art : artist.thumb) ?? "replace-with-default-asset",
+            image: (artist.thumb ? artist.thumb : artist.art) ?? "replace-with-default-asset",
             key: artist.key,
+            summary: artist.summary,
             library: artistsJSON.MediaContainer.librarySectionUUID,
           };
         });
@@ -139,6 +142,7 @@ export const GET: RequestHandler = async () => {
             uuid: album.guid,
             image: album.thumb ? album.thumb : album.art,
             key: album.key,
+            summary: album.summary,
             library: albumsJSON.MediaContainer.librarySectionUUID,
             artist: album.parentGuid,
           };
@@ -207,6 +211,7 @@ export const GET: RequestHandler = async () => {
           image: sql.raw(`excluded.${toSnakeCase(artists.image.name)}`),
           key: sql.raw(`excluded.${toSnakeCase(artists.key.name)}`),
           library: sql.raw(`excluded.${toSnakeCase(artists.library.name)}`),
+          summary: sql.raw(`excluded.${toSnakeCase(artists.summary.name)}`),
         },
       }).returning();
 
@@ -221,6 +226,7 @@ export const GET: RequestHandler = async () => {
           key: sql.raw(`excluded.${toSnakeCase(albums.key.name)}`),
           library: sql.raw(`excluded.${toSnakeCase(albums.library.name)}`),
           artist: sql.raw(`excluded.${toSnakeCase(albums.artist.name)}`),
+          summary: sql.raw(`excluded.${toSnakeCase(albums.summary.name)}`),
         },
       }).returning();
 

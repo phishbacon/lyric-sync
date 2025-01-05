@@ -3,7 +3,7 @@
 
   import { Navigation } from "@skeletonlabs/skeleton-svelte";
   import { page } from "$app/stores";
-  import { DiscAlbum, FileMusic, Music, Settings } from "lucide-svelte";
+  import { DiscAlbum, Music, Settings } from "lucide-svelte";
 
   const { children }: { children: Snippet } = $props();
 </script>
@@ -17,10 +17,8 @@
     <Navigation.Tile id="1" label="Albums" href="/view-library/albums" selected={$page.url.pathname === ("/view-library/albums")}>
       <DiscAlbum />
     </Navigation.Tile>
-    <Navigation.Tile id="2" label="Tracks" href="/view-library/tracks" selected={$page.url.pathname === ("/view-library/tracks")}>
-      <FileMusic />
-    </Navigation.Tile>
   {/snippet}
+  <!-- TODO: Not sure when this settings tile disappeared need to get it back -->
   {#snippet footer()}
     <Navigation.Tile labelExpanded="Settings" href="#" title="settings"><Settings /></Navigation.Tile>
   {/snippet}
