@@ -26,7 +26,6 @@ export const POST: RequestHandler = async ({ request }) => {
     });
 
     if (response.ok) {
-      logger.debug(response);
       const data: Root = await response.json();
       if (data.MediaContainer) {
         testConnectionResponse.connection = true;

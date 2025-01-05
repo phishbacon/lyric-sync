@@ -1,38 +1,54 @@
-# sv
+# Lyric-Sync
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A free and open source self hosted solution for grabbing lyrics for your Plex Music Libraries.
 
-## Creating a project
+Built with
 
-If you're seeing this, you've probably already done this step. Congrats!
+<div align="center">
+<a href="https://svelte.dev/">
+  <img src="https://github.com/sveltejs/branding/blob/master/svelte-horizontal.png?raw=true" width="300"/>
+</a>
+</div>
+<div align="center">
+<a href="https://www.skeleton.dev/">
+  <img src="https://user-images.githubusercontent.com/1509726/199282306-7454adcb-b765-4618-8438-67655a7dee47.png" width="300"/>
+</a>
+</div>
+<div align="center">
+<a href="https://orm.drizzle.team/">
+  <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-dark.svg#gh-dark-mode-only" width="300" />
+  <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg" width="300" />
+</a>
+</div>
+
+## Installation
+
+Will fill this out later
+
+## Contributing
+
+Lyric-Sync is an open source project, it is made possible with contributors like you.
+
+The best way to start contributing to Lyric-Sync is by having access to an instance of Plex. This way, you can populate the database with real data and get real responses back from Plex.
 
 ```bash
-# create a new project in the current directory
-npx sv create
+# clone this repo
+git clone git@github.com:phishbacon/lyric-sync.git
 
-# create a new project in my-app
-npx sv create my-app
+# cd into the project directory
+cd lyric-sync
+
+# install dependencies
+pnpm install
+
+# copy the .env.example file and rename it to .env
+cp .env.example .env
+
+# run db migrations
+pnpm db:migrate
+
+# start the project
+pnpm dev
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+If you don't have access to a Plex instance, have no fear! You can still contribute. Run the project in _No Plex Mode_ by replacing the last step above with `pnpm dev:no_plex`. This will start the project, ignoring the .env file, and instead use a database with dummy data and circumvent any connections to Plex. This mode is primarily for developing the UI/UX experience of Lyric-Sync.
