@@ -1,32 +1,13 @@
 <script lang="ts">
   import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
 
-  import { goto } from "$app/navigation";
   import { getContext, onMount } from "svelte";
 
-  import type { LayoutServerData } from "./$types";
-
-  const { data }: { data: LayoutServerData } = $props();
-  export const toast: ToastContext = getContext("toast");
+  const toast: ToastContext = getContext("toast");
+  const redirectOnMount: (toast: ToastContext) => void = getContext("redirectOnMount");
 
   onMount(() => {
-    if (!data.serverConfiguration) {
-      goto("/add-server");
-      toast.create({
-        title: "No Server Configuration",
-        description: "Please add a server configuration",
-        type: "error",
-      });
-    }
-    // server configuration defined but no currentLibrary is set
-    else if (!data.currentLibrary) {
-      goto("/select-library");
-      toast.create({
-        title: "No Library Selected",
-        description: "Select which library you would like to sync",
-        type: "error",
-      });
-    }
+    redirectOnMount(toast);
   });
 </script>
 

@@ -3,6 +3,7 @@ import type { Root } from "$lib/plex-api-types";
 import type { TestConnectionResponse } from "$lib/types";
 
 import { logger } from "$lib/logger";
+import env from "$lib/server/env";
 
 export const POST: RequestHandler = async ({ request }) => {
   const { hostname, port, xPlexToken }: {
@@ -17,6 +18,12 @@ export const POST: RequestHandler = async ({ request }) => {
   };
 
   logger.info(`Testing Plex Connection with ${URL}`);
+
+  if (env.NO_PLEX) {
+    testConnectionResponse.connection = true;
+    testConnectionResponse.message = "Connection Established";
+    return new Response(JSON.stringify(testConnectionResponse));
+  }
 
   try {
     const response: Response = await fetch(URL, {

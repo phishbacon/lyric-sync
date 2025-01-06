@@ -35,7 +35,7 @@
   <!-- {/* Header */} -->
   <header>
     <LazyLoading>
-      <img src={baseURL + artist.image + plexAuthToken} class="h-40" alt="Artist Artwork"
+      <img src={artist.image === "no-plex" ? "https://picsum.photos/200" : baseURL + artist.image + plexAuthToken} class="h-40" alt="Artist Artwork"
            class:hidden={loading}
            transition:fade
            onload={imageLoaded} />

@@ -28,7 +28,7 @@
 >
   <!-- {/* Header */} -->
   <header>
-    <img src={baseURL + library.image + plexAuthToken} alt="Library Artwork" />
+    <img src={library.image === "no-plex" ? "https://picsum.photos/200" : baseURL + library.image + plexAuthToken} alt="Library Artwork" />
   </header>
   <!-- {/* Article */} -->
   <article class="space-y-4 p-4">

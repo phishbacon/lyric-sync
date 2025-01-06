@@ -18,6 +18,7 @@ const EnvSchema = z.object({
   PORT: z.coerce.number().default(9999),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]),
   DATABASE_URL: z.string().url(),
+  NO_PLEX: z.coerce.boolean().optional().default(false),
 }).superRefine((input, ctx) => {
   if (input.NODE_ENV === "production") {
     if (!input.DATABASE_URL) {

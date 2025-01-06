@@ -2,21 +2,33 @@
   import "../app.postcss";
 
   import { AppBar, type ToastContext, ToastProvider } from "@skeletonlabs/skeleton-svelte";
+  import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { getContext, setContext, type Snippet } from "svelte";
 
   import type { LayoutServerData } from "./$types";
 
   const { data, children }: { data: LayoutServerData; children: Snippet } = $props();
-  const toast: ToastContext = getContext("toast");
-  function toaster(title: string, description: string, type: "error" | "success" | "info") {
-    toast.create({
-      title,
-      description,
-      type,
-    });
+  export function redirectOnMount(toast: ToastContext): void {
+    if (!data.serverConfiguration) {
+      goto("/add-server");
+      toast.create({
+        title: "No Server Configuration",
+        description: "Please add a server configuration",
+        type: "error",
+      });
+    }
+    // server configuration defined but no currentLibrary is set
+    else if (!data.currentLibrary) {
+      goto("/select-library");
+      toast.create({
+        title: "No Library Selected",
+        description: "Select which library you would like to sync",
+        type: "error",
+      });
+    }
   }
-  setContext("toaster", toaster);
+  setContext("redirectOnMount", redirectOnMount);
 </script>
 
 <ToastProvider>

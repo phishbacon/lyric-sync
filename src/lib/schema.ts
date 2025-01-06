@@ -71,7 +71,7 @@ export const insertServerSchema = createInsertSchema(
 
 export const updateServerSchema = insertServerSchema.partial();
 
-export const libraries = sqliteTable("libaries", {
+export const libraries = sqliteTable("libraries", {
   title: text()
     .notNull(),
   uuid: text()

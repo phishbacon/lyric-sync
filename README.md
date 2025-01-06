@@ -53,4 +53,4 @@ pnpm db:migrate
 pnpm dev
 ```
 
-If you don't have access to a Plex instance, have no fear! You can still contribute. Run the project in _No Plex Mode_ by replacing the last step above with `pnpm dev:no_plex`. This will start the project, ignoring the .env file, and instead use a database with dummy data and circumvent any connections to Plex. This mode is primarily for developing the UI/UX experience of Lyric-Sync.
+If you don't have access to a Plex instance, have no fear! You can still contribute. Run the project in _No Plex Mode_ by adding `NO_PLEX=true` to your .env file. This will start the project and circumvent any connections to Plex. This mode is primarily for developing the UI/UX experience of Lyric-Sync.

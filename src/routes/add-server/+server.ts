@@ -4,6 +4,8 @@ import type { SafeParseReturnType, typeToFlattenedError } from "zod";
 
 import { insertServerSchema, servers } from "$lib/schema";
 import db from "$lib/server/db";
+import noPlexServer from "$lib/server/db/no-plex-seed/server";
+import env from "$lib/server/env";
 
 export const POST: RequestHandler = async ({ request }) => {
   const serverConfigurations: Array<InferredSelectServerSchema> = await db.query.servers.findMany();
@@ -16,7 +18,7 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 
   // Might as well validate everything again
-  const serverConfig: AddServerFormValues = await request.json();
+  const serverConfig: AddServerFormValues = env.NO_PLEX ? noPlexServer : await request.json();
   const validate: SafeParseReturnType<AddServerFormValues, AddServerFormValues> = insertServerSchema.safeParse(serverConfig);
   const errors: typeToFlattenedError<AddServerFormValues>["fieldErrors"] | undefined = validate.success ? undefined : validate.error.flatten().fieldErrors;
 
