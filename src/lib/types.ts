@@ -74,6 +74,6 @@ export interface LibraryItems {
   returnedTracks: Array<InferredSelectTrackSchema> | undefined;
 };
 
-export interface ViewLibraryServerLoadValues extends ServerLoadValues, LibraryItems {
-
+export interface ViewLibraryServerLoadValues extends ServerLoadValues {
+  returnedArtists: Array<InferredSelectArtistSchema> | undefined;
 };

@@ -3,8 +3,8 @@
 
   import { AppBar, type ToastContext, ToastProvider } from "@skeletonlabs/skeleton-svelte";
   import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
-  import { getContext, setContext, type Snippet } from "svelte";
+  import { page } from "$app/state";
+  import { setContext, type Snippet } from "svelte";
 
   import type { LayoutServerData } from "./$types";
 
@@ -36,7 +36,7 @@
   <AppBar classes="fixed z-10 h-16">
     {#snippet lead()}
       <strong class="text-xl uppercase">
-        <a href={data.currentLibrary ? "/view-library/artists" : "/"}>
+        <a href={data.currentLibrary ? "/view-library" : "/"}>
           Lyric-Sync
         </a>
       </strong>
@@ -47,8 +47,8 @@
           <a class="btn btn-sm variant-ghost-surface" href="/select-library" rel="noreferrer">
             Syncing: {data.currentLibrary.title}
           </a>
-          {#if !$page.url.pathname.includes("/view-library")}
-            <a class="btn btn-sm variant-ghost-surface" href="/view-library/artists" rel="noreferrer">
+          {#if !page.url.pathname.includes("/view-library")}
+            <a class="btn btn-sm variant-ghost-surface" href="/view-library" rel="noreferrer">
               View Library
             </a>
           {/if}
@@ -61,9 +61,7 @@
     {/snippet}
   </AppBar>
   <!-- Page Route Content -->
-  <div class="py-16">
-    {@render children()}
-  </div>
+  {@render children()}
 </ToastProvider>
 
 <style>

@@ -1,8 +1,15 @@
-<div class="container h-full mx-auto flex justify-center items-center">
-  <div class="space-y-10 text-center flex flex-col items-center">
-    <h2 class="h2">Viewing Libraries.</h2>
-    <!-- / -->
-    <div class="flex justify-center space-x-2">
-    </div>
-  </div>
+<script lang="ts">
+  import ArtistCard from "$lib/components/ArtistCard.svelte";
+
+  import type { LayoutServerData } from "./$types";
+
+  const { data }: { data: LayoutServerData } = $props();
+</script>
+
+<div class="px-5 py-1 grid grid-cols-1 w-full space-y-3">
+  {#if data.returnedArtists}
+    {#each data.returnedArtists as artist}
+      <ArtistCard {artist} serverConfiguration={data.serverConfiguration} />
+    {/each}
+  {/if}
 </div>

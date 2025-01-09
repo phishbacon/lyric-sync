@@ -1,6 +1,6 @@
-import type { ServerLoadValues, ViewLibraryServerLoadValues } from "$lib/types";
+import type { InferredSelectArtistSchema, ServerLoadValues, ViewLibraryServerLoadValues } from "$lib/types";
 
-import { getArtistsAlbumsTracksForLibrary } from "$lib/server/db/query-utils";
+import { getAllArtistsInLibrary } from "$lib/server/db/query-utils";
 
 import type { LayoutServerLoad } from "./$types";
 
@@ -10,8 +10,6 @@ export const load: LayoutServerLoad = async ({ parent }) => {
     libraries: [],
     currentLibrary: undefined,
     returnedArtists: undefined,
-    returnedAlbums: undefined,
-    returnedTracks: undefined,
   };
 
   const { serverConfiguration, libraries, currentLibrary }: ServerLoadValues = await parent();
@@ -21,11 +19,9 @@ export const load: LayoutServerLoad = async ({ parent }) => {
   returnData.currentLibrary = currentLibrary;
 
   if (returnData.currentLibrary) {
-    const { returnedArtists, returnedAlbums, returnedTracks } = await getArtistsAlbumsTracksForLibrary(returnData.currentLibrary);
+    const returnedArtists: Array<InferredSelectArtistSchema> = await getAllArtistsInLibrary(returnData.currentLibrary.uuid);
 
     returnData.returnedArtists = returnedArtists;
-    returnData.returnedAlbums = returnedAlbums;
-    returnData.returnedTracks = returnedTracks;
   }
 
   return returnData;

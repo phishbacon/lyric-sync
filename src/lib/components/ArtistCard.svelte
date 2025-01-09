@@ -2,6 +2,7 @@
   import type { InferredSelectArtistSchema, InferredSelectServerSchema } from "$lib/types";
 
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
+  import { RandomImageURL } from "$lib/external-links";
   import { CircleCheck, CircleX } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
@@ -30,12 +31,12 @@
   class:preset-filled-surface-700-100={hovered}
   onmouseenter={() => { hovered = true; }}
   onmouseleave={() => { hovered = false; }}
-  href="#{artist.title}"
+  href="view-library/artist/{encodeURIComponent(artist.uuid)}"
 >
   <!-- {/* Header */} -->
   <header>
     <LazyLoading>
-      <img src={artist.image === "no-plex" ? "https://picsum.photos/200" : baseURL + artist.image + plexAuthToken} class="h-40" alt="Artist Artwork"
+      <img src={artist.image === "no-plex" ? RandomImageURL : baseURL + artist.image + plexAuthToken} class="h-40" alt="Artist Artwork"
            class:hidden={loading}
            transition:fade
            onload={imageLoaded} />

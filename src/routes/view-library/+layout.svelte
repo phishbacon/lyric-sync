@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Navigation, type ToastContext } from "@skeletonlabs/skeleton-svelte";
-  import { page } from "$app/stores";
-  import { DiscAlbum, Music, Settings } from "lucide-svelte";
+  import { page } from "$app/state";
+  import { Music, Settings } from "lucide-svelte";
   import { getContext, onMount, type Snippet } from "svelte";
 
   const { children }: { children: Snippet } = $props();
@@ -13,14 +13,10 @@
   });
 </script>
 
-<!-- Component -->
 <Navigation.Rail width="25rem" classes="fixed">
   {#snippet tiles()}
-    <Navigation.Tile id="0" label="Artists" href="/view-library/artists" selected={$page.url.pathname === ("/view-library/artists")}>
+    <Navigation.Tile id="0" label="Library" href="/view-library" selected={page.url.pathname === ("/view-library")}>
       <Music />
-    </Navigation.Tile>
-    <Navigation.Tile id="1" label="Albums" href="/view-library/albums" selected={$page.url.pathname === ("/view-library/albums")}>
-      <DiscAlbum />
     </Navigation.Tile>
   {/snippet}
   <!-- TODO: Not sure when this settings tile disappeared need to get it back -->
@@ -29,6 +25,6 @@
   {/snippet}
 </Navigation.Rail>
 <!-- Content -->
-<div class="ml-16">
+<div class="ml-16 pt-16">
   {@render children()}
 </div>

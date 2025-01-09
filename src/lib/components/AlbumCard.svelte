@@ -2,6 +2,7 @@
   import type { InferredSelectAlbumSchema, InferredSelectServerSchema } from "$lib/types";
 
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
+  import { RandomImageURL } from "$lib/external-links";
   import { CircleCheck, CircleX } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
@@ -36,7 +37,7 @@
   <!-- {/* Header */} -->
   <header>
     <LazyLoading>
-      <img src={album.image === "no-plex" ? "https://picsum.photos/200" : baseURL + album.image + plexAuthToken} class="h-40" alt="Album Artwork"
+      <img src={album.image === "no-plex" ? RandomImageURL : baseURL + album.image + plexAuthToken} class="h-40" alt="Album Artwork"
            class:hidden={loading}
            transition:fade
            onload={imageLoaded} />

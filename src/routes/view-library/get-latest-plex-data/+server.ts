@@ -10,7 +10,7 @@ import db from "$lib/server/db";
 import noPlexAlbums from "$lib/server/db/no-plex-seed/albums";
 import noPlexArtists from "$lib/server/db/no-plex-seed/artists";
 import noPlexTracks from "$lib/server/db/no-plex-seed/tracks";
-import { getArtistsAlbumsTracksForLibrary } from "$lib/server/db/query-utils";
+import { getAllArtistsAlbumsTracksInLibrary } from "$lib/server/db/query-utils";
 import env from "$lib/server/env";
 import { eq, sql } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
@@ -33,7 +33,7 @@ export const GET: RequestHandler = async () => {
     if (currentLibrary) {
       logger.info("Updating db with latest data from plex");
 
-      const { returnedArtists, returnedAlbums, returnedTracks } = await getArtistsAlbumsTracksForLibrary(currentLibrary);
+      const { returnedArtists, returnedAlbums, returnedTracks } = await getAllArtistsAlbumsTracksInLibrary(currentLibrary.uuid);
 
       if (returnedArtists) {
       // create array of InferredInsertLibrarySchema

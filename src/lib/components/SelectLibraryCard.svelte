@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { InferredSelectLibrarySchema, InferredSelectServerSchema } from "$lib/types";
 
+  import { RandomImageURL } from "$lib/external-links";
   import { CircleCheck, CircleX } from "lucide-svelte";
 
   const selectedColor: string = "#00ff00";
@@ -28,7 +29,7 @@
 >
   <!-- {/* Header */} -->
   <header>
-    <img src={library.image === "no-plex" ? "https://picsum.photos/200" : baseURL + library.image + plexAuthToken} alt="Library Artwork" />
+    <img src={library.image === "no-plex" ? RandomImageURL : baseURL + library.image + plexAuthToken} alt="Library Artwork" />
   </header>
   <!-- {/* Article */} -->
   <article class="space-y-4 p-4">
