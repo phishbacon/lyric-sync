@@ -25,7 +25,7 @@
 </script>
 
 <!-- TODO: Make all cards the same size no matter what -->
-<div class="flex justify-center"
+<div class="flex justify-center my-2"
      class:hidden={artist.library === "hide_me"}>
   <a
     class="card border-[1px] border-surface-200-800 card-hover w-96 divide-surface-200-800 divide-y"
@@ -33,7 +33,7 @@
     class:preset-filled-surface-700-100={hovered}
     onmouseenter={() => { hovered = true; }}
     onmouseleave={() => { hovered = false; }}
-    href="view-library/artist/{encodeURIComponent(artist.uuid)}"
+    href="/view-library/artist/{encodeURIComponent(artist.uuid)}"
   >
     <!-- {/* Header */} -->
     <header class="flex p-4">

@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { InferredSelectArtistSchema } from "$lib/types";
 
-  import { Accordion, ProgressRing } from "@skeletonlabs/skeleton-svelte";
+  import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
   import { page } from "$app/state";
+  import AlbumCard from "$lib/components/AlbumCard.svelte";
   import { RandomImageURL } from "$lib/external-links";
   import { fade } from "svelte/transition";
 
@@ -44,21 +45,12 @@
       </span>
     {/if}
   </div>
+</div>
 
+<div class="px-2 py-1 grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
   {#if data.returnedAlbums}
-    <Accordion multiple>
-      {#each data.returnedAlbums as album}
-        <Accordion.Item value={album.uuid}>
-          <!-- Control -->
-          {#snippet lead()}{album.title}{/snippet}
-          {#snippet control()}{album.tracksSynced}/{album.totalTracks}{/snippet}
-          {#snippet panel()}
-            <!-- TODO: put tracks here or move them to seprate view-library/album/uuid  -->
-          {/snippet}
-          <!-- Panel -->
-        </Accordion.Item>
-        <hr class="hr" />
-      {/each}
-    </Accordion>
+    {#each data.returnedAlbums as album}
+      <AlbumCard {album} serverConfiguration={data.serverConfiguration} />
+    {/each}
   {/if}
 </div>
