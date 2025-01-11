@@ -1,8 +1,8 @@
-import type { InferredInsertLibrarySchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSelectLibrarySchema, InferredSelectTrackSchema, LibraryItems } from "$lib/types";
+import type { ArtistWithAlbumCount, InferredInsertLibrarySchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSelectTrackSchema, LibraryItems } from "$lib/types";
 
 import { logger } from "$lib/logger";
 import { albums, artists, libraries, tracks } from "$lib/schema";
-import { and, eq, sql, type SQL } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, sql, type SQL } from "drizzle-orm";
 
 import db from ".";
 
@@ -37,6 +37,18 @@ export async function getAllArtistsInLibrary(libraryUUID: string): Promise<Array
   const returnedArtists: Array<InferredSelectArtistSchema> | undefined = await db.query.artists.findMany({
     where: eq(artists.library, libraryUUID),
   });
+
+  logger.info(returnedArtists, `returning all artists in library ${libraryUUID}`);
+
+  return returnedArtists;
+};
+
+export async function getAllArtistsInLibraryWithAlbumCounts(libraryUUID: string): Promise<Array<ArtistWithAlbumCount>> {
+  const returnedArtists: Array<ArtistWithAlbumCount> = await db.select({
+    ...getTableColumns(artists),
+    totalAlbums: sql<number>`COUNT(${albums.uuid})`,
+    albumsSynced: sql<number>`SUM(CASE WHEN ${albums.synced} = 1 THEN 1 ELSE 0 END)`,
+  }).from(artists).leftJoin(albums, sql`${albums.artist} = ${artists.uuid}`).where(eq(artists.library, libraryUUID)).groupBy(artists.uuid).orderBy(asc(sql`LOWER(${artists.title})`));
 
   logger.info(returnedArtists, `returning all artists in library ${libraryUUID}`);
 

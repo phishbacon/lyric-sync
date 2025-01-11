@@ -74,6 +74,18 @@ export interface LibraryItems {
   returnedTracks: Array<InferredSelectTrackSchema> | undefined;
 };
 
+export interface ArtistWithAlbumCount extends InferredSelectArtistSchema {
+  totalAlbums: number;
+  albumsSynced: number;
+}
+
 export interface ViewLibraryServerLoadValues extends ServerLoadValues {
-  returnedArtists: Array<InferredSelectArtistSchema> | undefined;
+  returnedArtists: Array<ArtistWithAlbumCount> | undefined;
 };
+
+// types for view-library/artist/slug
+
+export interface AlbumWithTrackCount extends InferredSelectAlbumSchema {
+  totalTracks: number;
+  trackSynced: number;
+}
