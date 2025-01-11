@@ -87,5 +87,5 @@ export interface ViewLibraryServerLoadValues extends ServerLoadValues {
 
 export interface AlbumWithTrackCount extends InferredSelectAlbumSchema {
   totalTracks: number;
-  trackSynced: number;
+  tracksSynced: number;
 }

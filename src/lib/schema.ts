@@ -224,6 +224,9 @@ export const tracks = sqliteTable("tracks", {
   album: text()
     .notNull()
     .references(() => albums.uuid),
+  trackNumber: integer()
+    .notNull()
+    .default(0),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -244,6 +247,7 @@ export const insertTrackSchema = createInsertSchema(
     library: schema => schema.library.min(1, "Library uuid is required"),
     artist: schema => schema.artist.min(1, "Artist uuid is required"),
     album: schema => schema.album.min(1, "Album uuid is required"),
+    trackNumber: schema => schema.trackNumber.min(1, "Track number is required"),
   },
 )
   .omit({

@@ -51,8 +51,10 @@
         <Accordion.Item value={album.uuid}>
           <!-- Control -->
           {#snippet lead()}{album.title}{/snippet}
-          {#snippet control()}{/snippet}
-          {#snippet panel()}{/snippet}
+          {#snippet control()}{album.tracksSynced}/{album.totalTracks}{/snippet}
+          {#snippet panel()}
+            <!-- TODO: put tracks here or move them to seprate view-library/album/uuid  -->
+          {/snippet}
           <!-- Panel -->
         </Accordion.Item>
         <hr class="hr" />

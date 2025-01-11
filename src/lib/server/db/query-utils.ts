@@ -1,4 +1,4 @@
-import type { ArtistWithAlbumCount, InferredInsertLibrarySchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSelectTrackSchema, LibraryItems } from "$lib/types";
+import type { AlbumWithTrackCount, ArtistWithAlbumCount, InferredInsertLibrarySchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSelectTrackSchema, LibraryItems } from "$lib/types";
 
 import { logger } from "$lib/logger";
 import { albums, artists, libraries, tracks } from "$lib/schema";
@@ -55,6 +55,28 @@ export async function getAllArtistsInLibraryWithAlbumCounts(libraryUUID: string)
   return returnedArtists;
 };
 
+export async function getAllAlbumsFromArtistInLibraryWithTrackCounts(libraryUUID: string, artistUUID: string): Promise<Array<AlbumWithTrackCount>> {
+  const returnedAlbums: Array<AlbumWithTrackCount> = await db.select({
+    ...getTableColumns(albums),
+    totalTracks: sql<number>`COUNT(${tracks.uuid})`,
+    tracksSynced: sql<number>`SUM(CASE WHEN ${tracks.synced} = 1 THEN 1 ELSE 0 END)`,
+  }).from(albums).leftJoin(tracks, sql`${tracks.artist} = ${albums.artist} AND ${tracks.album} = ${albums.uuid}`).where(and(eq(tracks.library, libraryUUID), eq(tracks.artist, artistUUID))).groupBy(albums.uuid).orderBy(asc(sql`LOWER(${albums.title})`));
+
+  logger.info(returnedAlbums, `returning albums from artist: ${artistUUID} in library ${libraryUUID}`);
+
+  return returnedAlbums;
+};
+
+export async function getAllTracksFromAlbumInLibrary(libraryUUID: string, albumUUID: string): Promise<Array<InferredSelectTrackSchema>> {
+  const returnedTracks: Array<InferredSelectTrackSchema> = await db.query.tracks.findMany({
+    where: and(eq(tracks.album, albumUUID), eq(tracks.library, libraryUUID)),
+  });
+
+  logger.info(returnedTracks, `retruning tracks from album: ${albumUUID} in library ${libraryUUID}`);
+
+  return returnedTracks;
+};
+
 export async function getAllAlbumsInLibrary(libraryUUID: string): Promise<Array<InferredSelectAlbumSchema>> {
   const returnedAlbums: Array<InferredSelectAlbumSchema> | undefined = await db.query.albums.findMany({
     where: eq(albums.library, libraryUUID),
@@ -73,16 +95,6 @@ export async function getAllTracksInLibrary(libraryUUID: string): Promise<Array<
   logger.info(returnedTracks, `returning all tracks in library ${libraryUUID}`);
 
   return returnedTracks;
-};
-
-export async function getAllAlbumsFromArtistInLibrary(libraryUUID: string, artistUUID: string): Promise<Array<InferredSelectAlbumSchema>> {
-  const returnedAlbums: Array<InferredSelectAlbumSchema> | undefined = await db.query.albums.findMany({
-    where: and(eq(albums.library, libraryUUID), eq(albums.artist, artistUUID)),
-  });
-
-  logger.info(returnedAlbums, `returning albums from artist: ${artistUUID} in library ${libraryUUID}`);
-
-  return returnedAlbums;
 };
 
 export async function getAllArtistsAlbumsTracksInLibrary(libraryUUID: string): Promise<LibraryItems> {

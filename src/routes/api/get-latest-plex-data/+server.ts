@@ -74,7 +74,7 @@ export const GET: RequestHandler = async () => {
       // create array of InferredInsertTrackSchema
       // from the db response so we can merge that with
       // whatever we got from plex
-        albumTracks = returnedTracks.map(({ title, uuid, key, path, synced, library, artist, album, duration }) => {
+        albumTracks = returnedTracks.map(({ title, uuid, key, path, synced, library, artist, album, duration, trackNumber }) => {
           return {
             title,
             uuid,
@@ -85,6 +85,7 @@ export const GET: RequestHandler = async () => {
             artist,
             album,
             duration,
+            trackNumber,
           };
         });
       }
@@ -195,6 +196,7 @@ export const GET: RequestHandler = async () => {
               artist: track.grandparentGuid,
               album: track.parentGuid,
               duration: track.Media[0].Part[0].duration,
+              trackNumber: track.index,
             };
           });
 
@@ -254,6 +256,7 @@ export const GET: RequestHandler = async () => {
           artist: sql.raw(`excluded.${toSnakeCase(tracks.artist.name)}`),
           album: sql.raw(`excluded.${toSnakeCase(tracks.album.name)}`),
           duration: sql.raw(`excluded.${toSnakeCase(tracks.duration.name)}`),
+          trackNumber: sql.raw(`excluded.${toSnakeCase(tracks.trackNumber.name)}`),
         },
       }).returning();
 
