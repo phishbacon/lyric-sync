@@ -73,14 +73,16 @@
         <tbody class="hover:[&>tr]:preset-tonal-primary">
           {#each data.returnedTracks as track}
             <tr>
-              <td>{track.title}</td>
+              <td>{track.trackNumber.toString().padStart(2, "0")}. {track.title}</td>
               <td>{track.path.split("/")[track.path.split("/").length - 1]}</td>
               <td>
                 <div class="flex justify-end">
                   {#if track.synced}
                     <CircleCheck color={syncedColor}></CircleCheck>
                   {:else}
-                    <CircleX color={notSyncedColor}></CircleX>
+                    <a href="#">
+                      <CircleX color={notSyncedColor}></CircleX>
+                    </a>
                   {/if}
                 </div>
               </td>
