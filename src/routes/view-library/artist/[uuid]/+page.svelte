@@ -14,7 +14,7 @@
 
   const artist: InferredSelectArtistSchema | undefined = $derived.by(() => {
     if (data.returnedArtists) {
-      return data.returnedArtists.find(artist => artist.uuid === page.params.slug);
+      return data.returnedArtists.find(artist => artist.uuid === page.params.uuid);
     }
     else {
       return undefined;
