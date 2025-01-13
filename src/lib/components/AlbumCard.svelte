@@ -49,7 +49,7 @@
         </LazyLoading>
       </div>
       <div class="flex w-1/2 justify-end">
-        <ProgressRing value={album.tracksSynced} max={album.totalTracks} size="size-40" />
+        <ProgressRing value={Math.ceil((album.tracksSynced / album.totalTracks) * 100)} max={100} size="size-40" />
       </div>
       <!-- TODO: Figure out how to get the artist summary in here. Want it to be inline with image
        overflow hidden with ellipsis -->

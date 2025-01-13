@@ -229,7 +229,8 @@ export const GET: RequestHandler = async () => {
         },
       }).returning();
 
-      logger.info(updatedArtists, "updated artists");
+      logger.info(`Artists updated for library: ${currentLibrary.uuid}`);
+      logger.debug(updatedArtists);
 
       // now we can just upsert the albums returned from plex
       const updatedAlbums: Array<InferredSelectAlbumSchema> = await db.insert(albums).values(plexArtistAlbums).onConflictDoUpdate({
@@ -244,7 +245,8 @@ export const GET: RequestHandler = async () => {
         },
       }).returning();
 
-      logger.info(updatedAlbums, "updated albums");
+      logger.info(`Albust updated for library: ${currentLibrary.uuid}`);
+      logger.debug(updatedAlbums);
       // now we can just upsert the tracks returned from plex
       const updatedTracks: Array<InferredSelectTrackSchema> = await db.insert(tracks).values(plexAlbumTracks).onConflictDoUpdate({
         target: tracks.uuid,
@@ -260,7 +262,8 @@ export const GET: RequestHandler = async () => {
         },
       }).returning();
 
-      logger.info(updatedTracks, "updated tracks");
+      logger.info(`Tracks updated for library: ${currentLibrary.uuid}`);
+      logger.debug(updatedTracks);
     };
   }
 

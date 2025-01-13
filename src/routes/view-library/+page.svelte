@@ -1,9 +1,9 @@
 <script lang="ts">
   import ArtistCard from "$lib/components/ArtistCard.svelte";
 
-  import type { LayoutServerData } from "./$types";
+  import type { PageData } from "./$types";
 
-  const { data }: { data: LayoutServerData } = $props();
+  const { data }: { data: PageData } = $props();
 </script>
 
 <div class="px-5 py-1 grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">

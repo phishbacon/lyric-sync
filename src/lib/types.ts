@@ -79,13 +79,30 @@ export interface ArtistWithAlbumCount extends InferredSelectArtistSchema {
   albumsSynced: number;
 }
 
-export interface ViewLibraryServerLoadValues extends ServerLoadValues {
-  returnedArtists: Array<ArtistWithAlbumCount> | undefined;
-};
-
 // types for view-library/artist/slug
 
 export interface AlbumWithTrackCount extends InferredSelectAlbumSchema {
   totalTracks: number;
   tracksSynced: number;
+}
+
+// lrclib 200 response api/get?artist_name track_name album_name duration
+export interface LRCResponse {
+  id: number;
+  name: string;
+  trackName: string;
+  artistName: string;
+  albumName: string;
+  duration: number;
+  instrumental: boolean;
+  plainLyrics: string;
+  syncedLyrics: string;
+}
+
+// types for /api/sync-lyrics/track
+export interface SyncTrackResponse {
+  synced: boolean;
+  plainLyrics: boolean;
+  message: string;
+  stack?: string;
 }

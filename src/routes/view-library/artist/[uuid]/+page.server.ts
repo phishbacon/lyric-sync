@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ parent, params }) => {
       summary: null,
       createdAt: null,
       updatedAt: null,
-      totalTracks: 0,
+      totalTracks: 1,
       tracksSynced: 0,
     });
 

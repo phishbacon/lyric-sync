@@ -1,7 +1,9 @@
 <script lang="ts">
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
+  import { invalidateAll } from "$app/navigation";
+  import TrackTableRow from "$lib/components/TrackTableRow.svelte";
   import { RandomImageURL } from "$lib/external-links";
-  import { CircleCheck, CircleX } from "lucide-svelte";
+  import { logger } from "$lib/logger";
   import { fade } from "svelte/transition";
 
   import type { PageData } from "./$types";
@@ -9,8 +11,6 @@
   const { data }: { data: PageData } = $props();
   // TODO: Move this to the server side maybe...
 
-  const syncedColor: string = "#00ff00";
-  const notSyncedColor: string = "#ff0000";
   const baseURL: string = `${data.serverConfiguration?.hostname}:${data.serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`;
   let loading: boolean = $state(true);
@@ -20,6 +20,11 @@
       totalTracks: 0,
       tracksSynced: 0,
     };
+
+    if (data.invalidateData) {
+      logger.info("Album marked as synced in db. Refreshing data");
+      invalidateAll();
+    }
 
     if (data.returnedTracks) {
       returnData.totalTracks = data.returnedTracks.length;
@@ -38,7 +43,7 @@
 
   function imageLoaded(): void {
     loading = false;
-  }
+  };
 </script>
 
 <div class="px-2 py-1 grid grid-cols-1 w-full space-y-3">
@@ -72,21 +77,7 @@
         </thead>
         <tbody class="hover:[&>tr]:preset-tonal-primary">
           {#each data.returnedTracks as track}
-            <tr>
-              <td>{track.trackNumber.toString().padStart(2, "0")}. {track.title}</td>
-              <td>{track.path.split("/")[track.path.split("/").length - 1]}</td>
-              <td>
-                <div class="flex justify-end">
-                  {#if track.synced}
-                    <CircleCheck color={syncedColor}></CircleCheck>
-                  {:else}
-                    <a href="#">
-                      <CircleX color={notSyncedColor}></CircleX>
-                    </a>
-                  {/if}
-                </div>
-              </td>
-            </tr>
+            <TrackTableRow library={data.currentLibrary} artist={data.returnedArtist} album={data.returnedAlbum} {track} />
           {/each}
         </tbody>
         <tfoot>

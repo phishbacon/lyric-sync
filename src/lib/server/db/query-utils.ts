@@ -38,7 +38,8 @@ export async function getAllArtistsInLibrary(libraryUUID: string): Promise<Array
     where: eq(artists.library, libraryUUID),
   });
 
-  logger.info(returnedArtists, `returning all artists in library ${libraryUUID}`);
+  logger.info(`returning all artists in library ${libraryUUID}`);
+  logger.debug(returnedArtists);
 
   return returnedArtists;
 };
@@ -50,7 +51,8 @@ export async function getAllArtistsInLibraryWithAlbumCounts(libraryUUID: string)
     albumsSynced: sql<number>`SUM(CASE WHEN ${albums.synced} = 1 THEN 1 ELSE 0 END)`,
   }).from(artists).leftJoin(albums, sql`${albums.artist} = ${artists.uuid}`).where(eq(artists.library, libraryUUID)).groupBy(artists.uuid).orderBy(asc(sql`LOWER(${artists.title})`));
 
-  logger.info(returnedArtists, `returning all artists in library ${libraryUUID}`);
+  logger.info(`returning all artists in library with album counts ${libraryUUID}`);
+  logger.debug(returnedArtists);
 
   return returnedArtists;
 };
@@ -62,7 +64,8 @@ export async function getAllAlbumsFromArtistInLibraryWithTrackCounts(libraryUUID
     tracksSynced: sql<number>`SUM(CASE WHEN ${tracks.synced} = 1 THEN 1 ELSE 0 END)`,
   }).from(albums).leftJoin(tracks, sql`${tracks.artist} = ${albums.artist} AND ${tracks.album} = ${albums.uuid}`).where(and(eq(tracks.library, libraryUUID), eq(tracks.artist, artistUUID))).groupBy(albums.uuid).orderBy(asc(sql`LOWER(${albums.title})`));
 
-  logger.info(returnedAlbums, `returning albums from artist: ${artistUUID} in library ${libraryUUID}`);
+  logger.info(`returning albums from artist: ${artistUUID} in library ${libraryUUID}`);
+  logger.debug(returnedAlbums);
 
   return returnedAlbums;
 };
@@ -70,9 +73,11 @@ export async function getAllAlbumsFromArtistInLibraryWithTrackCounts(libraryUUID
 export async function getAllTracksFromAlbumInLibrary(libraryUUID: string, albumUUID: string): Promise<Array<InferredSelectTrackSchema>> {
   const returnedTracks: Array<InferredSelectTrackSchema> = await db.query.tracks.findMany({
     where: and(eq(tracks.album, albumUUID), eq(tracks.library, libraryUUID)),
+    orderBy: [asc(tracks.trackNumber)],
   });
 
-  logger.info(returnedTracks, `retruning tracks from album: ${albumUUID} in library ${libraryUUID}`);
+  logger.info(`retruning tracks from album: ${albumUUID} in library ${libraryUUID}`);
+  logger.debug(returnedTracks);
 
   return returnedTracks;
 };
@@ -82,7 +87,8 @@ export async function getAllAlbumsInLibrary(libraryUUID: string): Promise<Array<
     where: eq(albums.library, libraryUUID),
   });
 
-  logger.info(returnedAlbums, `returning all albums in library ${libraryUUID}`);
+  logger.info(`returning all albums in library ${libraryUUID}`);
+  logger.debug(returnedAlbums);
 
   return returnedAlbums;
 };
@@ -92,7 +98,8 @@ export async function getAllTracksInLibrary(libraryUUID: string): Promise<Array<
     where: eq(tracks.library, libraryUUID),
   });
 
-  logger.info(returnedTracks, `returning all tracks in library ${libraryUUID}`);
+  logger.info(`returning all tracks in library ${libraryUUID}`);
+  logger.debug(returnedTracks);
 
   return returnedTracks;
 };
@@ -109,4 +116,28 @@ export async function getAllArtistsAlbumsTracksInLibrary(libraryUUID: string): P
     returnedAlbums,
     returnedTracks,
   };
+};
+
+export async function markTrackAsSynced(trackUUID: string, libraryUUID: string): Promise<Array<InferredSelectTrackSchema>> {
+  logger.info(`Attempting to mark track: ${trackUUID} in libary: ${libraryUUID} as SYNCED`);
+  const returnedTrack: Array<InferredSelectTrackSchema> | undefined = await db.update(tracks).set({ synced: true }).where(and(eq(tracks.uuid, trackUUID), eq(tracks.library, libraryUUID))).returning();
+
+  if (returnedTrack) {
+    logger.info(`track: ${trackUUID} in library: ${libraryUUID} SYNCED`);
+    logger.debug(returnedTrack);
+  }
+
+  return returnedTrack;
+};
+
+export async function markAlbumAsSynced(albumUUID: string, libraryUUID: string): Promise<Array<InferredSelectAlbumSchema>> {
+  logger.info(`Attempting to mark album: ${albumUUID} in libary: ${libraryUUID} as SYNCED`);
+  const returnedAlbum: Array<InferredSelectAlbumSchema> | undefined = await db.update(albums).set({ synced: true }).where(and(eq(albums.uuid, albumUUID), eq(albums.library, libraryUUID))).returning();
+
+  if (returnedAlbum) {
+    logger.info(`album: ${albumUUID} in library: ${libraryUUID} SYNCED`);
+    logger.debug(returnedAlbum);
+  }
+
+  return returnedAlbum;
 };
