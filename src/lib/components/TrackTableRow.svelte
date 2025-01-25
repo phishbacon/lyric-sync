@@ -5,6 +5,7 @@
   import { invalidateAll } from "$app/navigation";
   import { CircleCheck, CircleX } from "lucide-svelte";
   import { getContext } from "svelte";
+  import { fade } from "svelte/transition";
 
   const notSyncedColor: string = "#ff0000";
   const syncedColor: string = "#00ff00";
@@ -53,21 +54,22 @@
   <td>{track.trackNumber.toString().padStart(2, "0")}. {track.title}</td>
   <td>{track.path.split("/")[track.path.split("/").length - 1]}</td>
   <td>
-    <div class="flex justify-end">
-      {#if track.synced}
-        <CircleCheck color={syncedColor}></CircleCheck>
-      {:else}
-        <!-- using a here because I want the cursor to turn into a pointer
-                     when the user is hovering over the icon -->
-        <!-- svelte-ignore a11y_invalid_attribute -->
-        {#if loading}
-          <ProgressRing value={null} size="size-6" meterStroke="stroke-tertiary-600-400" trackStroke="stroke-tertiary-50-950" />
+    <div class="flex justify-end" transition:fade>
+      <div class:hidden={loading}>
+        {#if track.synced}
+          <CircleCheck color={syncedColor}></CircleCheck>
         {:else}
+          <!-- using a here because I want the cursor to turn into a pointer
+                       when the user is hovering over the icon -->
+          <!-- svelte-ignore a11y_invalid_attribute -->
           <a href="" onclick={syncTrackLyrics}>
             <CircleX color={notSyncedColor}></CircleX>
           </a>
         {/if}
-      {/if}
+      </div>
+      <div transition:fade class:hidden={!loading}>
+        <ProgressRing value={null} size="size-6" meterStroke="stroke-tertiary-600-400" trackStroke="stroke-tertiary-50-950" />
+      </div>
     </div>
   </td>
 </tr>
