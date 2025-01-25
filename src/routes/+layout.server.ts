@@ -105,6 +105,12 @@ export const load: LayoutServerLoad = async () => {
       },
     }).returning();
 
+    // again for skeleton ui beta 3 bug, or I might just not understand something about how cards work
+    if (updatedLibraries.length > 0) {
+      const dummyLibrary: InferredSelectLibrarySchema = JSON.parse(JSON.stringify(updatedLibraries[0]));
+      dummyLibrary.key = "hide_me";
+      updatedLibraries.unshift(dummyLibrary);
+    }
     // might as well take advantage of upserting everything everytime
     defaultValues.libraries = updatedLibraries;
     defaultValues.currentLibrary = updatedLibraries.find(library => library.currentLibrary);
