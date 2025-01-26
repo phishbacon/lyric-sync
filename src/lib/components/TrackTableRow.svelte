@@ -1,6 +1,6 @@
 <script lang="ts">
   import type {
-    CheckTrackResponse,
+    CheckTrackLyricsOnDiskResponse,
     InferredSelectAlbumSchema,
     InferredSelectArtistSchema,
     InferredSelectLibrarySchema,
@@ -71,7 +71,7 @@
       `/api/check-for-lrcs/track?library=${library ? library.uuid : ""}&track=${track.uuid}`,
     );
 
-    const checkTrackResponseJson: CheckTrackResponse =
+    const checkTrackResponseJson: CheckTrackLyricsOnDiskResponse =
       await checkTrackResponse.json();
     loadingFileCheck = false;
     if (checkTrackResponseJson.lyricsExist) {

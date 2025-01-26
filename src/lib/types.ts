@@ -108,8 +108,9 @@ export interface SyncTrackResponse {
 }
 
 // types for /api/check-for-lrcs/track
-export interface CheckTrackResponse {
+export interface CheckTrackLyricsOnDiskResponse {
   lyricsExist: boolean;
+  expectationMet?: boolean;
   plainLyrics: boolean;
   message: string;
   stack?: string;
