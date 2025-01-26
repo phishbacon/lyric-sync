@@ -106,3 +106,11 @@ export interface SyncTrackResponse {
   message: string;
   stack?: string;
 }
+
+// types for /api/check-for-lrcs/track
+export interface CheckTrackResponse {
+  lyricsExist: boolean;
+  plainLyrics: boolean;
+  message: string;
+  stack?: string;
+}

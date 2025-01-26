@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { ArtistWithAlbumCount, InferredSelectServerSchema } from "$lib/types";
+  import type {
+    ArtistWithAlbumCount,
+    InferredSelectServerSchema,
+  } from "$lib/types";
 
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
   import { RandomImageURL } from "$lib/external-links";
@@ -9,7 +12,10 @@
   import LazyLoading from "./LazyLoading.svelte";
 
   const selectedColor: string = "#00ff00";
-  const { artist, serverConfiguration }: {
+  const {
+    artist,
+    serverConfiguration,
+  }: {
     artist: ArtistWithAlbumCount;
     serverConfiguration: InferredSelectServerSchema | undefined;
   } = $props();
@@ -25,31 +31,52 @@
 </script>
 
 <!-- TODO: Make all cards the same size no matter what -->
-<div class="flex justify-center my-2"
-     class:hidden={artist.library === "hide_me"}>
+<div
+  class="flex justify-center my-2"
+  class:hidden={artist.library === "hide_me"}
+>
   <a
     class="card border-[1px] border-surface-200-800 card-hover w-96 divide-surface-200-800 divide-y"
     class:preset-filled-surface-100-900={!hovered}
     class:preset-filled-surface-700-100={hovered}
-    onmouseenter={() => { hovered = true; }}
-    onmouseleave={() => { hovered = false; }}
+    onmouseenter={() => {
+      hovered = true;
+    }}
+    onmouseleave={() => {
+      hovered = false;
+    }}
     href="/view-library/artist/{encodeURIComponent(artist.uuid)}"
   >
     <!-- {/* Header */} -->
     <header class="flex p-4">
       <div class="flex w-1/2">
         <LazyLoading>
-          <img src={artist.image === "no-plex" ? RandomImageURL : baseURL + artist.image + plexAuthToken} class="h-40" alt="Artist Artwork"
-               class:hidden={loading}
-               transition:fade
-               onload={imageLoaded} />
+          <img
+            src={artist.image === "no-plex"
+              ? RandomImageURL
+              : baseURL + artist.image + plexAuthToken}
+            class="h-40"
+            alt="Artist Artwork"
+            class:hidden={loading}
+            transition:fade
+            onload={imageLoaded}
+          />
           <div class:hidden={!loading}>
-            <ProgressRing value={null} size="size-40" meterStroke="stroke-primary-600-400" trackStroke="stroke-secondary-50-950" />
+            <ProgressRing
+              value={null}
+              size="size-40"
+              meterStroke="stroke-primary-600-400"
+              trackStroke="stroke-secondary-50-950"
+            />
           </div>
         </LazyLoading>
       </div>
       <div class="flex w-1/2 justify-end">
-        <ProgressRing value={Math.ceil((artist.albumsSynced / artist.totalAlbums) * 100)} max={100} size="size-40" />
+        <ProgressRing
+          value={Math.ceil((artist.albumsSynced / artist.totalAlbums) * 100)}
+          max={100}
+          size="size-40"
+        />
       </div>
       <!-- TODO: Figure out how to get the artist summary in here. Want it to be inline with image
        overflow hidden with ellipsis -->
@@ -77,7 +104,9 @@
           <CircleX></CircleX>
         </div>
         <div class="flex">
-          <button type="button" class="btn preset-filled-primary-500">Sync</button>
+          <button type="button" class="btn preset-filled-primary-500"
+            >Sync</button
+          >
         </div>
       {/if}
     </footer>
@@ -86,6 +115,6 @@
 
 <style>
   img {
-    border-radius: .3rem;
+    border-radius: 0.3rem;
   }
 </style>

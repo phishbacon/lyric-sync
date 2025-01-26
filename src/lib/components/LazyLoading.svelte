@@ -20,7 +20,6 @@
       createIntersectionObserver().observe(rootElement);
     }
   });
-
 </script>
 
 <div bind:this={rootElement}>

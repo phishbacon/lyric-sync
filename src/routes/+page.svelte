@@ -4,7 +4,8 @@
   import { getContext, onMount } from "svelte";
 
   const toast: ToastContext = getContext("toast");
-  const redirectOnMount: (toast: ToastContext) => void = getContext("redirectOnMount");
+  const redirectOnMount: (toast: ToastContext) => void =
+    getContext("redirectOnMount");
 
   onMount(() => {
     redirectOnMount(toast);

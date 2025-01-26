@@ -5,7 +5,16 @@
   import { CircleCheck, CircleX, Info } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
-  const { label, placeholder, field, type = "text", errors, inputFocused, updateForm, info }: {
+  const {
+    label,
+    placeholder,
+    field,
+    type = "text",
+    errors,
+    inputFocused,
+    updateForm,
+    info,
+  }: {
     label: string;
     placeholder: string;
     field: keyof AddServerFormValues;
@@ -13,12 +22,17 @@
     errors: string[] | undefined;
     inputFocused: boolean;
     info: string;
-    updateForm: (field: keyof AddServerFormValues, value: string | number) => void;
+    updateForm: (
+      field: keyof AddServerFormValues,
+      value: string | number,
+    ) => void;
   } = $props();
 
-  const value = $derived(type === "number"
-    ? (e: Event) => updateForm(field, Number((e.target as HTMLInputElement).value))
-    : (e: Event) => updateForm(field, (e.target as HTMLInputElement).value),
+  const value = $derived(
+    type === "number"
+      ? (e: Event) =>
+          updateForm(field, Number((e.target as HTMLInputElement).value))
+      : (e: Event) => updateForm(field, (e.target as HTMLInputElement).value),
   );
   // #d41976
   const inputClassIconAndTitle: ClassIconAndTitle = $derived.by(() => {
@@ -53,7 +67,8 @@
       type="text"
       {placeholder}
       class="input {inputClassIconAndTitle.class}"
-      oninput={value} />
+      oninput={value}
+    />
     {#if true}
       {@const Icon = inputClassIconAndTitle.icon}
       {#key inputClassIconAndTitle.icon}
@@ -62,14 +77,13 @@
             href={PlexAuthTokenURL}
             target="_blank"
             in:fade
-            title={inputClassIconAndTitle.title}>
+            title={inputClassIconAndTitle.title}
+          >
             <Icon color={inputClassIconAndTitle.color} />
           </a>
         {:else}
           <!-- svelte-ignore a11y_missing_attribute -->
-          <a
-            in:fade
-            title={inputClassIconAndTitle.title}>
+          <a in:fade title={inputClassIconAndTitle.title}>
             <Icon color={inputClassIconAndTitle.color} />
           </a>
         {/if}
@@ -83,6 +97,6 @@
     display: flex;
     justify-content: end;
     align-items: center;
-    margin-right: .75rem;
+    margin-right: 0.75rem;
   }
 </style>
