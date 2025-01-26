@@ -24,7 +24,8 @@
     libraryState.forEach((library) => {
       if (library.uuid === uuid) {
         library.currentLibrary = true;
-      } else {
+      }
+      else {
         library.currentLibrary = false;
       }
     });
@@ -48,7 +49,8 @@
         description: res.message,
         type: "success",
       });
-    } else {
+    }
+    else {
       toast.create({
         title: "Library Selection Error",
         description: res.message,
@@ -71,7 +73,7 @@
       {/each}
     </div>
     <button type="button" class="btn preset-filled" onclick={selectLibrary}
-      >Submit</button
+    >Submit</button
     >
   </div>
 </div>

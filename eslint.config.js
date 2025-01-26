@@ -22,7 +22,7 @@ export default antfu({
     semi: true,
     quotes: "double",
   },
-  ignores: ["**/migrations/*"],
+  ignores: ["**/migrations/*", ".github"],
 }, {
   rules: {
     "no-unused-vars": ["off"],

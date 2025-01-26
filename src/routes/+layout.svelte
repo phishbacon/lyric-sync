@@ -12,8 +12,8 @@
 
   import type { LayoutServerData } from "./$types";
 
-  const { data, children }: { data: LayoutServerData; children: Snippet } =
-    $props();
+  const { data, children }: { data: LayoutServerData; children: Snippet }
+    = $props();
   export function redirectOnMount(toast: ToastContext): void {
     if (!data.serverConfiguration) {
       goto("/add-server");

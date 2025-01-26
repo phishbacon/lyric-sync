@@ -6,8 +6,8 @@
 
   const { children }: { children: Snippet } = $props();
   const toast: ToastContext = getContext("toast");
-  const redirectOnMount: (toast: ToastContext) => void =
-    getContext("redirectOnMount");
+  const redirectOnMount: (toast: ToastContext) => void
+    = getContext("redirectOnMount");
 
   onMount(() => {
     redirectOnMount(toast);
@@ -28,7 +28,7 @@
   <!-- TODO: Not sure when this settings tile disappeared need to get it back -->
   {#snippet footer()}
     <Navigation.Tile labelExpanded="Settings" href="#" title="settings"
-      ><Settings /></Navigation.Tile
+    ><Settings /></Navigation.Tile
     >
   {/snippet}
 </Navigation.Rail>

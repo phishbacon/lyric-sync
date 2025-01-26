@@ -105,7 +105,7 @@
         </div>
         <div class="flex">
           <button type="button" class="btn preset-filled-primary-500"
-            >Sync</button
+          >Sync</button
           >
         </div>
       {/if}

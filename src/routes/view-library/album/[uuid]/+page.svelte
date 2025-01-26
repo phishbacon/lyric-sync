@@ -34,7 +34,8 @@
       returnData.tracksSynced = data.returnedTracks.reduce((acc, el) => {
         if (el.synced) {
           return acc + 1;
-        } else {
+        }
+        else {
           return acc;
         }
       }, 0);

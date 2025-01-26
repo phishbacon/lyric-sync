@@ -36,9 +36,9 @@ export const GET: RequestHandler = async () => {
       const { returnedArtists, returnedAlbums, returnedTracks } = await getAllArtistsAlbumsTracksInLibrary(currentLibrary.uuid);
 
       if (returnedArtists) {
-      // create array of InferredInsertLibrarySchema
-      // from the db response so we can merge that with
-      // whatever we got from plex
+        // create array of InferredInsertLibrarySchema
+        // from the db response so we can merge that with
+        // whatever we got from plex
         libraryArtists = returnedArtists.map(({ title, uuid, image, key, summary, synced, library }) => {
           return {
             title,
@@ -53,9 +53,9 @@ export const GET: RequestHandler = async () => {
       }
 
       if (returnedAlbums) {
-      // create array of InferredInsertAlbumSchema
-      // from the db response so we can merge that with
-      // whatever we got from plex
+        // create array of InferredInsertAlbumSchema
+        // from the db response so we can merge that with
+        // whatever we got from plex
         artistAlbums = returnedAlbums.map(({ title, uuid, image, key, summary, synced, library, artist }) => {
           return {
             title,
@@ -71,9 +71,9 @@ export const GET: RequestHandler = async () => {
       }
 
       if (returnedTracks) {
-      // create array of InferredInsertTrackSchema
-      // from the db response so we can merge that with
-      // whatever we got from plex
+        // create array of InferredInsertTrackSchema
+        // from the db response so we can merge that with
+        // whatever we got from plex
         albumTracks = returnedTracks.map(({ title, uuid, key, path, synced, library, artist, album, duration, trackNumber }) => {
           return {
             title,

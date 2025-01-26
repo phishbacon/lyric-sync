@@ -1,12 +1,13 @@
+import type { RequestHandler } from "@sveltejs/kit";
+import type { CheckTrackLyricsOnDiskResponse, InferredSelectTrackSchema } from "$lib/types";
+
 import { logger } from "$lib/logger";
 import { tracks } from "$lib/schema";
 import db from "$lib/server/db";
-import type { CheckTrackLyricsOnDiskResponse, InferredSelectTrackSchema } from "$lib/types";
-import type { RequestHandler } from "@sveltejs/kit";
 import { and, eq, sql } from "drizzle-orm";
-import path from "node:path";
-import fs from "node:fs/promises";
 import { toSnakeCase } from "drizzle-orm/casing";
+import fs from "node:fs/promises";
+import path from "node:path";
 // this function will look in the file system for each tracks path
 // if there is an lrc file matching the path, then we will consider it synced
 // and update the db
@@ -42,7 +43,8 @@ export const GET: RequestHandler = async ({ url }) => {
         checkTrackResponse.message = `Lyrics on disk for ${trackResponse.title}`;
         logger.info(`Lrc found ${lrcPath} marking as synced`);
         trackResponse.synced = true;
-      } catch {
+      }
+      catch {
         trackResponse.synced = false;
         logger.info(`No lrc found ${lrcPath} marking as unsynced`);
         checkTrackResponse.message = `Lyrics not on disk for ${trackResponse.title}. Marking as unsynced`;
@@ -57,7 +59,8 @@ export const GET: RequestHandler = async ({ url }) => {
           checkTrackResponse.message = `Lyrics on disk for ${trackResponse.title}`;
           logger.info(`Txt found ${txtPath}`);
           trackResponse.synced = true;
-        } catch {
+        }
+        catch {
           trackResponse.synced = false;
           logger.info(`No txt found ${txtPath} marking as unsynced`);
           checkTrackResponse.message = `Lyrics not on disk for ${trackResponse.title}. Marking as unsynced`;
@@ -72,7 +75,8 @@ export const GET: RequestHandler = async ({ url }) => {
       }).returning();
       ;
     }
-  } else {
+  }
+  else {
     checkTrackResponse.message = "Missing library or track UUID in request";
   }
 

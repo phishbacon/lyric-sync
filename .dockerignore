@@ -1,0 +1,7 @@
+.vscode
+.git
+.env
+*.db
+eslint.config.js
+Dockerfile
+node_modules

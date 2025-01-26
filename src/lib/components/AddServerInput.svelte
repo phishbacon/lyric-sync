@@ -31,7 +31,7 @@
   const value = $derived(
     type === "number"
       ? (e: Event) =>
-          updateForm(field, Number((e.target as HTMLInputElement).value))
+        updateForm(field, Number((e.target as HTMLInputElement).value))
       : (e: Event) => updateForm(field, (e.target as HTMLInputElement).value),
   );
   // #d41976
