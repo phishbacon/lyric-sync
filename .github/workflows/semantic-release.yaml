@@ -7,7 +7,6 @@ on:
       - dev/*
       - feature/*
       - hotfix/*
-      - commitizen
 
 jobs:
   semantic-release:
