@@ -38,6 +38,7 @@
     "@tailwindcss/forms": "^0.5.10",
     "@types/node": "^22.10.10",
     "autoprefixer": "^10.4.20",
+    "cz-conventional-changelog": "^3.3.0",
     "drizzle-kit": "^0.26.2",
     "eslint": "^9.19.0",
     "eslint-plugin-format": "^0.1.3",
@@ -49,5 +50,10 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
     "vite": "^5.4.14"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
