@@ -37,9 +37,8 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         id: semantic # Need an `id` for output variables
         with:
-          semantic_version: 17
           extra_plugins: |
-            @semantic-release/changelog
+            @semantic-release/changelog@6.0.0
             @semantic-release/exec
             @semantic-release/git
         env:
