@@ -12,7 +12,6 @@
     ProgressRing,
     type ToastContext,
   } from "@skeletonlabs/skeleton-svelte";
-  import { invalidateAll } from "$app/navigation";
   import { CircleCheck, CircleX, File } from "lucide-svelte";
   import { getContext } from "svelte";
   import { fade } from "svelte/transition";
@@ -34,6 +33,8 @@
   let loadingFileCheck: boolean = $state(false);
   const toast: ToastContext = getContext("toast");
 
+  let trackSynced: boolean = $state(track.synced);
+
   async function syncTrackLyrics(): Promise<void> {
     loading = true;
     const syncLyricsResponse: Response = await fetch(`/api/sync-lyrics/track`, {
@@ -46,18 +47,18 @@
       }),
     });
 
-    const syncLyricsResponseJson: SyncTrackResponse
-      = await syncLyricsResponse.json();
+    const syncLyricsResponseJson: SyncTrackResponse =
+      await syncLyricsResponse.json();
     loading = false;
     if (syncLyricsResponseJson.synced) {
-      invalidateAll();
+      trackSynced = true;
       toast.create({
         title: "Sync Success",
         description: syncLyricsResponseJson.message,
         type: "success",
       });
-    }
-    else {
+    } else {
+      trackSynced = false;
       toast.create({
         title: "Sync Failed",
         description: syncLyricsResponseJson.message,
@@ -72,8 +73,8 @@
       `/api/check-for-lrcs/track?library=${library ? library.uuid : ""}&track=${track.uuid}`,
     );
 
-    const checkTrackResponseJson: CheckTrackLyricsOnDiskResponse
-      = await checkTrackResponse.json();
+    const checkTrackResponseJson: CheckTrackLyricsOnDiskResponse =
+      await checkTrackResponse.json();
     loadingFileCheck = false;
     if (checkTrackResponseJson.lyricsExist) {
       if (track.synced) {
@@ -82,27 +83,24 @@
           description: checkTrackResponseJson.message,
           type: "info",
         });
-      }
-      else {
+      } else {
         // reload to reconcile the differences
-        invalidateAll();
+        trackSynced = true;
         toast.create({
           title: "Marking As Synced",
           description: checkTrackResponseJson.message,
           type: "success",
         });
       }
-    }
-    else {
+    } else {
       if (track.synced) {
-        invalidateAll();
+        trackSynced = false;
         toast.create({
           title: "Marking As Unsynced",
           description: checkTrackResponseJson.message,
           type: "error",
         });
-      }
-      else {
+      } else {
         toast.create({
           title: "Always Good To Double Check",
           description: checkTrackResponseJson.message,
@@ -119,7 +117,7 @@
   <td>
     <div class="flex justify-end" transition:fade>
       <div class:hidden={loadingFileCheck}>
-        {#if track.synced}
+        {#if trackSynced}
           <!-- using a here because I want the cursor to turn into a pointer
                        when the user is hovering over the icon -->
           <!-- svelte-ignore a11y_invalid_attribute -->
@@ -145,7 +143,7 @@
       </div>
 
       <div class:hidden={loading}>
-        {#if track.synced}
+        {#if trackSynced}
           <CircleCheck color={syncedColor}></CircleCheck>
         {:else}
           <!-- using a here because I want the cursor to turn into a pointer
