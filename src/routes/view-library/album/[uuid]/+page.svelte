@@ -4,6 +4,7 @@
   import TrackTableRow from "$lib/components/TrackTableRow.svelte";
   import { RandomImageURL } from "$lib/external-links";
   import { logger } from "$lib/logger";
+  import { onMount } from "svelte";
   import { fade } from "svelte/transition";
 
   import type { PageData } from "./$types";
@@ -24,10 +25,12 @@
       tracksSynced: 0,
     };
 
-    if (data.invalidateData) {
-      logger.info("Album marked as synced in db. Refreshing data");
-      invalidateAll();
-    }
+    onMount(() => {
+      if (data.invalidateData) {
+        logger.info("Album marked as synced in db. Refreshing data");
+        invalidateAll();
+      }
+    });
 
     if (data.returnedTracks) {
       returnData.totalTracks = data.returnedTracks.length;
