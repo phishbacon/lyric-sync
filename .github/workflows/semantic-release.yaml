@@ -17,6 +17,8 @@ jobs:
       contents: write
 
     steps:
+      - name: Get semantic release image
+        uses: docker://ghcr.io/codfish/semantic-release-action:v3
       - name: Checkout
         uses: actions/checkout@v4
 
