@@ -12,11 +12,11 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     name: Semantic Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-      - name: Grab semantic release Image
-        uses: docker://ghcr.io/codfish/semantic-release-action:v3
-
       - name: Checkout
         uses: actions/checkout@v4
 
