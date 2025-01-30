@@ -47,8 +47,8 @@
       }),
     });
 
-    const syncLyricsResponseJson: SyncTrackResponse =
-      await syncLyricsResponse.json();
+    const syncLyricsResponseJson: SyncTrackResponse
+      = await syncLyricsResponse.json();
     loading = false;
     if (syncLyricsResponseJson.synced) {
       trackSynced = true;
@@ -57,7 +57,8 @@
         description: syncLyricsResponseJson.message,
         type: "success",
       });
-    } else {
+    }
+    else {
       trackSynced = false;
       toast.create({
         title: "Sync Failed",
@@ -73,8 +74,8 @@
       `/api/check-for-lrcs/track?library=${library ? library.uuid : ""}&track=${track.uuid}`,
     );
 
-    const checkTrackResponseJson: CheckTrackLyricsOnDiskResponse =
-      await checkTrackResponse.json();
+    const checkTrackResponseJson: CheckTrackLyricsOnDiskResponse
+      = await checkTrackResponse.json();
     loadingFileCheck = false;
     if (checkTrackResponseJson.lyricsExist) {
       if (track.synced) {
@@ -83,7 +84,8 @@
           description: checkTrackResponseJson.message,
           type: "info",
         });
-      } else {
+      }
+      else {
         // reload to reconcile the differences
         trackSynced = true;
         toast.create({
@@ -92,7 +94,8 @@
           type: "success",
         });
       }
-    } else {
+    }
+    else {
       if (track.synced) {
         trackSynced = false;
         toast.create({
@@ -100,7 +103,8 @@
           description: checkTrackResponseJson.message,
           type: "error",
         });
-      } else {
+      }
+      else {
         toast.create({
           title: "Always Good To Double Check",
           description: checkTrackResponseJson.message,
