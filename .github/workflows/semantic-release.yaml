@@ -12,43 +12,17 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     name: Semantic Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
+      - name: Grab semantic release Image
+        uses: docker://ghcr.io/codfish/semantic-release-action:v3
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with: 
-          node-version: "lts/*"
-
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: codfish/semantic-release-action@v3
         id: semantic # Need an `id` for output variables
-        with:
-          branches: |
-            [
-              "+([0-9])?(.{+([0-9]),x}).x",
-              "main",
-              {
-                name: "hotfix",
-                prerelease: true
-              },
-              {
-                name: "alpha",
-                prerelease: true
-              }
-            ] 
-          extra_plugins: |
-            @semantic-release/changelog@6.0.0
-            @semantic-release/exec
-            @semantic-release/git
-            @semantic-release/commit-analyzer"
-            @semantic-release/release-notes-generator"
-            @semantic-release/github"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
