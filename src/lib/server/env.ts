@@ -12,7 +12,6 @@ expand(config({
   ),
 }));
 
-// eslint-disable-next-line ts/typedef
 const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(9999),

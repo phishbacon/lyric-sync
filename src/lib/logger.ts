@@ -6,7 +6,7 @@ const pinoLogger: Logger & {
   setLogLevel?: (level: pino.LevelWithSilentOrString) => pino.LevelWithSilentOrString;
 } = await (async () => {
   let pinoOptions: LoggerOptions;
-  // eslint-disable-next-line ts/typedef
+
   let destinationStream;
 
   if (browser) {
@@ -16,7 +16,6 @@ const pinoLogger: Logger & {
     };
   }
   else {
-    // eslint-disable-next-line ts/typedef
     const pretty = await import("pino-pretty");
 
     pinoOptions = {

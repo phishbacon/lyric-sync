@@ -1,4 +1,4 @@
-/* eslint-disable ts/typedef */ // aint even gonna try with this one
+// aint even gonna try with this one
 // TODO: Default images to a static asset
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
