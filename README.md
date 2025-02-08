@@ -66,6 +66,7 @@ services:
     container_name: lyric-sync
     environment:
       - ORIGIN=http://where-lyric-sync-is-running:3000
+      - DATABASE_URL=/your-music-library/lyric-sync.db
     volumes:
       - /your-music-library:/your-music-library
     ports:
@@ -84,6 +85,7 @@ docker pull ghcr.io/phishbacon/lyric-sync:main
 # and run
 docker run -p 3000:3000 \
   -e ORIGIN=http://where-lyric-sync-is-running:3000 \
+  -e DATABASE_URL=/your-music-library/lyric-sync.db \
   --volume /your-music-library:/your-music-library \
   --name lyric-sync \
   -i ghcr.io/phishbacon/lyric-sync:main
