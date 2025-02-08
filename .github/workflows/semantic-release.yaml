@@ -6,6 +6,8 @@ on:
       - main
       - alpha/*
       - hotfix/*
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   semantic-release:
