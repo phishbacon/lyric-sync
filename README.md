@@ -1,6 +1,5 @@
 # Lyric-Sync
 
-Latest version: v0.0.1\
 ![Docker CI](https://github.com/phishbacon/lyric-sync/actions/workflows/docker-publish.yml/badge.svg)\
 ![Lint](https://github.com/phishbacon/lyric-sync/actions/workflows/eslint.yml/badge.svg)
 
