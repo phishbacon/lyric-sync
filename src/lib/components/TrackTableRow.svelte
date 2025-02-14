@@ -121,21 +121,14 @@
   <td>
     <div class="flex justify-end" transition:fade>
       <div class:hidden={loadingFileCheck}>
-        {#if trackSynced}
-          <!-- using a here because I want the cursor to turn into a pointer
-                       when the user is hovering over the icon -->
-          <!-- svelte-ignore a11y_invalid_attribute -->
-          <a href="" onclick={checkTrackLyrics}>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <div class="pointer" role="button" tabindex={track.trackNumber} onclick={checkTrackLyrics}>
+          {#if trackSynced}
             <File color={syncedColor}></File>
-          </a>
-        {:else}
-          <!-- using a here because I want the cursor to turn into a pointer
-                       when the user is hovering over the icon -->
-          <!-- svelte-ignore a11y_invalid_attribute -->
-          <a href="" onclick={checkTrackLyrics}>
+          {:else}
             <File color={notSyncedColor}></File>
-          </a>
-        {/if}
+          {/if}
+        </div>
       </div>
       <div transition:fade class:hidden={!loadingFileCheck}>
         <ProgressRing
@@ -150,12 +143,10 @@
         {#if trackSynced}
           <CircleCheck color={syncedColor}></CircleCheck>
         {:else}
-          <!-- using a here because I want the cursor to turn into a pointer
-                       when the user is hovering over the icon -->
-          <!-- svelte-ignore a11y_invalid_attribute -->
-          <a href="" onclick={syncTrackLyrics}>
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
+          <div class="pointer" role="button" tabindex={track.trackNumber} onclick={syncTrackLyrics}>
             <CircleX color={notSyncedColor}></CircleX>
-          </a>
+          </div>
         {/if}
       </div>
       <div transition:fade class:hidden={!loading}>
@@ -169,3 +160,9 @@
     </div>
   </td>
 </tr>
+
+<style>
+  .pointer {
+    cursor: pointer;
+  }
+</style>
