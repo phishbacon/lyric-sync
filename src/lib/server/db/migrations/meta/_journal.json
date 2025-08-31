@@ -50,6 +50,13 @@
       "when": 1736612892920,
       "tag": "0006_cold_ravenous",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1756601340955,
+      "tag": "0007_free_eddie_brock",
+      "breakpoints": true
     }
   ]
 }

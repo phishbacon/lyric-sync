@@ -4,7 +4,7 @@
     InferredSelectServerSchema,
   } from "$lib/types";
 
-  import { RandomImageURL } from "$lib/external-links";
+  import { getImageSrc } from "$lib/image-utils";
   import { CircleCheck, CircleX } from "lucide-svelte";
 
   const selectedColor: string = "#00ff00";
@@ -21,6 +21,7 @@
   const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
   let hovered: boolean = $state(false);
+
 </script>
 
 <!-- TODO: Make all cards the same size no matter what -->
@@ -42,9 +43,7 @@
   <!-- {/* Header */} -->
   <header>
     <img
-      src={library.image === "no-plex"
-        ? RandomImageURL
-        : baseURL + library.image + plexAuthToken}
+      src={getImageSrc({ image: library.image, baseURL, plexAuthToken })}
       alt="Library Artwork"
     />
   </header>
