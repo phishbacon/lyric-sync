@@ -4,7 +4,7 @@
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
   import { page } from "$app/state";
   import AlbumCard from "$lib/components/AlbumCard.svelte";
-  import { RandomImageURL } from "$lib/external-links";
+  import { getImageSrc } from "$lib/image-utils";
   import { fade } from "svelte/transition";
 
   import type { PageData } from "./$types";
@@ -33,10 +33,14 @@
 <div class="px-2 py-1 grid grid-cols-1 w-full space-y-3">
   <div class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 w-full h-56 p-4 flex">
     {#if artist}
-      <img src={artist.image === "no-plex" ? RandomImageURL : baseURL + artist.image + plexAuthToken} class="h-48" alt="Artist Artwork"
-           class:hidden={loading}
-           transition:fade
-           onload={imageLoaded} />
+      <img
+        src={getImageSrc({ image: artist.image, baseURL, plexAuthToken })}
+        class="h-48"
+        alt="Artist Artwork"
+        class:hidden={loading}
+        transition:fade
+        onload={imageLoaded}
+      />
       <div class:hidden={!loading}>
         <ProgressRing value={null} size="size-48" meterStroke="stroke-primary-600-400" trackStroke="stroke-secondary-50-950" />
       </div>
