@@ -156,7 +156,7 @@
 </script>
 
 <div class="p-24 container h-full mx-auto flex justify-center items-center">
-  <form class="card border-[1px] border-surface-200-800 preset-filled-surface-100-900 w-full max-w-md space-y-4 p-4">
+  <form class="card border border-surface-200-800 preset-filled-surface-100-900 w-full max-w-md space-y-4 p-4">
     <fieldset class="space-y-4">
       <AddServerInput
         label="Host"

@@ -54,7 +54,7 @@
 
 <div class="px-2 py-1 grid grid-cols-1 w-full space-y-3">
   <div
-    class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 w-full h-56 p-4 flex"
+    class="card preset-filled-surface-100-900 border border-surface-200-800 w-full h-56 p-4 flex"
   >
     {#if data.returnedAlbum}
       <img
@@ -91,7 +91,7 @@
           <tr>
             <th>Title</th>
             <th>Path</th>
-            <th class="!text-right">Synced</th>
+            <th class="text-right!">Synced</th>
           </tr>
         </thead>
         <tbody class="hover:[&>tr]:preset-tonal-primary">

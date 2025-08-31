@@ -31,7 +31,7 @@
 </script>
 
 <div class="px-2 py-1 grid grid-cols-1 w-full space-y-3">
-  <div class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 w-full h-56 p-4 flex">
+  <div class="card preset-filled-surface-100-900 border border-surface-200-800 w-full h-56 p-4 flex">
     {#if artist}
       <img src={artist.image === "no-plex" ? RandomImageURL : baseURL + artist.image + plexAuthToken} class="h-48" alt="Artist Artwork"
            class:hidden={loading}

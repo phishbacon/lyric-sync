@@ -36,7 +36,7 @@
   class:hidden={artist.library === "hide_me"}
 >
   <a
-    class="card border-[1px] border-surface-200-800 card-hover w-96 divide-surface-200-800 divide-y"
+    class="card border border-surface-200-800 card-hover w-96 divide-surface-200-800 divide-y"
     class:preset-filled-surface-100-900={!hovered}
     class:preset-filled-surface-700-100={hovered}
     onmouseenter={() => {
