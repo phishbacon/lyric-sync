@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
   import type {
     InferredSelectLibrarySchema,
     SelectLibraryResponse,
@@ -7,11 +6,9 @@
 
   import { goto } from "$app/navigation";
   import SelectLibraryCard from "$lib/components/SelectLibraryCard.svelte";
-  import { getContext } from "svelte";
+  import { toaster } from "$lib/toaster";
 
   import type { LayoutServerData } from "../$types";
-
-  export const toast: ToastContext = getContext("toast");
 
   const { data }: { data: LayoutServerData } = $props();
   // this is so the components are rerendered everytime their values change
@@ -44,14 +41,14 @@
     if (res.selected) {
       await fetch("/api/get-latest-plex-data");
       goto("/view-library", { invalidateAll: true });
-      toast.create({
+      toaster.create({
         title: "Library Selected",
         description: res.message,
         type: "success",
       });
     }
     else {
-      toast.create({
+      toaster.create({
         title: "Library Selection Error",
         description: res.message,
         type: "error",

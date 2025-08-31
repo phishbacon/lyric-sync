@@ -1,14 +1,11 @@
 <script lang="ts">
-  import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
   import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, TestConnectionResponse } from "$lib/types";
   import type { SafeParseReturnType } from "zod";
 
   import { goto } from "$app/navigation";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
   import { insertServerSchema } from "$lib/schema";
-  import { getContext } from "svelte";
-
-  export const toast: ToastContext = getContext("toast");
+  import { toaster } from "$lib/toaster";
 
   // Form state
   const addServerFormState: AddServerFormState = $state({
@@ -124,14 +121,14 @@
     const res: TestConnectionResponse = await response.json();
     testState.testSuccessful = res.connection;
     if (res.connection) {
-      toast.create({
+      toaster.create({
         title: "Connection Success",
         description: res.message,
         type: "success",
       });
     }
     else {
-      toast.create({
+      toaster.create({
         title: "Connection Error",
         description: res.message,
         type: "error",

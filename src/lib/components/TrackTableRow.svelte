@@ -10,10 +10,9 @@
 
   import {
     ProgressRing,
-    type ToastContext,
   } from "@skeletonlabs/skeleton-svelte";
+  import { toaster } from "$lib/toaster";
   import { CircleCheck, CircleX, File } from "lucide-svelte";
-  import { getContext } from "svelte";
   import { fade } from "svelte/transition";
 
   const notSyncedColor: string = "#ff0000";
@@ -31,7 +30,6 @@
   } = $props();
   let loading: boolean = $state(false);
   let loadingFileCheck: boolean = $state(false);
-  const toast: ToastContext = getContext("toast");
 
   let trackSynced: boolean = $state(track.synced);
 
@@ -52,7 +50,7 @@
     loading = false;
     if (syncLyricsResponseJson.synced) {
       trackSynced = true;
-      toast.create({
+      toaster.create({
         title: "Sync Success",
         description: syncLyricsResponseJson.message,
         type: "success",
@@ -60,7 +58,7 @@
     }
     else {
       trackSynced = false;
-      toast.create({
+      toaster.create({
         title: "Sync Failed",
         description: syncLyricsResponseJson.message,
         type: "error",
@@ -79,7 +77,7 @@
     loadingFileCheck = false;
     if (checkTrackResponseJson.lyricsExist) {
       if (track.synced) {
-        toast.create({
+        toaster.create({
           title: "Always Good To Double Check",
           description: checkTrackResponseJson.message,
           type: "info",
@@ -88,7 +86,7 @@
       else {
         // reload to reconcile the differences
         trackSynced = true;
-        toast.create({
+        toaster.create({
           title: "Marking As Synced",
           description: checkTrackResponseJson.message,
           type: "success",
@@ -98,14 +96,14 @@
     else {
       if (track.synced) {
         trackSynced = false;
-        toast.create({
+        toaster.create({
           title: "Marking As Unsynced",
           description: checkTrackResponseJson.message,
           type: "error",
         });
       }
       else {
-        toast.create({
+        toaster.create({
           title: "Always Good To Double Check",
           description: checkTrackResponseJson.message,
           type: "info",

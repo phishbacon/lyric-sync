@@ -1,16 +1,15 @@
 <script lang="ts">
-  import { Navigation, type ToastContext } from "@skeletonlabs/skeleton-svelte";
+  import { Navigation } from "@skeletonlabs/skeleton-svelte";
   import { page } from "$app/state";
   import { Music, Settings } from "lucide-svelte";
   import { getContext, onMount, type Snippet } from "svelte";
 
   const { children }: { children: Snippet } = $props();
-  const toast: ToastContext = getContext("toast");
-  const redirectOnMount: (toast: ToastContext) => void
+  const redirectOnMount: () => void
     = getContext("redirectOnMount");
 
   onMount(() => {
-    redirectOnMount(toast);
+    redirectOnMount();
   });
 </script>
 
