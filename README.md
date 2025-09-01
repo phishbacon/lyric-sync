@@ -33,8 +33,6 @@ First and foremost, checkout [tranzuanthang's lrcget](https://github.com/tranxua
 
 ## Features
 
-v0.0.1
-
 - Connect with your personal Plex Server
   ![Server configuration page](showcase/server-configuration.png)
 - Grab lyrics for multiple music libraries
