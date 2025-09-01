@@ -99,6 +99,13 @@ export interface LRCResponse {
   syncedLyrics: string;
 }
 
+// types for image handling
+export interface ImageConfig {
+  image: string | null | undefined;
+  baseURL: string;
+  plexAuthToken: string;
+}
+
 // types for /api/sync-lyrics/track
 export interface SyncTrackResponse {
   synced: boolean;

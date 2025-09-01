@@ -119,8 +119,7 @@ export const artists = sqliteTable("artists", {
     .notNull(),
   uuid: text()
     .primaryKey(),
-  image: text()
-    .notNull(),
+  image: text(),
   key: text()
     .unique()
     .notNull(),
@@ -145,7 +144,6 @@ export const insertArtistSchema = createInsertSchema(
   {
     title: schema => schema.title.min(1, "Title is required"),
     uuid: schema => schema.uuid.min(1, "UUID is required"),
-    image: schema => schema.image.min(1, "Image is required"),
     key: schema => schema.key.min(1, "Key is required"),
     library: schema => schema.library.min(1, "Library uuid is required"),
   },
@@ -160,8 +158,7 @@ export const albums = sqliteTable("albums", {
     .notNull(),
   uuid: text()
     .primaryKey(),
-  image: text()
-    .notNull(),
+  image: text(),
   key: text()
     .unique()
     .notNull(),
@@ -189,7 +186,6 @@ export const insertAlbumSchema = createInsertSchema(
   {
     title: schema => schema.title.min(1, "Title is required"),
     uuid: schema => schema.uuid.min(1, "UUID is required"),
-    image: schema => schema.image.min(1, "Image is required"),
     key: schema => schema.key.min(1, "Key is required"),
     library: schema => schema.library.min(1, "Library uuid is required"),
     artist: schema => schema.artist.min(1, "Artist uuid is required"),

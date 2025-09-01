@@ -5,7 +5,7 @@
   } from "$lib/types";
 
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
-  import { RandomImageURL } from "$lib/external-links";
+  import { getImageSrc } from "$lib/image-utils";
   import { CircleCheck, CircleX } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
@@ -52,9 +52,7 @@
       <div class="flex w-1/2">
         <LazyLoading>
           <img
-            src={album.image === "no-plex"
-              ? RandomImageURL
-              : baseURL + album.image + plexAuthToken}
+            src={getImageSrc({ image: album.image, baseURL, plexAuthToken })}
             class="h-40"
             alt="Album Artwork"
             class:hidden={loading}
@@ -73,7 +71,11 @@
       </div>
       <div class="flex w-1/2 justify-end">
         <ProgressRing
-          value={Math.ceil((album.tracksSynced / album.totalTracks) * 100)}
+          value={typeof album.tracksSynced === "number"
+            && typeof album.totalTracks === "number"
+            && album.totalTracks > 0
+            ? Math.ceil((album.tracksSynced / album.totalTracks) * 100)
+            : 0}
           max={100}
           size="size-40"
         />
