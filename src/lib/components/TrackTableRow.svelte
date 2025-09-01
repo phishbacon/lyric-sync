@@ -113,7 +113,7 @@
   }
 </script>
 
-<tr>
+<tr class="hover:preset-tonal-primary transition-colors duration-200">
   <td>{track.trackNumber.toString().padStart(2, "0")}. {track.title}</td>
   <td>{track.path.split("/")[track.path.split("/").length - 1]}</td>
   <td>

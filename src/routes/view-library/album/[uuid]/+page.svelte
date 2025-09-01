@@ -52,65 +52,108 @@
   }
 </script>
 
-<div class="px-2 py-1 grid grid-cols-1 w-full space-y-3">
-  <div
-    class="card preset-filled-surface-100-900 border border-surface-200-800 w-full h-56 p-4 flex"
-  >
-    {#if data.returnedAlbum}
-      <img
-        src={data.returnedAlbum.image === "no-plex"
-          ? RandomImageURL
-          : baseURL + data.returnedAlbum.image + plexAuthToken}
-        class="h-48"
-        alt="Album Artwork"
-        class:hidden={loading}
-        transition:fade
-        onload={imageLoaded}
-      />
-      <div class:hidden={!loading}>
-        <ProgressRing
-          value={null}
-          size="size-48"
-          meterStroke="stroke-primary-600-400"
-          trackStroke="stroke-secondary-50-950"
-        />
+<div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
+  <div class="container mx-auto px-4 py-24">
+    <div class="w-full max-w-7xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="h2 mb-6 text-surface-900-100">Album Details</h1>
       </div>
-      <span class="text-ellipsis overflow-hidden content-center text-left px-3">
-        {data.returnedAlbum.summary}
-      </span>
-    {/if}
-  </div>
-</div>
 
-<div class="px-2 py-1">
-  {#if data.returnedTracks}
-    <div class="table-wrap">
-      <table class="table caption-bottom">
-        <caption class="pt-4">Track List</caption>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Path</th>
-            <th class="text-right!">Synced</th>
-          </tr>
-        </thead>
-        <tbody class="hover:[&>tr]:preset-tonal-primary">
-          {#each data.returnedTracks as track}
-            <TrackTableRow
-              library={data.currentLibrary}
-              artist={data.returnedArtist}
-              album={data.returnedAlbum}
-              {track}
-            />
-          {/each}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="2">Total Synced</td>
-            <td class="text-right">{tracksSynced}/{totalTracks}</td>
-          </tr>
-        </tfoot>
-      </table>
+      <!-- Album Info Card -->
+      {#if data.returnedAlbum}
+        <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 shadow-xl mb-4">
+          <div class="flex items-center gap-4">
+            <!-- Album Image -->
+            <div class="flex-shrink-0">
+              <div class="relative">
+                <img
+                  src={data.returnedAlbum.image === "no-plex"
+                    ? RandomImageURL
+                    : baseURL + data.returnedAlbum.image + plexAuthToken}
+                  class="w-24 h-24 object-cover rounded-lg shadow-lg"
+                  alt="Album Artwork"
+                  class:hidden={loading}
+                  transition:fade
+                  onload={imageLoaded}
+                />
+                {#if loading}
+                  <div class="w-24 h-24 flex items-center justify-center">
+                    <ProgressRing
+                      value={null}
+                      size="size-24"
+                      meterStroke="stroke-primary-600-400"
+                      trackStroke="stroke-secondary-50-950"
+                    />
+                  </div>
+                {/if}
+              </div>
+            </div>
+
+            <!-- Album Info -->
+            <div class="flex-1">
+              <h2 class="h3 mb-2 text-surface-900-100">{data.returnedAlbum.title}</h2>
+              {#if data.returnedAlbum.summary}
+                <p class="text-surface-600-400 text-sm leading-relaxed line-clamp-2">
+                  {data.returnedAlbum.summary}
+                </p>
+              {:else}
+                <p class="text-surface-500-500 italic text-sm">
+                  No description available for this album
+                </p>
+              {/if}
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      <div class="text-center mb-4">
+        <h1 class="h3 text-surface-900-100">Tracks</h1>
+      </div>
+
+      <!-- Tracks Table Container -->
+      <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-8 md:p-10 shadow-xl">
+        {#if data.returnedTracks && data.returnedTracks.length > 0}
+          <div class="table-wrap">
+            <table class="table caption-bottom">
+              <caption class="pt-4 text-surface-600-400">Track List</caption>
+              <thead>
+                <tr>
+                  <th class="text-surface-900-100">Title</th>
+                  <th class="text-surface-900-100">Path</th>
+                  <th class="text-right! text-surface-900-100">Synced</th>
+                </tr>
+              </thead>
+              <tbody>
+                {#each data.returnedTracks as track}
+                  <TrackTableRow
+                    library={data.currentLibrary}
+                    artist={data.returnedArtist}
+                    album={data.returnedAlbum}
+                    {track}
+                  />
+                {/each}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2" class="text-surface-600-400 font-medium">Total Synced</td>
+                  <td class="text-right text-surface-900-100 font-medium">{tracksSynced}/{totalTracks}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        {:else}
+          <!-- Empty State -->
+          <div class="text-center py-16">
+            <div class="text-surface-400-600 text-lg mb-4">
+              No tracks found for this album
+            </div>
+            <p class="text-surface-500-500">
+              This album doesn't have any tracks in your library
+            </p>
+          </div>
+        {/if}
+      </div>
     </div>
-  {/if}
+  </div>
 </div>

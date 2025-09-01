@@ -136,9 +136,4 @@ cp .env.example .env
 # start the project
 pnpm dev
 ```
-
-## Developer Notes
-
-Lyric-Sync is currently using [Skeleton v3 Beta](https://github.com/skeletonlabs/skeleton/discussions/2919) one issue I have noticed is that when doing an each block with cards, the first one is always sized differently than the ones that follow. My current workaround is to just add a dummy entry to the array that is being iterated over. The dummy entry has a `hide_me` key on it so we can hide the offending card.
-
 Open an issue!

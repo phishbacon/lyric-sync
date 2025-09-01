@@ -152,78 +152,107 @@
   }
 </script>
 
-<div class="p-24 container h-full mx-auto flex justify-center items-center">
-  <form class="card border border-surface-200-800 preset-filled-surface-100-900 w-full max-w-md space-y-4 p-4">
-    <fieldset class="space-y-4">
-      <AddServerInput
-        label="Host"
-        placeholder="Hostname"
-        field="hostname"
-        errors={formValidationErrors.hostname}
-        inputFocused={addServerFormState.inputFocused.hostname}
-        {updateForm}
-        info="The URL of your plex server. Maybe localhost?"
-      />
+<div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-surface-50-900 to-surface-100-800">
+  <div class="w-full max-w-lg">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="h1 mb-3 text-surface-900-100">Add Plex Server</h1>
+      <p class="text-surface-600-400 text-lg">
+        Configure your Plex server connection to get started
+      </p>
+    </div>
 
-      <AddServerInput
-        label="Port"
-        placeholder="Port"
-        field="port"
-        type="number"
-        errors={formValidationErrors.port}
-        inputFocused={addServerFormState.inputFocused.port}
-        {updateForm}
-        info="Typically 32400"
-      />
+    <!-- Form Card -->
+    <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-8 shadow-xl">
+      <form class="space-y-6">
+        <!-- Server Name -->
+        <AddServerInput
+          label="Server Name"
+          placeholder="My Plex Server"
+          field="serverName"
+          errors={formValidationErrors.serverName}
+          inputFocused={addServerFormState.inputFocused.serverName}
+          {updateForm}
+          info="A memorable name for this server configuration"
+        />
 
-      <AddServerInput
-        label="X-Plex-Token"
-        placeholder="X-Plex-Token"
-        field="xPlexToken"
-        errors={formValidationErrors.xPlexToken}
-        inputFocused={addServerFormState.inputFocused.xPlexToken}
-        {updateForm}
-        info="Click me to find out where to find this"
-      />
+        <!-- Hostname -->
+        <AddServerInput
+          label="Hostname"
+          placeholder="localhost"
+          field="hostname"
+          errors={formValidationErrors.hostname}
+          inputFocused={addServerFormState.inputFocused.hostname}
+          {updateForm}
+          info="The URL of your Plex server (e.g., localhost, 192.168.1.100)"
+        />
 
-      <AddServerInput
-        label="Server Name"
-        placeholder="Something memorable"
-        field="serverName"
-        errors={formValidationErrors.serverName}
-        inputFocused={addServerFormState.inputFocused.serverName}
-        {updateForm}
-        info="A memorable name for this server configuration. We may support more in the future"
-      />
-    </fieldset>
+        <!-- Port -->
+        <AddServerInput
+          label="Port"
+          placeholder="32400"
+          field="port"
+          errors={formValidationErrors.port}
+          inputFocused={addServerFormState.inputFocused.port}
+          {updateForm}
+          info="Plex server port (typically 32400)"
+        />
 
-    <fieldset class="flex justify-end">
-      <button
-        type="button"
-        disabled={buttonsState.testButton.disabled}
-        onclick={testServer}
-        class="btn {buttonsState.testButton.class}"
-      >
-        Test
-      </button>
-      <button
-        type="button"
-        disabled={buttonsState.submitButton.disabled}
-        onclick={addServer}
-        class="btn margin-left preset-outlined-primary-500"
-      >
-        Submit
-      </button>
-    </fieldset>
-  </form>
+        <!-- X-Plex-Token -->
+        <AddServerInput
+          label="X-Plex-Token"
+          placeholder="Your Plex token"
+          field="xPlexToken"
+          errors={formValidationErrors.xPlexToken}
+          inputFocused={addServerFormState.inputFocused.xPlexToken}
+          {updateForm}
+          info="Click the info icon to learn how to get your Plex token"
+        />
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 pt-6">
+          <button
+            type="button"
+            disabled={buttonsState.testButton.disabled}
+            onclick={testServer}
+            class="btn flex-1 {buttonsState.testButton.class}"
+          >
+            {#if testState.testInProgress}
+              <span class="loading loading-spinner loading-sm"></span>
+              Testing...
+            {:else if testState.testPerformed && testState.testSuccessful}
+              ✓ Connected
+            {:else if testState.testPerformed && !testState.testSuccessful}
+              ✗ Failed
+            {:else}
+              Test Connection
+            {/if}
+          </button>
+
+          <button
+            type="button"
+            disabled={buttonsState.submitButton.disabled}
+            onclick={addServer}
+            class="btn preset-filled-primary-500 flex-1"
+          >
+            Add Server
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Help Text -->
+    <div class="text-center mt-6 text-sm text-surface-600-400">
+      <p>
+        Need help? Check
+        <a href="https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="text-primary-500 hover:text-primary-600 underline decoration-primary-400 hover:decoration-primary-500 transition-colors duration-200 font-medium">
+          Plex documentation
+        </a>
+        on how to get your Plex token.
+      </p>
+    </div>
+  </div>
 </div>
-
-<style>
-  .btn-group {
-    margin-top: 2rem;
-    float: right;
-  }
-  .margin-left {
-    margin-left: 0.5rem;
-  }
-</style>
