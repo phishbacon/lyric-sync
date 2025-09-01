@@ -4,7 +4,7 @@
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
   import { page } from "$app/state";
   import AlbumCard from "$lib/components/AlbumCard.svelte";
-  import { RandomImageURL } from "$lib/external-links";
+  import { getImageSrc } from "$lib/image-utils";
   import { fade } from "svelte/transition";
 
   import type { PageData } from "./$types";
@@ -46,7 +46,7 @@
             <div class="flex-shrink-0">
               <div class="relative">
                 <img
-                  src={artist.image === "no-plex" ? RandomImageURL : baseURL + artist.image + plexAuthToken}
+                  src={getImageSrc({ image: artist.image, baseURL, plexAuthToken })}
                   class="w-24 h-24 object-cover rounded-lg shadow-lg"
                   alt="Artist Artwork"
                   class:hidden={loading}

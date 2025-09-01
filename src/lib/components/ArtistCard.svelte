@@ -5,7 +5,7 @@
   } from "$lib/types";
 
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
-  import { RandomImageURL } from "$lib/external-links";
+  import { getImageSrc } from "$lib/image-utils";
   import { CircleCheck, CircleX } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
@@ -47,9 +47,7 @@
       <div class="image-container">
         <LazyLoading>
           <img
-            src={artist.image === "no-plex"
-              ? RandomImageURL
-              : baseURL + artist.image + plexAuthToken}
+            src={getImageSrc({ image: artist.image, baseURL, plexAuthToken })}
             class="artist-image"
             alt="Artist Artwork"
             class:hidden={loading}
@@ -70,7 +68,11 @@
       <!-- Progress Ring Overlay -->
       <div class="progress-overlay">
         <ProgressRing
-          value={Math.ceil((artist.albumsSynced / artist.totalAlbums) * 100)}
+          value={typeof artist.albumsSynced === "number"
+            && typeof artist.totalAlbums === "number"
+            && artist.totalAlbums > 0
+            ? Math.ceil((artist.albumsSynced / artist.totalAlbums) * 100)
+            : 0}
           max={100}
           size="size-16"
           showLabel

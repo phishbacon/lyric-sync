@@ -14,7 +14,8 @@ expand(config({
 
 const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.string().default("file:dev.db"),
+  NO_PLEX: z.string().optional().transform(val => val === "true"),
 }).superRefine((input, ctx) => {
   if (input.NODE_ENV === "production") {
     if (!input.DATABASE_URL) {
