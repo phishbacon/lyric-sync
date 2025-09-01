@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - main
-      - alpha/*
-      - hotfix/*
+      - alpha
+      - hotfix
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", alpha ]
 
 jobs:
   semantic-release:

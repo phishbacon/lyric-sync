@@ -1,14 +1,11 @@
 <script lang="ts">
-  import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
-
   import { getContext, onMount } from "svelte";
 
-  const toast: ToastContext = getContext("toast");
-  const redirectOnMount: (toast: ToastContext) => void
+  const redirectOnMount: () => void
     = getContext("redirectOnMount");
 
   onMount(() => {
-    redirectOnMount(toast);
+    redirectOnMount();
   });
 </script>
 
