@@ -11,7 +11,7 @@
   import { toaster } from "$lib/toaster";
   import { Menu, Music, Settings } from "lucide-svelte";
   import { setContext, type Snippet } from "svelte";
-  import { fade, fly, slide } from "svelte/transition";
+  import { fade, fly } from "svelte/transition";
 
   import type { LayoutServerData } from "./$types";
 
