@@ -41,7 +41,7 @@
       <!-- Artist Info Card -->
       {#if artist}
         <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 shadow-xl mb-4">
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4 mb-4">
             <!-- Artist Image -->
             <div class="flex-shrink-0">
               <div class="relative">
@@ -80,6 +80,14 @@
                 </p>
               {/if}
             </div>
+          </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              class="btn preset-filled-primary-500 w-24"
+            >
+              Sync All
+            </button>
           </div>
         </div>
       {/if}

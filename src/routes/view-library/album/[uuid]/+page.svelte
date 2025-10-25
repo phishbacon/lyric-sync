@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { TrackRef } from "$lib/types";
+
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
   import { invalidateAll } from "$app/navigation";
   import TrackTableRow from "$lib/components/TrackTableRow.svelte";
@@ -16,6 +18,8 @@
   const plexAuthToken: string = `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`;
   let loading: boolean = $state(true);
 
+  const localTracks: Array<TrackRef> | undefined = $state(data.returnedTracks);
+
   const {
     totalTracks,
     tracksSynced,
@@ -26,15 +30,15 @@
     };
 
     onMount(() => {
-      if (data.invalidateData) {
+      if (localTracks) {
         logger.info("Album marked as synced in db. Refreshing data");
         invalidateAll();
       }
     });
 
-    if (data.returnedTracks) {
-      returnData.totalTracks = data.returnedTracks.length;
-      returnData.tracksSynced = data.returnedTracks.reduce((acc, el) => {
+    if (localTracks) {
+      returnData.totalTracks = localTracks.length;
+      returnData.tracksSynced = localTracks.reduce((acc, el) => {
         if (el.synced) {
           return acc + 1;
         }
@@ -46,6 +50,18 @@
 
     return returnData;
   });
+
+  function syncAllLyrics(): void {
+    const shouldShowToasts = false;
+    const callingFromParent = true;
+    if (localTracks) {
+      localTracks.forEach((row) => {
+        if (row.tableRow) {
+          row.tableRow.syncTrackLyrics(shouldShowToasts, callingFromParent);
+        }
+      });
+    }
+  }
 
   function imageLoaded(): void {
     loading = false;
@@ -63,7 +79,7 @@
       <!-- Album Info Card -->
       {#if data.returnedAlbum}
         <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 shadow-xl mb-4">
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4 mb-4">
             <!-- Album Image -->
             <div class="flex-shrink-0">
               <div class="relative">
@@ -102,6 +118,14 @@
               {/if}
             </div>
           </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              class="btn preset-filled-primary-500 w-24"
+              onclick={syncAllLyrics}>
+              Sync All
+            </button>
+          </div>
         </div>
       {/if}
 
@@ -111,7 +135,7 @@
 
       <!-- Tracks Table Container -->
       <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-8 md:p-10 shadow-xl">
-        {#if data.returnedTracks && data.returnedTracks.length > 0}
+        {#if localTracks && localTracks.length > 0}
           <div class="table-wrap">
             <table class="table caption-bottom">
               <caption class="pt-4 text-surface-600-400">Track List</caption>
@@ -123,12 +147,13 @@
                 </tr>
               </thead>
               <tbody>
-                {#each data.returnedTracks as track}
+                {#each localTracks as _track, i}
                   <TrackTableRow
+                    bind:this={localTracks[i].tableRow}
                     library={data.currentLibrary}
                     artist={data.returnedArtist}
                     album={data.returnedAlbum}
-                    {track}
+                    bind:track={localTracks[i]}
                   />
                 {/each}
               </tbody>

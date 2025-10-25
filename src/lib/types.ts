@@ -1,3 +1,4 @@
+import type TrackTableRow from "$lib/components/TrackTableRow.svelte";
 import type { Icon as IconType } from "lucide-svelte";
 import type { z } from "zod";
 
@@ -121,4 +122,10 @@ export interface CheckTrackLyricsOnDiskResponse {
   plainLyrics: boolean;
   message: string;
   stack?: string;
+}
+
+// types for track references on album page
+
+export interface TrackRef extends InferredSelectTrackSchema {
+  tableRow?: TrackTableRow | undefined;
 }
