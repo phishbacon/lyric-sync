@@ -30,15 +30,10 @@
   }
 </script>
 
-<!-- TODO: Make all cards the same size no matter what -->
-<div
-  class="flex justify-center my-2"
-  class:hidden={album.library === "hide_me"}
->
+<div class="album-card-container">
   <a
-    class="card border-[1px] border-surface-200-800 card-hover w-96 divide-surface-200-800 divide-y"
-    class:preset-filled-surface-100-900={!hovered}
-    class:preset-filled-surface-700-100={hovered}
+    class="album-card"
+    class:hovered={hovered}
     onmouseenter={() => {
       hovered = true;
     }}
@@ -47,13 +42,13 @@
     }}
     href="/view-library/album/{encodeURIComponent(album.uuid)}"
   >
-    <!-- {/* Header */} -->
-    <header class="flex p-4">
-      <div class="flex w-1/2">
+    <!-- Album Image and Progress -->
+    <div class="image-section">
+      <div class="image-container">
         <LazyLoading>
           <img
             src={getImageSrc({ image: album.image, baseURL, plexAuthToken })}
-            class="h-40"
+            class="album-image"
             alt="Album Artwork"
             class:hidden={loading}
             transition:fade
@@ -69,7 +64,9 @@
           </div>
         </LazyLoading>
       </div>
-      <div class="flex w-1/2 justify-end">
+
+      <!-- Progress Ring Overlay -->
+      <div class="progress-overlay">
         <ProgressRing
           value={typeof album.tracksSynced === "number"
             && typeof album.totalTracks === "number"
@@ -77,46 +74,174 @@
             ? Math.ceil((album.tracksSynced / album.totalTracks) * 100)
             : 0}
           max={100}
-          size="size-40"
+          size="size-16"
+          showLabel
         />
       </div>
-      <!-- TODO: Figure out how to get the artist summary in here. Want it to be inline with image
-       overflow hidden with ellipsis -->
-    </header>
-    <!-- {/* Article */} -->
-    <article class="flex items-center px-4 justify-between">
-      <div>
-        <h4>{album.title}</h4>
-      </div>
-      <div>
-        {album.tracksSynced} / {album.totalTracks} Tracks Synced
-      </div>
-    </article>
-    <!-- {/* Footer */} -->
-    <footer class="flex items-center justify-between gap-4 p-4 h-10">
-      <!-- TODO: Fill this with more information like how many albums/tracks are synced -->
+    </div>
+
+    <!-- Album Info -->
+    <div class="album-info">
+      <h3 class="album-title">{album.title}</h3>
+      <p class="track-count">{album.tracksSynced} / {album.totalTracks} Tracks Synced</p>
+    </div>
+
+    <!-- Status Footer -->
+    <div class="status-footer">
       {#if album.totalTracks === album.tracksSynced}
-        <div class="flex gap-4">
-          <small class="opacity-60">Synced</small>
-          <CircleCheck color={selectedColor}></CircleCheck>
+        <div class="status-item synced">
+          <span class="status-text">Synced</span>
+          <CircleCheck color={selectedColor} size={20} />
         </div>
       {:else}
-        <div class="flex gap-4">
-          <small class="opacity-60">Lyrics Missing</small>
-          <CircleX></CircleX>
+        <div class="status-item missing">
+          <span class="status-text">Lyrics Missing</span>
+          <CircleX color="#d41976" size={20} />
         </div>
-        <div class="flex">
-          <button type="button" class="btn preset-filled-primary-500"
-          >Sync</button
-          >
-        </div>
+        <button type="button" class="sync-button">
+          Sync
+        </button>
       {/if}
-    </footer>
+    </div>
   </a>
 </div>
 
 <style>
-  img {
-    border-radius: 0.3rem;
+  .album-card-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  .album-card {
+    position: relative;
+    background: var(--color-surface-50-900);
+    border: 2px solid var(--color-surface-200-800);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 320px;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .album-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: var(--color-primary-500);
+  }
+
+  .image-section {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .album-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    transition: transform 0.3s ease;
+  }
+
+  .album-card:hover .album-image {
+    transform: scale(1.05);
+  }
+
+  .progress-overlay {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .album-info {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .album-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-surface-900-100);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+  }
+
+  .track-count {
+    font-size: 0.875rem;
+    color: var(--color-surface-600-400);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .status-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--color-surface-200-800);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-item.synced {
+    color: var(--color-success-500);
+  }
+
+  .status-item.missing {
+    color: var(--color-error-500);
+  }
+
+  .status-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .sync-button {
+    background: var(--color-primary-500);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sync-button:hover {
+    background: var(--color-primary-600);
+    transform: translateY(-1px);
   }
 </style>

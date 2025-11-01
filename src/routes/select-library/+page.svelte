@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { ToastContext } from "@skeletonlabs/skeleton-svelte";
   import type {
     InferredSelectLibrarySchema,
     SelectLibraryResponse,
@@ -7,11 +6,9 @@
 
   import { goto } from "$app/navigation";
   import SelectLibraryCard from "$lib/components/SelectLibraryCard.svelte";
-  import { getContext } from "svelte";
+  import { toaster } from "$lib/toaster";
 
   import type { LayoutServerData } from "../$types";
-
-  export const toast: ToastContext = getContext("toast");
 
   const { data }: { data: LayoutServerData } = $props();
   // this is so the components are rerendered everytime their values change
@@ -44,14 +41,14 @@
     if (res.selected) {
       await fetch("/api/get-latest-plex-data");
       goto("/view-library", { invalidateAll: true });
-      toast.create({
+      toaster.create({
         title: "Library Selected",
         description: res.message,
         type: "success",
       });
     }
     else {
-      toast.create({
+      toaster.create({
         title: "Library Selection Error",
         description: res.message,
         type: "error",
@@ -60,20 +57,42 @@
   }
 </script>
 
-<div class="p-24 container h-full mx-auto flex justify-center items-center">
-  <div class="space-y-10 flex flex-col items-center">
-    <h2 class="h2 text-center">Select Library</h2>
-    <div class="grid grid-cols-2 space-x-1 space-y-3">
-      {#each libraryState as library}
-        <SelectLibraryCard
-          {library}
-          serverConfiguration={data.serverConfiguration}
-          {updateSelected}
-        />
-      {/each}
+<div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
+  <div class="container mx-auto px-4 py-24">
+    <div class="w-full max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="h1 mb-6 text-surface-900-100">Select Library</h1>
+        <p class="text-surface-600-400 text-lg">
+          Choose which Plex library you'd like to sync lyrics for
+        </p>
+      </div>
+
+      <!-- Library Cards Container -->
+      <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 md:p-8 shadow-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+          {#each libraryState as library}
+            <div class="flex justify-center">
+              <SelectLibraryCard
+                {library}
+                serverConfiguration={data.serverConfiguration}
+                {updateSelected}
+              />
+            </div>
+          {/each}
+        </div>
+
+        <!-- Action Button -->
+        <div class="flex justify-center pt-8 md:pt-10">
+          <button
+            type="button"
+            class="btn preset-filled-primary-500 px-8 py-3 text-lg"
+            onclick={selectLibrary}
+          >
+            Select Library
+          </button>
+        </div>
+      </div>
     </div>
-    <button type="button" class="btn preset-filled" onclick={selectLibrary}
-    >Submit</button
-    >
   </div>
 </div>

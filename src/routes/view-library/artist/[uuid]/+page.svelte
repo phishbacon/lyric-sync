@@ -30,31 +30,92 @@
   }
 </script>
 
-<div class="px-2 py-1 grid grid-cols-1 w-full space-y-3">
-  <div class="card preset-filled-surface-100-900 border-[1px] border-surface-200-800 w-full h-56 p-4 flex">
-    {#if artist}
-      <img
-        src={getImageSrc({ image: artist.image, baseURL, plexAuthToken })}
-        class="h-48"
-        alt="Artist Artwork"
-        class:hidden={loading}
-        transition:fade
-        onload={imageLoaded}
-      />
-      <div class:hidden={!loading}>
-        <ProgressRing value={null} size="size-48" meterStroke="stroke-primary-600-400" trackStroke="stroke-secondary-50-950" />
+<div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
+  <div class="container mx-auto px-4 py-24">
+    <div class="w-full max-w-7xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="h2 mb-6 text-surface-900-100">Artist Details</h1>
       </div>
-      <span class="text-ellipsis overflow-hidden content-center text-left px-3">
-        {artist.summary}
-      </span>
-    {/if}
-  </div>
-</div>
 
-<div class="px-2 py-1 grid lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
-  {#if data.returnedAlbums}
-    {#each data.returnedAlbums as album}
-      <AlbumCard {album} serverConfiguration={data.serverConfiguration} />
-    {/each}
-  {/if}
+      <!-- Artist Info Card -->
+      {#if artist}
+        <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 shadow-xl mb-4">
+          <div class="flex items-center gap-4 mb-4">
+            <!-- Artist Image -->
+            <div class="flex-shrink-0">
+              <div class="relative">
+                <img
+                  src={getImageSrc({ image: artist.image, baseURL, plexAuthToken })}
+                  class="w-24 h-24 object-cover rounded-lg shadow-lg"
+                  alt="Artist Artwork"
+                  class:hidden={loading}
+                  transition:fade
+                  onload={imageLoaded}
+                />
+                {#if loading}
+                  <div class="w-24 h-24 flex items-center justify-center">
+                    <ProgressRing
+                      value={null}
+                      size="size-24"
+                      meterStroke="stroke-primary-600-400"
+                      trackStroke="stroke-secondary-50-950"
+                      showLabel
+                    />
+                  </div>
+                {/if}
+              </div>
+            </div>
+
+            <!-- Artist Info -->
+            <div class="flex-1">
+              <h2 class="h3 mb-2 text-surface-900-100">{artist.title}</h2>
+              {#if artist.summary}
+                <p class="text-surface-600-400 text-sm leading-relaxed line-clamp-2">
+                  {artist.summary}
+                </p>
+              {:else}
+                <p class="text-surface-500-500 italic text-sm">
+                  No description available for this artist
+                </p>
+              {/if}
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              class="btn preset-filled-primary-500 w-24"
+            >
+              Sync All
+            </button>
+          </div>
+        </div>
+      {/if}
+
+      <div class="text-center mb-4">
+        <h1 class="h3 text-surface-900-100">Albums</h1>
+      </div>
+
+      <!-- Albums Grid Container -->
+      <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-8 md:p-10 shadow-xl">
+        {#if data.returnedAlbums && data.returnedAlbums.length > 0}
+          <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
+            {#each data.returnedAlbums as album}
+              <AlbumCard {album} serverConfiguration={data.serverConfiguration} />
+            {/each}
+          </div>
+        {:else}
+          <!-- Empty State -->
+          <div class="text-center py-16">
+            <div class="text-surface-400-600 text-lg mb-4">
+              No albums found for this artist
+            </div>
+            <p class="text-surface-500-500">
+              This artist doesn't have any albums in your library
+            </p>
+          </div>
+        {/if}
+      </div>
+    </div>
+  </div>
 </div>
