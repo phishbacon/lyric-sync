@@ -88,7 +88,7 @@ export const libraries = sqliteTable("libraries", {
     .notNull(),
   serverName: text()
     .notNull()
-    .references(() => servers.serverName),
+    .references(() => servers.serverName, { onDelete: "cascade" }),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -128,7 +128,7 @@ export const artists = sqliteTable("artists", {
     .notNull(),
   library: text()
     .notNull()
-    .references(() => libraries.uuid),
+    .references(() => libraries.uuid, { onDelete: "cascade" }),
   summary: text(),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
@@ -168,10 +168,10 @@ export const albums = sqliteTable("albums", {
   summary: text(),
   library: text()
     .notNull()
-    .references(() => libraries.uuid),
+    .references(() => libraries.uuid, { onDelete: "cascade" }),
   artist: text()
     .notNull()
-    .references(() => artists.uuid),
+    .references(() => artists.uuid, { onDelete: "cascade" }),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -213,13 +213,13 @@ export const tracks = sqliteTable("tracks", {
     .notNull(),
   library: text()
     .notNull()
-    .references(() => libraries.uuid),
+    .references(() => libraries.uuid, { onDelete: "cascade" }),
   artist: text()
     .notNull()
-    .references(() => artists.uuid),
+    .references(() => artists.uuid, { onDelete: "cascade" }),
   album: text()
     .notNull()
-    .references(() => albums.uuid),
+    .references(() => albums.uuid, { onDelete: "cascade" }),
   trackNumber: integer()
     .notNull()
     .default(0),
@@ -244,6 +244,35 @@ export const insertTrackSchema = createInsertSchema(
     artist: schema => schema.artist.min(1, "Artist uuid is required"),
     album: schema => schema.album.min(1, "Album uuid is required"),
     trackNumber: schema => schema.trackNumber.min(1, "Track number is required"),
+  },
+)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  });
+
+export const librarySettings = sqliteTable("settings", {
+  id: integer({ mode: "number" })
+    .primaryKey({ autoIncrement: true }),
+  library: text()
+    .notNull()
+    .references(() => libraries.uuid, { onDelete: "cascade" }),
+  plexLibrarySyncInterval: integer({ mode: "number" })
+    .default(0),
+  createdAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date()),
+  updatedAt: integer({ mode: "timestamp_ms" })
+    .$default(() => new Date())
+    .$onUpdate(() => new Date()),
+});
+
+export const selectLibrarySettingSchema = createSelectSchema(librarySettings);
+
+export const insertLibrarySettingSchema = createInsertSchema(
+  librarySettings,
+  {
+    library: schema => schema.library.min(1, "Library uuid is required"),
+    plexLibrarySyncInterval: schema => schema.plexLibrarySyncInterval.min(0, "Plex library sync interval must be greater than or equal to 0"),
   },
 )
   .omit({

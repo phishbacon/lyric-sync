@@ -2,7 +2,7 @@ import type TrackTableRow from "$lib/components/TrackTableRow.svelte";
 import type { Icon as IconType } from "lucide-svelte";
 import type { z } from "zod";
 
-import type { insertAlbumSchema, insertArtistSchema, insertLibrarySchema, insertServerSchema, insertTrackSchema, selectAlbumSchema, selectArtistSchema, selectLibrarySchema, selectServerSchema, selectTrackSchema } from "./schema";
+import type { insertAlbumSchema, insertArtistSchema, insertLibrarySchema, insertLibrarySettingSchema, insertServerSchema, insertTrackSchema, selectAlbumSchema, selectArtistSchema, selectLibrarySchema, selectLibrarySettingSchema, selectServerSchema, selectTrackSchema } from "./schema";
 
 // types for add-server
 
@@ -66,6 +66,10 @@ export type InferredInsertAlbumSchema = z.infer<typeof insertAlbumSchema>;
 // types for tracks
 export type InferredSelectTrackSchema = z.infer<typeof selectTrackSchema>;
 export type InferredInsertTrackSchema = z.infer<typeof insertTrackSchema>;
+
+// types for library settings
+export type InferredSelectLibrarySettingSchema = z.infer<typeof selectLibrarySettingSchema>;
+export type InferredInsertLibrarySettingSchema = z.infer<typeof insertLibrarySettingSchema>;
 
 // types for view-library
 
