@@ -57,6 +57,13 @@
       "when": 1756601340955,
       "tag": "0007_free_eddie_brock",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1764547202310,
+      "tag": "0008_hot_exiles",
+      "breakpoints": true
     }
   ]
 }

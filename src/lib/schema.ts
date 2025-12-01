@@ -88,7 +88,7 @@ export const libraries = sqliteTable("libraries", {
     .notNull(),
   serverName: text()
     .notNull()
-    .references(() => servers.serverName),
+    .references(() => servers.serverName, { onDelete: "cascade" }),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -128,7 +128,7 @@ export const artists = sqliteTable("artists", {
     .notNull(),
   library: text()
     .notNull()
-    .references(() => libraries.uuid),
+    .references(() => libraries.uuid, { onDelete: "cascade" }),
   summary: text(),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
@@ -168,10 +168,10 @@ export const albums = sqliteTable("albums", {
   summary: text(),
   library: text()
     .notNull()
-    .references(() => libraries.uuid),
+    .references(() => libraries.uuid, { onDelete: "cascade" }),
   artist: text()
     .notNull()
-    .references(() => artists.uuid),
+    .references(() => artists.uuid, { onDelete: "cascade" }),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -213,13 +213,13 @@ export const tracks = sqliteTable("tracks", {
     .notNull(),
   library: text()
     .notNull()
-    .references(() => libraries.uuid),
+    .references(() => libraries.uuid, { onDelete: "cascade" }),
   artist: text()
     .notNull()
-    .references(() => artists.uuid),
+    .references(() => artists.uuid, { onDelete: "cascade" }),
   album: text()
     .notNull()
-    .references(() => albums.uuid),
+    .references(() => albums.uuid, { onDelete: "cascade" }),
   trackNumber: integer()
     .notNull()
     .default(0),
