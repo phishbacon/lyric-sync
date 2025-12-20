@@ -1,15 +1,14 @@
 <script lang="ts">
   import type {
     ArtistWithAlbumCount,
+    ImageConfig,
     InferredSelectServerSchema,
   } from "$lib/types";
 
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
-  import { getImageSrc } from "$lib/image-utils";
   import { CircleCheck, CircleX } from "lucide-svelte";
-  import { fade } from "svelte/transition";
 
-  import LazyLoading from "./LazyLoading.svelte";
+  import Image from "./Image.svelte";
 
   const selectedColor: string = "#00ff00";
   const {
@@ -22,12 +21,12 @@
 
   const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
+  const imageConfig: ImageConfig = {
+    image: artist.image,
+    baseURL,
+    plexAuthToken,
+  };
   let hovered: boolean = $state(false);
-  let loading: boolean = $state(true);
-
-  function imageLoaded(): void {
-    loading = false;
-  }
 </script>
 
 <div class="artist-card-container">
@@ -45,24 +44,15 @@
     <!-- Artist Image and Progress -->
     <div class="image-section">
       <div class="image-container">
-        <LazyLoading>
-          <img
-            src={getImageSrc({ image: artist.image, baseURL, plexAuthToken })}
-            class="artist-image"
-            alt="Artist Artwork"
-            class:hidden={loading}
-            transition:fade
-            onload={imageLoaded}
-          />
-          <div class:hidden={!loading}>
-            <ProgressRing
-              value={null}
-              size="size-40"
-              meterStroke="stroke-primary-600-400"
-              trackStroke="stroke-secondary-50-950"
-            />
-          </div>
-        </LazyLoading>
+        <Image
+          {imageConfig}
+          alt="Artist Artwork"
+          imgClasses="hover-image"
+          loadingClasses="flex items-center justify-center"
+          size="size-40"
+          meterStroke="stroke-primary-600-400"
+          trackStroke="stroke-secondary-50-950"
+        />
       </div>
 
       <!-- Progress Ring Overlay -->
@@ -149,18 +139,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .artist-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0.5rem;
-    transition: transform 0.3s ease;
-  }
-
-  .artist-card:hover .artist-image {
-    transform: scale(1.05);
   }
 
   .progress-overlay {

@@ -1,11 +1,9 @@
 <script lang="ts">
   import type { InferredSelectArtistSchema } from "$lib/types";
 
-  import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
   import { page } from "$app/state";
   import AlbumCard from "$lib/components/AlbumCard.svelte";
-  import { getImageSrc } from "$lib/image-utils";
-  import { fade } from "svelte/transition";
+  import Image from "$lib/components/Image.svelte";
 
   import type { PageData } from "./$types";
 
@@ -23,11 +21,6 @@
 
   const baseURL: string = `${data.serverConfiguration?.hostname}:${data.serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`;
-  let loading: boolean = $state(true);
-
-  function imageLoaded(): void {
-    loading = false;
-  }
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
@@ -45,25 +38,17 @@
             <!-- Artist Image -->
             <div class="flex-shrink-0">
               <div class="relative">
-                <img
-                  src={getImageSrc({ image: artist.image, baseURL, plexAuthToken })}
-                  class="w-24 h-24 object-cover rounded-lg shadow-lg"
+                <Image
+                  imageConfig={{ image: artist.image, baseURL, plexAuthToken }}
                   alt="Artist Artwork"
-                  class:hidden={loading}
-                  transition:fade
-                  onload={imageLoaded}
+                  imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
+                  loadingClasses="w-24 h-24 flex items-center justify-center"
+                  size="size-24"
+                  meterStroke="stroke-primary-600-400"
+                  trackStroke="stroke-secondary-50-950"
+                  showLabel={true}
+                  lazy={false}
                 />
-                {#if loading}
-                  <div class="w-24 h-24 flex items-center justify-center">
-                    <ProgressRing
-                      value={null}
-                      size="size-24"
-                      meterStroke="stroke-primary-600-400"
-                      trackStroke="stroke-secondary-50-950"
-                      showLabel
-                    />
-                  </div>
-                {/if}
               </div>
             </div>
 

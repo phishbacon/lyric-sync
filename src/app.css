@@ -31,3 +31,19 @@ html,
 body {
   height: var(--h-full);
 }
+
+.hover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.artist-card:hover .hover-image {
+  transform: scale(1.05);
+}
+
+.album-card:hover .hover-image {
+  transform: scale(1.05);
+}

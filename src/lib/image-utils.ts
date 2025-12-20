@@ -1,15 +1,14 @@
 import type { ImageConfig } from "$lib/types";
 
-import { RandomImageURL } from "$lib/external-links";
+import place_holder from "$lib/assets/place_holder.png";
 
 export function getImageSrc(config: ImageConfig): string {
-  if (config.image === "no-plex") {
-    return RandomImageURL;
+  if (config.image === "replace-with-default-asset") {
+    return place_holder;
   }
-
   if (config.image) {
     return config.baseURL + config.image + config.plexAuthToken;
   }
 
-  return "/unknown.jpg";
+  return place_holder;
 }

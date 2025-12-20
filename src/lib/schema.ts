@@ -76,8 +76,7 @@ export const libraries = sqliteTable("libraries", {
     .notNull(),
   uuid: text()
     .primaryKey(),
-  image: text()
-    .notNull(),
+  image: text(),
   path: text()
     .notNull(),
   key: text()
@@ -103,7 +102,6 @@ export const insertLibrarySchema = createInsertSchema(
   {
     title: schema => schema.title.min(1, "Title is required"),
     uuid: schema => schema.uuid.min(1, "UUID is required"),
-    image: schema => schema.image.min(1, "Image is required"),
     path: schema => schema.path.min(1, "Path is required"),
     key: schema => schema.key.min(1, "Key is required"),
     serverName: schema => schema.serverName.min(1, "Server name is required"),
