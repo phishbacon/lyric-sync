@@ -10,7 +10,7 @@
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
   import { toaster } from "$lib/toaster";
-  import { Menu, Music, DatabaseBackup, Settings } from "lucide-svelte";
+  import { DatabaseBackup, Menu, Music, Settings } from "lucide-svelte";
   import { setContext, type Snippet } from "svelte";
   import { fade, fly } from "svelte/transition";
 
@@ -124,51 +124,51 @@
 
 <!-- Navigation Rail -->
 {#if menuOpen && isViewLibrary}
-  <div transition:fade={{duration: 100}}>
-  <Navigation.Rail
-    width="16rem"
-    classes="fixed pb-18 top-16 left-0 z-20 h-full transition-all duration-500 ease-in-out"
-  >
-    {#snippet tiles()}
-      <Navigation.Tile
-        id="artists"
-        label="Artists"
-        href="/view-library"
-        selected={page.url.pathname === "/view-library"}
-      >
-        <Music />
-      </Navigation.Tile>
-      <Navigation.Tile
-        id="fetch-plex-data"
-        label="Fetch Plex"
-        onclick={fetchPlexData}
-      >
-        {#if fetchingPlexData}
-          <div in:fade>
-            <ProgressRing
-              value={null}
-              size="size-6"
-              meterStroke="stroke-primary-600-400"
-              trackStroke="stroke-secondary-50-950"
-            />
-          </div>
-        {:else if !fetchingPlexData}
-          <div in:fade>
-            <DatabaseBackup />
-          </div>
-        {/if}
-      </Navigation.Tile>
-    {/snippet}
-    {#snippet footer()}
-      <Navigation.Tile
-        label="Settings"
-        href="#"
-        title="settings"
-      >
-        <Settings />
-      </Navigation.Tile>
-    {/snippet}
-  </Navigation.Rail>
+  <div transition:fade={{ duration: 100 }}>
+    <Navigation.Rail
+      width="16rem"
+      classes="fixed pb-18 top-16 left-0 z-20 h-full transition-all duration-500 ease-in-out"
+    >
+      {#snippet tiles()}
+        <Navigation.Tile
+          id="artists"
+          label="Artists"
+          href="/view-library"
+          selected={page.url.pathname === "/view-library"}
+        >
+          <Music />
+        </Navigation.Tile>
+        <Navigation.Tile
+          id="fetch-plex-data"
+          label="Fetch Plex"
+          onclick={fetchPlexData}
+        >
+          {#if fetchingPlexData}
+            <div in:fade>
+              <ProgressRing
+                value={null}
+                size="size-6"
+                meterStroke="stroke-primary-600-400"
+                trackStroke="stroke-secondary-50-950"
+              />
+            </div>
+          {:else if !fetchingPlexData}
+            <div in:fade>
+              <DatabaseBackup />
+            </div>
+          {/if}
+        </Navigation.Tile>
+      {/snippet}
+      {#snippet footer()}
+        <Navigation.Tile
+          label="Settings"
+          href="#"
+          title="settings"
+        >
+          <Settings />
+        </Navigation.Tile>
+      {/snippet}
+    </Navigation.Rail>
   </div>
 {/if}
 
