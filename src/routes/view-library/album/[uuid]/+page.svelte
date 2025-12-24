@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TrackRef } from "$lib/types";
+  import type { ImageConfig, TrackRef } from "$lib/types";
 
   import { invalidateAll } from "$app/navigation";
   import Image from "$lib/components/Image.svelte";
@@ -12,8 +12,11 @@
   const { data }: { data: PageData } = $props();
   // TODO: Move this to the server side maybe...
 
-  const baseURL: string = `${data.serverConfiguration?.hostname}:${data.serverConfiguration?.port}`;
-  const plexAuthToken: string = `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`;
+  const imageConfig: ImageConfig = $derived({
+    image: data.returnedAlbum?.image,
+    baseURL: `${data.serverConfiguration?.hostname}:${data.serverConfiguration?.port}`,
+    plexAuthToken: `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`,
+  });
 
   const localTracks: Array<TrackRef> | undefined = $state(data.returnedTracks);
 
@@ -76,17 +79,19 @@
             <!-- Album Image -->
             <div class="flex-shrink-0">
               <div class="relative">
-                <Image
-                  imageConfig={{ image: data.returnedAlbum.image, baseURL, plexAuthToken }}
-                  alt="Album Artwork"
-                  imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
-                  loadingClasses="w-24 h-24 flex items-center justify-center"
-                  size="size-24"
-                  meterStroke="stroke-primary-600-400"
-                  trackStroke="stroke-secondary-50-950"
-                  showLabel={true}
-                  lazy={false}
-                />
+                {#key imageConfig}
+                  <Image
+                    {imageConfig}
+                    alt="Album Artwork"
+                    imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
+                    loadingClasses="w-24 h-24 flex items-center justify-center"
+                    size="size-24"
+                    meterStroke="stroke-primary-600-400"
+                    trackStroke="stroke-secondary-50-950"
+                    showLabel={true}
+                    lazy={false}
+                  />
+                {/key}
               </div>
             </div>
 

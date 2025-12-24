@@ -21,7 +21,7 @@
       <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-8 md:p-10 shadow-xl">
         {#if data.returnedArtists && data.returnedArtists.length > 0}
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 md:gap-8">
-            {#each data.returnedArtists as artist}
+            {#each data.returnedArtists as artist (artist.uuid)}
               <ArtistCard {artist} serverConfiguration={data.serverConfiguration} />
             {/each}
           </div>

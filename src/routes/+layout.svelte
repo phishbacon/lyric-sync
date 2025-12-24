@@ -4,12 +4,13 @@
   import {
     AppBar,
     Navigation,
+    ProgressRing,
     Toaster,
   } from "@skeletonlabs/skeleton-svelte";
-  import { goto } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
   import { toaster } from "$lib/toaster";
-  import { Menu, Music, Settings } from "lucide-svelte";
+  import { Menu, Music, DatabaseBackup, Settings } from "lucide-svelte";
   import { setContext, type Snippet } from "svelte";
   import { fade, fly } from "svelte/transition";
 
@@ -20,6 +21,7 @@
 
   // Menu state
   let menuOpen: boolean = $state(false);
+  let fetchingPlexData: boolean = $state(false);
   const isViewLibrary: boolean = $derived(page.url.pathname.includes("/view-library"));
   const isSelectLibrary: boolean = $derived(page.url.pathname.includes("/select-library"));
 
@@ -46,6 +48,18 @@
 
   function toggleMenu(): void {
     menuOpen = !menuOpen;
+  }
+
+  async function fetchPlexData(): Promise<void> {
+    fetchingPlexData = true;
+    await fetch("/api/get-latest-plex-data");
+    await invalidateAll();
+    toaster.create({
+      title: "Plex Fetched",
+      description: "Latest Plex Data Acquired",
+      type: "success",
+    });
+    fetchingPlexData = false;
   }
 </script>
 
@@ -110,9 +124,10 @@
 
 <!-- Navigation Rail -->
 {#if menuOpen && isViewLibrary}
+  <div transition:fade={{duration: 100}}>
   <Navigation.Rail
     width="16rem"
-    classes="fixed top-16 left-0 z-20 h-full transition-all duration-500 ease-in-out"
+    classes="fixed pb-18 top-16 left-0 z-20 h-full transition-all duration-500 ease-in-out"
   >
     {#snippet tiles()}
       <Navigation.Tile
@@ -122,6 +137,26 @@
         selected={page.url.pathname === "/view-library"}
       >
         <Music />
+      </Navigation.Tile>
+      <Navigation.Tile
+        id="fetch-plex-data"
+        label="Fetch Plex"
+        onclick={fetchPlexData}
+      >
+        {#if fetchingPlexData}
+          <div in:fade>
+            <ProgressRing
+              value={null}
+              size="size-6"
+              meterStroke="stroke-primary-600-400"
+              trackStroke="stroke-secondary-50-950"
+            />
+          </div>
+        {:else if !fetchingPlexData}
+          <div in:fade>
+            <DatabaseBackup />
+          </div>
+        {/if}
       </Navigation.Tile>
     {/snippet}
     {#snippet footer()}
@@ -134,6 +169,7 @@
       </Navigation.Tile>
     {/snippet}
   </Navigation.Rail>
+  </div>
 {/if}
 
 <Toaster {toaster}></Toaster>

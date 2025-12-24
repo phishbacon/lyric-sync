@@ -19,13 +19,11 @@
     serverConfiguration: InferredSelectServerSchema | undefined;
   } = $props();
 
-  const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
-  const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
-  const imageConfig: ImageConfig = {
+  const imageConfig: ImageConfig = $derived({
     image: album.image,
-    baseURL,
-    plexAuthToken,
-  };
+    baseURL: `${serverConfiguration?.hostname}:${serverConfiguration?.port}`,
+    plexAuthToken: `?X-Plex-Token=${serverConfiguration?.xPlexToken}`,
+  });
   let hovered: boolean = $state(false);
 </script>
 
@@ -44,14 +42,16 @@
     <!-- Album Image and Progress -->
     <div class="image-section">
       <div class="image-container">
-        <Image
-          imageConfig={imageConfig}
-          alt="Album Artwork"
-          imgClasses="hover-image"
-          size="size-40"
-          meterStroke="stroke-primary-600-400"
-          trackStroke="stroke-secondary-50-950"
-        />
+        {#key imageConfig}
+          <Image
+            {imageConfig}
+            alt="Album Artwork"
+            imgClasses="hover-image"
+            size="size-40"
+            meterStroke="stroke-primary-600-400"
+            trackStroke="stroke-secondary-50-950"
+          />
+        {/key}
       </div>
 
       <!-- Progress Ring Overlay -->

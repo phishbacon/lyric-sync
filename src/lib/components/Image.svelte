@@ -31,7 +31,7 @@
     showLabel?: boolean;
     lazy?: boolean;
   }>();
-  let src: string = $state(getImageSrc(imageConfig));
+  let src: string = $derived(getImageSrc(imageConfig));
   let renderComponent: boolean = $state(false);
   let loading: boolean = $state(true);
   let timeout: number | undefined;
@@ -72,7 +72,7 @@
         {alt}
         class={imgClasses}
         class:hidden={loading}
-        transition:fade
+        in:fade
         onload={imageLoaded}
       />
       <div class:hidden={!loading} class={loadingClasses}>
@@ -92,7 +92,7 @@
     {alt}
     class={imgClasses}
     class:hidden={loading}
-    transition:fade
+    in:fade
     onload={imageLoaded}
   />
   <div class:hidden={!loading} class={loadingClasses}>
