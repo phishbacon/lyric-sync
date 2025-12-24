@@ -1,15 +1,14 @@
 <script lang="ts">
   import type {
     AlbumWithTrackCount,
+    ImageConfig,
     InferredSelectServerSchema,
   } from "$lib/types";
 
   import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
-  import { getImageSrc } from "$lib/image-utils";
   import { CircleCheck, CircleX } from "lucide-svelte";
-  import { fade } from "svelte/transition";
 
-  import LazyLoading from "./LazyLoading.svelte";
+  import Image from "./Image.svelte";
 
   const selectedColor: string = "#00ff00";
   const {
@@ -22,12 +21,12 @@
 
   const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
+  const imageConfig: ImageConfig = {
+    image: album.image,
+    baseURL,
+    plexAuthToken,
+  };
   let hovered: boolean = $state(false);
-  let loading: boolean = $state(true);
-
-  function imageLoaded(): void {
-    loading = false;
-  }
 </script>
 
 <div class="album-card-container">
@@ -45,24 +44,14 @@
     <!-- Album Image and Progress -->
     <div class="image-section">
       <div class="image-container">
-        <LazyLoading>
-          <img
-            src={getImageSrc({ image: album.image, baseURL, plexAuthToken })}
-            class="album-image"
-            alt="Album Artwork"
-            class:hidden={loading}
-            transition:fade
-            onload={imageLoaded}
-          />
-          <div class:hidden={!loading}>
-            <ProgressRing
-              value={null}
-              size="size-40"
-              meterStroke="stroke-primary-600-400"
-              trackStroke="stroke-secondary-50-950"
-            />
-          </div>
-        </LazyLoading>
+        <Image
+          imageConfig={imageConfig}
+          alt="Album Artwork"
+          imgClasses="hover-image"
+          size="size-40"
+          meterStroke="stroke-primary-600-400"
+          trackStroke="stroke-secondary-50-950"
+        />
       </div>
 
       <!-- Progress Ring Overlay -->
@@ -149,18 +138,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .album-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0.5rem;
-    transition: transform 0.3s ease;
-  }
-
-  .album-card:hover .album-image {
-    transform: scale(1.05);
   }
 
   .progress-overlay {

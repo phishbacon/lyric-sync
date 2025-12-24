@@ -1,31 +1,40 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { type Snippet } from "svelte";
   import { fade } from "svelte/transition";
 
-  let rootElement: HTMLElement;
-  let renderComponent: boolean = false;
+  let {
+    renderComponent = $bindable(false),
+    content,
+  } = $props<{
+    renderComponent?: boolean;
+    content: Snippet;
+  }>();
 
-  const createIntersectionObserver = () => {
-    return new IntersectionObserver((entries) => {
+  let rootElement: HTMLElement;
+
+  $effect(() => {
+    if (!rootElement) {
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           renderComponent = true;
         }
       }
     });
-  };
 
-  onMount(() => {
-    if (rootElement) {
-      createIntersectionObserver().observe(rootElement);
-    }
+    observer.observe(rootElement);
+
+    return () => observer.disconnect();
   });
 </script>
 
 <div bind:this={rootElement}>
   {#if renderComponent}
     <div transition:fade>
-      <slot></slot>
+      {@render content()}
     </div>
   {/if}
 </div>

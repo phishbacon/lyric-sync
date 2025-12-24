@@ -1,13 +1,11 @@
 <script lang="ts">
   import type { TrackRef } from "$lib/types";
 
-  import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
   import { invalidateAll } from "$app/navigation";
+  import Image from "$lib/components/Image.svelte";
   import TrackTableRow from "$lib/components/TrackTableRow.svelte";
-  import { getImageSrc } from "$lib/image-utils";
   import { logger } from "$lib/logger";
   import { onMount } from "svelte";
-  import { fade } from "svelte/transition";
 
   import type { PageData } from "./$types";
 
@@ -16,7 +14,6 @@
 
   const baseURL: string = `${data.serverConfiguration?.hostname}:${data.serverConfiguration?.port}`;
   const plexAuthToken: string = `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`;
-  let loading: boolean = $state(true);
 
   const localTracks: Array<TrackRef> | undefined = $state(data.returnedTracks);
 
@@ -62,10 +59,6 @@
       });
     }
   }
-
-  function imageLoaded(): void {
-    loading = false;
-  }
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
@@ -83,24 +76,17 @@
             <!-- Album Image -->
             <div class="flex-shrink-0">
               <div class="relative">
-                <img
-                  src={getImageSrc({ image: data.returnedAlbum.image, baseURL, plexAuthToken })}
-                  class="w-24 h-24 object-cover rounded-lg shadow-lg"
+                <Image
+                  imageConfig={{ image: data.returnedAlbum.image, baseURL, plexAuthToken }}
                   alt="Album Artwork"
-                  class:hidden={loading}
-                  transition:fade
-                  onload={imageLoaded}
+                  imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
+                  loadingClasses="w-24 h-24 flex items-center justify-center"
+                  size="size-24"
+                  meterStroke="stroke-primary-600-400"
+                  trackStroke="stroke-secondary-50-950"
+                  showLabel={true}
+                  lazy={false}
                 />
-                {#if loading}
-                  <div class="w-24 h-24 flex items-center justify-center">
-                    <ProgressRing
-                      value={null}
-                      size="size-24"
-                      meterStroke="stroke-primary-600-400"
-                      trackStroke="stroke-secondary-50-950"
-                    />
-                  </div>
-                {/if}
               </div>
             </div>
 
