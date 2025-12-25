@@ -47,7 +47,7 @@
                     alt="Artist Artwork"
                     imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
                     loadingClasses="w-24 h-24 flex items-center justify-center"
-                    size="size-24"
+                    size="[--size:--spacing(24)]"
                     meterStroke="stroke-primary-600-400"
                     trackStroke="stroke-secondary-50-950"
                     lazy={false}
