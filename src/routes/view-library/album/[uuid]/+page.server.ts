@@ -3,12 +3,16 @@ import type { InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSel
 import { albums, artists } from "$lib/schema";
 import db from "$lib/server/db";
 import { getAllTracksFromAlbumInLibrary, markAlbumAsSynced } from "$lib/server/db/query-utils";
+import { decodePlexID } from "$lib/uuid-encoder";
 import { and, eq } from "drizzle-orm";
 
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ depends, parent, params }) => {
   depends("data:viewLibraryAlbumReturnData");
+
+  const decodedPlexID = decodePlexID(params.uuid);
+
   const viewLibraryAlbumReturnData: {
     returnedArtist: InferredSelectArtistSchema | undefined;
     returnedAlbum: InferredSelectAlbumSchema | undefined;
@@ -25,7 +29,7 @@ export const load: PageServerLoad = async ({ depends, parent, params }) => {
   // get the album
   if (currentLibrary) {
     const returnedAlbum: InferredSelectAlbumSchema | undefined = await db.query.albums.findFirst({
-      where: and(eq(albums.uuid, params.uuid), eq(albums.library, currentLibrary.uuid)),
+      where: and(eq(albums.uuid, decodedPlexID), eq(albums.library, currentLibrary.uuid)),
     });
     // get the artist
     // this is for querying lrc for the lyrics
@@ -37,7 +41,7 @@ export const load: PageServerLoad = async ({ depends, parent, params }) => {
       viewLibraryAlbumReturnData.returnedArtist = returnedArtist;
     }
     // get the tracks in the album
-    const returnedTracks: Array<InferredSelectTrackSchema> = await getAllTracksFromAlbumInLibrary(currentLibrary.uuid, params.uuid);
+    const returnedTracks: Array<InferredSelectTrackSchema> = await getAllTracksFromAlbumInLibrary(currentLibrary.uuid, decodedPlexID);
 
     // if the album isn't marked as synced then check if we can mark it as such
     if (returnedTracks && returnedAlbum && !returnedAlbum.synced) {

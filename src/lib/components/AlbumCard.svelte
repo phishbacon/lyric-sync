@@ -7,6 +7,7 @@
 
   import { CircleCheck, CircleX } from "@lucide/svelte";
   import { Progress } from "@skeletonlabs/skeleton-svelte";
+  import { encodePlexID } from "$lib/uuid-encoder";
 
   import Image from "./Image.svelte";
 
@@ -37,7 +38,7 @@
     onmouseleave={() => {
       hovered = false;
     }}
-    href="/view-library/album/{encodeURIComponent(album.uuid)}"
+    href="/view-library/album/{encodePlexID(album.uuid)}"
   >
     <!-- Album Image and Progress -->
     <div class="image-section">

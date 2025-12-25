@@ -4,6 +4,7 @@
   import { page } from "$app/state";
   import AlbumCard from "$lib/components/AlbumCard.svelte";
   import Image from "$lib/components/Image.svelte";
+  import { decodePlexID } from "$lib/uuid-encoder";
 
   import type { PageData } from "./$types";
 
@@ -12,7 +13,7 @@
 
   const artist: InferredSelectArtistSchema | undefined = $derived.by(() => {
     if (data.returnedArtists) {
-      return data.returnedArtists.find(artist => artist.uuid === page.params.uuid);
+      return data.returnedArtists.find(artist => artist.uuid === decodePlexID(page.params.uuid));
     }
     else {
       return undefined;

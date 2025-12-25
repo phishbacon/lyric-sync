@@ -4,6 +4,7 @@ import type { CheckTrackLyricsOnDiskResponse, InferredSelectTrackSchema } from "
 import { logger } from "$lib/logger";
 import { tracks } from "$lib/schema";
 import db from "$lib/server/db";
+import { decodePlexID } from "$lib/uuid-encoder";
 import { and, eq, sql } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
 import fs from "node:fs/promises";
@@ -16,8 +17,8 @@ export const GET: RequestHandler = async ({ url }) => {
     library: string;
     track: string;
   } = {
-    library: url.searchParams.get("library") ?? "",
-    track: url.searchParams.get("track") ?? "",
+    library: decodePlexID(url.searchParams.get("library") ?? ""),
+    track: decodePlexID(url.searchParams.get("track") ?? ""),
   };
 
   const checkTrackResponse: CheckTrackLyricsOnDiskResponse = {
