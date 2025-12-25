@@ -27,7 +27,7 @@
 </script>
 
 <div class="min-h-screen bg-linear-to-br from-surface-50-900 to-surface-100-800">
-  <div class="container mx-auto px-4 py-24">
+  <div class="container mx-auto px-4 py-16">
     <div class="w-full max-w-7xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-8">

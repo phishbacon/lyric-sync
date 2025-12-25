@@ -60,7 +60,7 @@
 </script>
 
 <div class="min-h-screen bg-linear-to-br from-surface-50-900 to-surface-100-800">
-  <div class="container mx-auto p-4">
+  <div class="container mx-auto p-4 py-16">
     <div class="w-full max-w-4xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-8">

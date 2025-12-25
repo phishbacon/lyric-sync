@@ -86,7 +86,7 @@
 </script>
 
 <!-- App Bar -->
-<AppBar class="z-10 h-16 justify-center p-2">
+<AppBar class="fixed top-0 left-0 right-0 z-10 h-16 justify-center p-2">
   <AppBar.Toolbar class="grid-cols-[1fr_2fr_1fr]">
     <AppBar.Lead>
       {#if isViewLibrary}
