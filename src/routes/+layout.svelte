@@ -147,7 +147,7 @@
 
 <!-- Navigation Rail -->
 {#if menuOpen && isViewLibrary}
-  <div transition:fade={{ duration: 500 }} class="fixed pb-16 top-16 left-0 z-0 h-full">
+  <div transition:fade={{ duration: 500 }} class="fixed top-0 left-0 z-0 h-full">
     <Navigation layout="rail" class="w-16">
       <Navigation.Header>
       </Navigation.Header>
