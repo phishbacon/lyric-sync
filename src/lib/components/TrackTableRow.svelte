@@ -13,6 +13,7 @@
     Progress,
   } from "@skeletonlabs/skeleton-svelte";
   import { toaster } from "$lib/toaster";
+  import { encodePlexID } from "$lib/uuid-encoder";
   import { fade } from "svelte/transition";
 
   const notSyncedColor: string = "#ff0000";
@@ -78,7 +79,7 @@
   export async function checkTrackLyrics(showToasts: boolean = true): Promise<void> {
     loadingFileCheck = true;
     const checkTrackResponse: Response = await fetch(
-      `/api/check-for-lrcs/track?library=${library ? library.uuid : ""}&track=${track.uuid}`,
+      `/api/check-for-lrcs/track?library=${library ? encodePlexID(library.uuid) : ""}&track=${encodePlexID(track.uuid)}`,
     );
 
     const checkTrackResponseJson: CheckTrackLyricsOnDiskResponse
