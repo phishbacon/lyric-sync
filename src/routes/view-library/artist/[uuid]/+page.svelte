@@ -50,7 +50,6 @@
                     size="size-24"
                     meterStroke="stroke-primary-600-400"
                     trackStroke="stroke-secondary-50-950"
-                    showLabel={true}
                     lazy={false}
                   />
                 {/key}

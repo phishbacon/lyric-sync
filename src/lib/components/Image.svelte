@@ -27,7 +27,6 @@
     size: string;
     meterStroke: string;
     trackStroke: string;
-    showLabel?: boolean;
     lazy?: boolean;
   }>();
   // svelte-ignore state_referenced_locally

@@ -71,7 +71,7 @@
       });
     }
     catch (error) {
-      logger.error(`Error fetching Plex data:, ${error}`);
+      logger.error(`Error fetching Plex data: ${error}`);
 
       toaster.create({
         title: "Plex Fetched Failed",
@@ -97,7 +97,7 @@
           out:fade={{ duration: 300 }}
           onclick={toggleMenu}
         >
-          <Menu class="size=6" />
+          <Menu class="size-6" />
         </button>
       {/if}
     </AppBar.Lead>
@@ -157,7 +157,7 @@
             <Music class="size-6" />
             <Navigation.TriggerText>Artists</Navigation.TriggerText>
           </Navigation.TriggerAnchor>
-          <Navigation.TriggerAnchor href="#" onclick={fetchPlexData}>
+          <Navigation.Trigger onclick={fetchPlexData} class="w-12 h-14">
             {#if fetchingPlexData}
               <div in:fade>
                 <Progress class="items-center w-fit" value={null}>
@@ -167,13 +167,13 @@
                   </Progress.Circle>
                 </Progress>
               </div>
-            {:else if !fetchingPlexData}
+            {:else}
               <div in:fade>
-                <CloudSync class="size=6" />
+                <CloudSync class="size-6" />
               </div>
             {/if}
             <Navigation.TriggerText>Fetch Plex</Navigation.TriggerText>
-          </Navigation.TriggerAnchor>
+          </Navigation.Trigger>
         </Navigation.Menu>
       </Navigation.Content>
       <Navigation.Footer>
