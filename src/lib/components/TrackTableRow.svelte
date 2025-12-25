@@ -8,11 +8,11 @@
     SyncTrackResponse,
   } from "$lib/types";
 
+  import { CircleCheck, CircleX, File } from "@lucide/svelte";
   import {
-    ProgressRing,
+    Progress,
   } from "@skeletonlabs/skeleton-svelte";
   import { toaster } from "$lib/toaster";
-  import { CircleCheck, CircleX, File } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
   const notSyncedColor: string = "#ff0000";
@@ -146,12 +146,12 @@
         </div>
       </div>
       <div transition:fade class:hidden={!loadingFileCheck}>
-        <ProgressRing
-          value={null}
-          size="size-6"
-          meterStroke="stroke-tertiary-600-400"
-          trackStroke="stroke-tertiary-50-950"
-        />
+        <Progress class="items-center w-fit" value={null}>
+          <Progress.Circle class="[--size:--spacing(6)]">
+            <Progress.CircleTrack class="stroke-tertiary-50-950" />
+            <Progress.CircleRange class="stroke-tertiary-600-400" />
+          </Progress.Circle>
+        </Progress>
       </div>
 
       <div class:hidden={loading}>
@@ -165,12 +165,12 @@
         {/if}
       </div>
       <div transition:fade class:hidden={!loading}>
-        <ProgressRing
-          value={null}
-          size="size-6"
-          meterStroke="stroke-tertiary-600-400"
-          trackStroke="stroke-tertiary-50-950"
-        />
+        <Progress class="items-center w-fit" value={null}>
+          <Progress.Circle class="[--size:--spacing(6)]">
+            <Progress.CircleTrack class="stroke-tertiary-50-950" />
+            <Progress.CircleRange class="stroke-tertiary-600-400" />
+          </Progress.Circle>
+        </Progress>
       </div>
     </div>
   </td>

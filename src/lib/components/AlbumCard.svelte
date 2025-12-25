@@ -5,8 +5,8 @@
     InferredSelectServerSchema,
   } from "$lib/types";
 
-  import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
-  import { CircleCheck, CircleX } from "lucide-svelte";
+  import { CircleCheck, CircleX } from "@lucide/svelte";
+  import { Progress } from "@skeletonlabs/skeleton-svelte";
 
   import Image from "./Image.svelte";
 
@@ -47,7 +47,8 @@
             {imageConfig}
             alt="Album Artwork"
             imgClasses="hover-image"
-            size="size-40"
+            loadingClasses="flex items-center justify-center"
+            size="[--size:--spacing(40)]"
             meterStroke="stroke-primary-600-400"
             trackStroke="stroke-secondary-50-950"
           />
@@ -56,16 +57,20 @@
 
       <!-- Progress Ring Overlay -->
       <div class="progress-overlay">
-        <ProgressRing
-          value={typeof album.tracksSynced === "number"
-            && typeof album.totalTracks === "number"
-            && album.totalTracks > 0
-            ? Math.ceil((album.tracksSynced / album.totalTracks) * 100)
-            : 0}
-          max={100}
-          size="size-16"
-          showLabel
-        />
+        <Progress class="w-fit relative"
+                  value={typeof album.tracksSynced === "number"
+                    && typeof album.totalTracks === "number"
+                    && album.totalTracks > 0
+                    ? Math.ceil((album.tracksSynced / album.totalTracks) * 100)
+                    : 0}>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <Progress.ValueText />
+          </div>
+          <Progress.Circle class="[--size:--spacing(16)]">
+            <Progress.CircleTrack />
+            <Progress.CircleRange />
+          </Progress.Circle>
+        </Progress>
       </div>
     </div>
 

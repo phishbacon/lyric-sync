@@ -1,18 +1,20 @@
 <script lang="ts">
-  import "../app.css";
+  import "./layout.css";
 
+  import type { Snippet } from "svelte";
+
+  import { CloudSync, Menu, Music, Settings } from "@lucide/svelte";
   import {
     AppBar,
     Navigation,
-    ProgressRing,
-    Toaster,
+    Progress,
   } from "@skeletonlabs/skeleton-svelte";
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
+  import { logger } from "$lib/logger";
   import { toaster } from "$lib/toaster";
-  import { DatabaseBackup, Menu, Music, Settings } from "lucide-svelte";
-  import { setContext, type Snippet } from "svelte";
-  import { fade, fly } from "svelte/transition";
+  import { setContext } from "svelte";
+  import { fade } from "svelte/transition";
 
   import type { LayoutServerData } from "./$types";
 
@@ -52,127 +54,137 @@
 
   async function fetchPlexData(): Promise<void> {
     fetchingPlexData = true;
-    await fetch("/api/get-latest-plex-data");
-    await invalidateAll();
-    toaster.create({
-      title: "Plex Fetched",
-      description: "Latest Plex Data Acquired",
-      type: "success",
-    });
-    fetchingPlexData = false;
+
+    try {
+      const response = await fetch("/api/get-latest-plex-data");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Plex data: ${response.status} ${response.statusText}`);
+      }
+
+      await invalidateAll();
+
+      toaster.create({
+        title: "Plex Fetched",
+        description: "Latest Plex Data Acquired",
+        type: "success",
+      });
+    }
+    catch (error) {
+      logger.error(`Error fetching Plex data:, ${error}`);
+
+      toaster.create({
+        title: "Plex Fetched Failed",
+        description: "Unable to acquire latest Plex data",
+        type: "error",
+      });
+    }
+    finally {
+      fetchingPlexData = false;
+    }
   }
 </script>
 
 <!-- App Bar -->
-<AppBar classes="fixed z-10 h-16">
-  {#snippet lead()}
-    <div class="flex items-center gap-4">
+<AppBar class="z-10 h-16 justify-center p-2">
+  <AppBar.Toolbar class="grid-cols-[1fr_2fr_1fr]">
+    <AppBar.Lead>
       {#if isViewLibrary}
         <button
           type="button"
-          class="btn btn-sm variant-ghost-surface p-2"
+          class="btn-icon btn-icon-lg hover:preset-tonal"
           in:fade={{ duration: 300 }}
           out:fade={{ duration: 300 }}
           onclick={toggleMenu}
         >
-          <Menu size={20} />
+          <Menu class="size=6" />
         </button>
       {/if}
+    </AppBar.Lead>
+    <AppBar.Headline class="flex justify-center">
       {#key isViewLibrary}
         <strong
           class="text-xl uppercase"
-          in:fly={{ x: isViewLibrary ? -40 : 0, duration: 300, opacity: 1 }}
         >
           <a href={data.currentLibrary ? "/view-library" : "/"}> Lyric-Sync </a>
         </strong>
       {/key}
-    </div>
-  {/snippet}
-  {#snippet trail()}
-    {#if data.serverConfiguration}
-      {#if data.currentLibrary}
-        {#if page.url.pathname !== "/select-library"}
-          <a
-            class="btn btn-sm variant-ghost-surface"
-            href="/select-library"
-            rel="noreferrer"
-          >
-            Change Library
-          </a>
+    </AppBar.Headline>
+    <AppBar.Trail class="justify-end">
+      {#if data.serverConfiguration}
+        {#if data.currentLibrary}
+          {#if page.url.pathname !== "/select-library"}
+            <a
+              class="btn btn-sm variant-ghost-surface"
+              href="/select-library"
+              rel="noreferrer"
+            >
+              Change Library
+            </a>
+          {/if}
+          {#if !page.url.pathname.includes("/view-library")}
+            <a
+              class="btn btn-sm variant-ghost-surface"
+              href="/view-library"
+              rel="noreferrer"
+            >
+              View Library
+            </a>
+          {/if}
         {/if}
-        {#if !page.url.pathname.includes("/view-library")}
-          <a
-            class="btn btn-sm variant-ghost-surface"
-            href="/view-library"
-            rel="noreferrer"
-          >
-            View Library
-          </a>
-        {/if}
+      {:else}
+        <a
+          class="btn btn-sm variant-ghost-surface"
+          href="/add-server"
+          rel="noreferrer"
+        >
+          Add Server
+        </a>
       {/if}
-    {:else}
-      <a
-        class="btn btn-sm variant-ghost-surface"
-        href="/add-server"
-        rel="noreferrer"
-      >
-        Add Server
-      </a>
-    {/if}
-  {/snippet}
+    </AppBar.Trail>
+  </AppBar.Toolbar>
 </AppBar>
 
 <!-- Navigation Rail -->
 {#if menuOpen && isViewLibrary}
-  <div transition:fade={{ duration: 100 }}>
-    <Navigation.Rail
-      width="16rem"
-      classes="fixed pb-18 top-16 left-0 z-20 h-full transition-all duration-500 ease-in-out"
-    >
-      {#snippet tiles()}
-        <Navigation.Tile
-          id="artists"
-          label="Artists"
-          href="/view-library"
-          selected={page.url.pathname === "/view-library"}
-        >
-          <Music />
-        </Navigation.Tile>
-        <Navigation.Tile
-          id="fetch-plex-data"
-          label="Fetch Plex"
-          onclick={fetchPlexData}
-        >
-          {#if fetchingPlexData}
-            <div in:fade>
-              <ProgressRing
-                value={null}
-                size="size-6"
-                meterStroke="stroke-primary-600-400"
-                trackStroke="stroke-secondary-50-950"
-              />
-            </div>
-          {:else if !fetchingPlexData}
-            <div in:fade>
-              <DatabaseBackup />
-            </div>
-          {/if}
-        </Navigation.Tile>
-      {/snippet}
-      {#snippet footer()}
-        <Navigation.Tile
-          label="Settings"
-          href="#"
-          title="settings"
-        >
+  <div transition:fade={{ duration: 500 }} class="fixed pb-16 top-16 left-0 z-0 h-full w-full">
+    <Navigation layout="rail" class="w-16">
+      <Navigation.Header>
+      </Navigation.Header>
+      <Navigation.Content>
+        <Navigation.Menu>
+          <Navigation.TriggerAnchor href="/view-library">
+            <Music class="size-6" />
+            <Navigation.TriggerText>Artists</Navigation.TriggerText>
+          </Navigation.TriggerAnchor>
+          <Navigation.TriggerAnchor href="#" onclick={fetchPlexData}>
+            {#if fetchingPlexData}
+              <div in:fade>
+                <Progress class="items-center w-fit" value={null}>
+                  <Progress.Circle class="[--size:--spacing(6)]">
+                    <Progress.CircleTrack />
+                    <Progress.CircleRange />
+                  </Progress.Circle>
+                </Progress>
+              </div>
+            {:else if !fetchingPlexData}
+              <div in:fade>
+                <CloudSync class="size=6" />
+              </div>
+            {/if}
+            <Navigation.TriggerText>Fetch Plex</Navigation.TriggerText>
+          </Navigation.TriggerAnchor>
+        </Navigation.Menu>
+      </Navigation.Content>
+      <Navigation.Footer>
+        <Navigation.TriggerAnchor href="/#" title="Settings" aria-label="Settings">
           <Settings />
-        </Navigation.Tile>
-      {/snippet}
-    </Navigation.Rail>
+        </Navigation.TriggerAnchor>
+      </Navigation.Footer>
+    </Navigation>
   </div>
 {/if}
 
-<Toaster {toaster}></Toaster>
+<!-- <Toaster {toaster}></Toaster> -->
 
 <!-- Page Route Content -->
 <div class="transition-all duration-500 ease-in-out {menuOpen && !isSelectLibrary ? "pl-16" : "pl-0"}">

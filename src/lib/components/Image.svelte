@@ -2,7 +2,7 @@
 
   import type { ImageConfig } from "$lib/types";
 
-  import { ProgressRing } from "@skeletonlabs/skeleton-svelte";
+  import { Progress } from "@skeletonlabs/skeleton-svelte";
   import place_holder from "$lib/assets/place_holder.png";
   import { getImageSrc } from "$lib/image-utils";
   import { onMount } from "svelte";
@@ -18,7 +18,6 @@
     size,
     meterStroke,
     trackStroke,
-    showLabel = false,
     lazy = true,
   } = $props<{
     imageConfig: ImageConfig;
@@ -31,7 +30,8 @@
     showLabel?: boolean;
     lazy?: boolean;
   }>();
-  let src: string = $derived(getImageSrc(imageConfig));
+  // svelte-ignore state_referenced_locally
+  let src: string = $state(getImageSrc(imageConfig));
   let renderComponent: boolean = $state(false);
   let loading: boolean = $state(true);
   let timeout: number | undefined;
@@ -67,41 +67,45 @@
 {#if lazy}
   <LazyLoading bind:renderComponent={renderComponent}>
     {#snippet content()}
-      <img
-        src={src}
-        {alt}
-        class={imgClasses}
-        class:hidden={loading}
-        in:fade
-        onload={imageLoaded}
-      />
-      <div class:hidden={!loading} class={loadingClasses}>
-        <ProgressRing
-          value={null}
-          {size}
-          {meterStroke}
-          {trackStroke}
-          {showLabel}
+      {#key loading}
+        <img
+          src={src}
+          {alt}
+          class={imgClasses}
+          class:hidden={loading}
+          in:fade
+          onload={imageLoaded}
+          onerror={imageFailed}
         />
-      </div>
+        <div class:hidden={!loading} class={loadingClasses} in:fade>
+          <Progress class="items-center w-fit" value={null}>
+            <Progress.Circle class={size}>
+              <Progress.CircleTrack class={trackStroke} />
+              <Progress.CircleRange class={meterStroke} />
+            </Progress.Circle>
+          </Progress>
+        </div>
+      {/key}
     {/snippet}
   </LazyLoading>
 {:else}
-  <img
-    src={src}
-    {alt}
-    class={imgClasses}
-    class:hidden={loading}
-    in:fade
-    onload={imageLoaded}
-  />
-  <div class:hidden={!loading} class={loadingClasses}>
-    <ProgressRing
-      value={null}
-      {size}
-      {meterStroke}
-      {trackStroke}
-      {showLabel}
+  {#key loading}
+    <img
+      src={src}
+      {alt}
+      class={imgClasses}
+      class:hidden={loading}
+      in:fade
+      onload={imageLoaded}
+      onerror={imageFailed}
     />
-  </div>
+    <div class:hidden={!loading} class={loadingClasses} in:fade>
+      <Progress class="items-center w-fit" value={null}>
+        <Progress.Circle class={size}>
+          <Progress.CircleTrack class={trackStroke} />
+          <Progress.CircleRange class={meterStroke} />
+        </Progress.Circle>
+      </Progress>
+    </div>
+  {/key}
 {/if}

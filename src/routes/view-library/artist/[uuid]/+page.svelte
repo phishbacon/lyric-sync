@@ -26,7 +26,7 @@
   });
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
+<div class="min-h-screen bg-linear-to-br from-surface-50-900 to-surface-100-800">
   <div class="container mx-auto px-4 py-24">
     <div class="w-full max-w-7xl mx-auto">
       <!-- Header -->
@@ -39,7 +39,7 @@
         <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 shadow-xl mb-4">
           <div class="flex items-center gap-4 mb-4">
             <!-- Artist Image -->
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
               <div class="relative">
                 {#key imageConfig}
                   <Image

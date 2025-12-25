@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { AddServerFormValues, ClassIconAndTitle } from "$lib/types";
 
+  import { CircleCheck, CircleX, Info } from "@lucide/svelte";
   import { PlexAuthTokenURL } from "$lib/external-links";
-  import { CircleCheck, CircleX, Info } from "lucide-svelte";
   import { fade } from "svelte/transition";
 
   const {

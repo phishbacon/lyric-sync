@@ -1,11 +1,12 @@
 import type { RequestHandler } from "@sveltejs/kit";
 import type { InferredInsertLibrarySchema, InferredSelectLibrarySchema, SelectLibraryResponse } from "$lib/types";
+import type { SafeParseReturnType, typeToFlattenedError, ZodArray } from "zod";
 
 import { insertLibrarySchema, libraries } from "$lib/schema";
 import db from "$lib/server/db";
 import { updateAllCurrentLibraryValuesToFalseExceptOne } from "$lib/server/db/query-utils";
 import { inArray } from "drizzle-orm";
-import { type SafeParseReturnType, type typeToFlattenedError, z, type ZodArray } from "zod";
+import { z } from "zod";
 
 export const POST: RequestHandler = async ({ request }) => {
   const selectLibraryResponse: SelectLibraryResponse = {

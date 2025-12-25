@@ -1,11 +1,12 @@
 <script lang="ts">
   import type {
+    ImageConfig,
     InferredSelectLibrarySchema,
     InferredSelectServerSchema,
   } from "$lib/types";
 
+  import { CircleCheck, CircleX } from "@lucide/svelte";
   import { getImageSrc } from "$lib/image-utils";
-  import { CircleCheck, CircleX } from "lucide-svelte";
 
   const selectedColor: string = "#00ff00";
   const {
@@ -18,8 +19,11 @@
     updateSelected: (uuid: string) => void;
   } = $props();
 
-  const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
-  const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
+  const imageConfig: ImageConfig = $derived({
+    image: library.image,
+    baseURL: `${serverConfiguration?.hostname}:${serverConfiguration?.port}`,
+    plexAuthToken: `?X-Plex-Token=${serverConfiguration?.xPlexToken}`,
+  });
   let hovered: boolean = $state(false);
 
 </script>
@@ -41,7 +45,7 @@
   <!-- Library Image -->
   <div class="image-container">
     <img
-      src={getImageSrc({ image: library.image, baseURL, plexAuthToken })}
+      src={getImageSrc(imageConfig)}
       alt="Library Artwork"
       class="library-image"
     />
@@ -153,6 +157,7 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
   }
 </style>

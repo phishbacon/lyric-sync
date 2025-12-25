@@ -18,6 +18,7 @@
     plexAuthToken: `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`,
   });
 
+  // svelte-ignore state_referenced_locally
   const localTracks: Array<TrackRef> | undefined = $state(data.returnedTracks);
 
   const {
@@ -64,7 +65,7 @@
   }
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
+<div class="min-h-screen bg-linear-to-br from-surface-50-900 to-surface-100-800">
   <div class="container mx-auto px-4 py-24">
     <div class="w-full max-w-7xl mx-auto">
       <!-- Header -->
@@ -77,7 +78,7 @@
         <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 shadow-xl mb-4">
           <div class="flex items-center gap-4 mb-4">
             <!-- Album Image -->
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
               <div class="relative">
                 {#key imageConfig}
                   <Image
@@ -85,10 +86,9 @@
                     alt="Album Artwork"
                     imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
                     loadingClasses="w-24 h-24 flex items-center justify-center"
-                    size="size-24"
+                    size="[--size:--spacing(24)]"
                     meterStroke="stroke-primary-600-400"
                     trackStroke="stroke-secondary-50-950"
-                    showLabel={true}
                     lazy={false}
                   />
                 {/key}
