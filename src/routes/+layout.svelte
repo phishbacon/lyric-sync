@@ -8,6 +8,7 @@
     AppBar,
     Navigation,
     Progress,
+    Toast,
   } from "@skeletonlabs/skeleton-svelte";
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
@@ -146,7 +147,7 @@
 
 <!-- Navigation Rail -->
 {#if menuOpen && isViewLibrary}
-  <div transition:fade={{ duration: 500 }} class="fixed pb-16 top-16 left-0 z-0 h-full w-full">
+  <div transition:fade={{ duration: 500 }} class="fixed pb-16 top-16 left-0 z-0 h-full">
     <Navigation layout="rail" class="w-16">
       <Navigation.Header>
       </Navigation.Header>
@@ -184,11 +185,20 @@
   </div>
 {/if}
 
-<!-- <Toaster {toaster}></Toaster> -->
-
 <!-- Page Route Content -->
 <div class="transition-all duration-500 ease-in-out {menuOpen && !isSelectLibrary ? "pl-16" : "pl-0"}">
   {@render children()}
+  <Toast.Group {toaster}>
+    {#snippet children(toast)}
+      <Toast toast={toast}>
+        <Toast.Message>
+          <Toast.Title>{toast.title}</Toast.Title>
+          <Toast.Description>{toast.description}</Toast.Description>
+        </Toast.Message>
+        <Toast.CloseTrigger />
+      </Toast>
+    {/snippet}
+  </Toast.Group>
 </div>
 
 <style>
