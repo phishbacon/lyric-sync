@@ -13,6 +13,8 @@
   const { data }: { data: LayoutServerData } = $props();
   // this is so the components are rerendered everytime their values change
   const libraryState: Array<InferredSelectLibrarySchema> = $state(
+    // eslint-disable-next-line svelte/no-unused-svelte-ignore
+    // svelte-ignore state_referenced_locally
     data.libraries,
   );
 
@@ -57,8 +59,8 @@
   }
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
-  <div class="container mx-auto px-4 py-24">
+<div class="min-h-screen bg-linear-to-br from-surface-50-900 to-surface-100-800">
+  <div class="container mx-auto p-4 py-16">
     <div class="w-full max-w-4xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-8">

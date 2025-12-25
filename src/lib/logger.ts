@@ -1,6 +1,9 @@
+import type { Logger, LoggerOptions } from "pino";
+import type { Readable } from "svelte/store";
+
 import { browser } from "$app/environment";
-import pino, { type Logger, type LoggerOptions } from "pino";
-import { get, readable, type Readable } from "svelte/store";
+import pino from "pino";
+import { get, readable } from "svelte/store";
 
 const pinoLogger: Logger & {
   setLogLevel?: (level: pino.LevelWithSilentOrString) => pino.LevelWithSilentOrString;

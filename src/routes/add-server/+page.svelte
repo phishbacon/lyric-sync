@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, TestConnectionResponse } from "$lib/types";
-  import type { SafeParseReturnType } from "zod";
+  import type { ZodSafeParseResult } from "zod";
 
   import { goto } from "$app/navigation";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
@@ -26,7 +26,7 @@
 
   const formValidationErrors: AddServerValidationErrors = $derived.by(() => {
     // Validate the form
-    const validate: SafeParseReturnType<AddServerFormValues, AddServerFormValues> = insertServerSchema.safeParse(addServerFormState.formValues);
+    const validate: ZodSafeParseResult<AddServerFormValues> = insertServerSchema.safeParse(addServerFormState.formValues);
     return validate.success ? {} : validate.error.flatten().fieldErrors;
   });
 
@@ -152,7 +152,7 @@
   }
 </script>
 
-<div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-surface-50-900 to-surface-100-800">
+<div class="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-surface-50-900 to-surface-100-800">
   <div class="w-full max-w-lg">
     <!-- Header -->
     <div class="text-center mb-8">

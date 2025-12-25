@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TrackRef } from "$lib/types";
+  import type { ImageConfig, TrackRef } from "$lib/types";
 
   import { invalidateAll } from "$app/navigation";
   import Image from "$lib/components/Image.svelte";
@@ -12,9 +12,13 @@
   const { data }: { data: PageData } = $props();
   // TODO: Move this to the server side maybe...
 
-  const baseURL: string = `${data.serverConfiguration?.hostname}:${data.serverConfiguration?.port}`;
-  const plexAuthToken: string = `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`;
+  const imageConfig: ImageConfig = $derived({
+    image: data.returnedAlbum?.image,
+    baseURL: `${data.serverConfiguration?.hostname}:${data.serverConfiguration?.port}`,
+    plexAuthToken: `?X-Plex-Token=${data.serverConfiguration?.xPlexToken}`,
+  });
 
+  // svelte-ignore state_referenced_locally
   const localTracks: Array<TrackRef> | undefined = $state(data.returnedTracks);
 
   const {
@@ -61,8 +65,8 @@
   }
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-surface-50-900 to-surface-100-800">
-  <div class="container mx-auto px-4 py-24">
+<div class="min-h-screen bg-linear-to-br from-surface-50-900 to-surface-100-800">
+  <div class="container mx-auto px-4 py-16">
     <div class="w-full max-w-7xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-8">
@@ -74,19 +78,20 @@
         <div class="card border border-surface-200-800 preset-filled-surface-100-900 p-6 shadow-xl mb-4">
           <div class="flex items-center gap-4 mb-4">
             <!-- Album Image -->
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
               <div class="relative">
-                <Image
-                  imageConfig={{ image: data.returnedAlbum.image, baseURL, plexAuthToken }}
-                  alt="Album Artwork"
-                  imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
-                  loadingClasses="w-24 h-24 flex items-center justify-center"
-                  size="size-24"
-                  meterStroke="stroke-primary-600-400"
-                  trackStroke="stroke-secondary-50-950"
-                  showLabel={true}
-                  lazy={false}
-                />
+                {#key imageConfig}
+                  <Image
+                    {imageConfig}
+                    alt="Album Artwork"
+                    imgClasses="w-24 h-24 object-cover rounded-lg shadow-lg"
+                    loadingClasses="w-24 h-24 flex items-center justify-center"
+                    size="[--size:--spacing(24)]"
+                    meterStroke="stroke-primary-600-400"
+                    trackStroke="stroke-secondary-50-950"
+                    lazy={false}
+                  />
+                {/key}
               </div>
             </div>
 

@@ -1,5 +1,5 @@
+import type { Icon as IconType } from "@lucide/svelte";
 import type TrackTableRow from "$lib/components/TrackTableRow.svelte";
-import type { Icon as IconType } from "lucide-svelte";
 import type { z } from "zod";
 
 import type { insertAlbumSchema, insertArtistSchema, insertLibrarySchema, insertServerSchema, insertTrackSchema, selectAlbumSchema, selectArtistSchema, selectLibrarySchema, selectServerSchema, selectTrackSchema } from "./schema";

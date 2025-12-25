@@ -1,10 +1,8 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 
-@source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
-
 @import '@skeletonlabs/skeleton';
-@import '@skeletonlabs/skeleton/optional/presets';
+@import '@skeletonlabs/skeleton-svelte';
 @import '@skeletonlabs/skeleton/themes/wintry';
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
