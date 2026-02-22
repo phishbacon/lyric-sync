@@ -1,12 +1,15 @@
 <script lang="ts">
   import type {
     InferredSelectLibrarySchema,
+    ReauthenticateAndRetry,
     SelectLibraryResponse,
   } from "$lib/types";
 
   import { goto } from "$app/navigation";
   import SelectLibraryCard from "$lib/components/SelectLibraryCard.svelte";
+  import { logger } from "$lib/logger";
   import { toaster } from "$lib/toaster";
+  import { getContext } from "svelte";
 
   import type { LayoutServerData } from "../$types";
 
@@ -17,6 +20,8 @@
     // svelte-ignore state_referenced_locally
     data.libraries,
   );
+
+  const reauthenticateAndRetry = getContext<ReauthenticateAndRetry>("reauthenticateAndRetry");
 
   // Update currentLibrary to true on clicked library and set all others to false
   function updateSelected(uuid: string): void {
@@ -32,6 +37,19 @@
     data.libraries = libraryState;
   }
 
+  async function fetchLatestPlexData(): Promise<void> {
+    const response: Response = await fetch("/api/get-latest-plex-data");
+
+    if (response.status === 401) {
+      await reauthenticateAndRetry();
+      return;
+    }
+
+    if (!response.ok) {
+      logger.error(`Failed to fetch Plex data: ${response.status} ${response.statusText}`);
+    }
+  }
+
   // Update all currentLibrary values in db
   async function selectLibrary() {
     const response: Response = await fetch("/select-library", {
@@ -41,7 +59,7 @@
 
     const res: SelectLibraryResponse = await response.json();
     if (res.selected) {
-      await fetch("/api/get-latest-plex-data");
+      await fetchLatestPlexData();
       goto("/view-library", { invalidateAll: true });
       toaster.create({
         title: "Library Selected",

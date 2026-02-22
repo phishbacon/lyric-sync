@@ -45,6 +45,10 @@ export const servers = sqliteTable("servers", {
     .notNull(),
   xPlexToken: text()
     .notNull(),
+  // UUID used to identify this client during the Plex OAuth authentication flow
+  clientIdentifier: text()
+    .notNull()
+    .default(""),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })

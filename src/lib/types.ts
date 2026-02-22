@@ -8,7 +8,8 @@ import type { insertAlbumSchema, insertArtistSchema, insertLibrarySchema, insert
 
 export type AddServerFormValues = z.infer<typeof insertServerSchema>;
 export type AddServerValidationErrors = Partial<Record<keyof AddServerFormValues, string[]>>;
-export type AddServerInputFocused = Record<keyof AddServerFormValues, boolean>;
+export type AddServerInputFields = "serverName" | "hostname" | "port";
+export type AddServerInputFocused = Record<AddServerInputFields, boolean>;
 export interface ClassIconAndTitle {
   class?: string;
   icon?: typeof IconType;
@@ -45,6 +46,7 @@ export interface ServerLoadValues {
   serverConfiguration: InferredSelectServerSchema | undefined;
   libraries: Array<InferredSelectLibrarySchema> | [];
   currentLibrary: InferredSelectLibrarySchema | undefined;
+  tokenValid: boolean;
 }
 
 // types for select-library
@@ -128,4 +130,29 @@ export interface CheckTrackLyricsOnDiskResponse {
 
 export interface TrackRef extends InferredSelectTrackSchema {
   tableRow?: TrackTableRow | undefined;
+}
+
+// types for Plex OAuth authentication
+
+export type ReauthenticateAndRetry = () => Promise<void>;
+
+export interface PlexPinApiResponse {
+  pinId: number;
+  pinCode: string;
+  clientId: string;
+  authUrl: string;
+}
+
+export interface PlexPollApiResponse {
+  authenticated: boolean;
+  token?: string;
+}
+
+export interface PlexValidateApiResponse {
+  valid: boolean;
+}
+
+export interface PlexUpdateTokenApiResponse {
+  updated: boolean;
+  message: string;
 }

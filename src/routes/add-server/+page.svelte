@@ -1,9 +1,10 @@
 <script lang="ts">
-  import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, TestConnectionResponse } from "$lib/types";
+  import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, PlexPinApiResponse, TestConnectionResponse } from "$lib/types";
   import type { ZodSafeParseResult } from "zod";
 
   import { goto } from "$app/navigation";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
+  import { pollForToken } from "$lib/plex-auth";
   import { insertServerSchema } from "$lib/schema";
   import { toaster } from "$lib/toaster";
 
@@ -14,14 +15,23 @@
       hostname: "",
       port: 0,
       xPlexToken: "",
+      clientIdentifier: "",
     },
     inputFocused: {
       serverName: false,
       hostname: false,
       port: false,
-      xPlexToken: false,
     },
     formUpdated: false,
+  });
+
+  // Plex auth state
+  const authState: {
+    authenticated: boolean;
+    inProgress: boolean;
+  } = $state({
+    authenticated: false,
+    inProgress: false,
   });
 
   const formValidationErrors: AddServerValidationErrors = $derived.by(() => {
@@ -48,10 +58,13 @@
       },
     };
 
+    // Auth must be complete before testing
+    if (!authState.authenticated) {
+      return baseButtonsState;
+    }
+
     if (testState.testPerformed && !testState.testInProgress) {
       if (testState.testSuccessful) {
-        // if we have a successful test and the form hasn't been
-        // updated since then disable the test button and enabel the submit button
         if (!addServerFormState.formUpdated) {
           baseButtonsState.testButton = {
             class: "preset-filled-success-500",
@@ -59,8 +72,7 @@
           };
           baseButtonsState.submitButton.disabled = false;
         }
-        else { // we ahve a successful test but the form was updated
-          // enable the test button and disable the submit button
+        else {
           baseButtonsState.testButton = {
             class: "preset-filled-success-500",
             disabled: false,
@@ -68,16 +80,14 @@
           baseButtonsState.submitButton.disabled = true;
         }
       }
-      else { // Our test failed
-        // If the form has been updated, enable the test button
-        // so we can test again
+      else {
         if (addServerFormState.formUpdated) {
           baseButtonsState.testButton = {
             class: "preset-filled-error-500",
             disabled: false,
           };
         }
-        else { // The form hasn't been updated so disable the test button
+        else {
           baseButtonsState.testButton = {
             class: "preset-filled-error-500",
             disabled: true,
@@ -85,15 +95,28 @@
         }
       }
     }
-    else if (Object.keys(formValidationErrors).length !== 0 || !addServerFormState.formUpdated || testState.testInProgress) {
-    // We haven't performed the test yet, but there are validation errors or we're in the process of testing the connection
-    // or the form hasn't been interacted with disable the test button
+    else if (
+      Object.keys(formValidationErrors).length !== 0
+      || !addServerFormState.formUpdated
+      || testState.testInProgress
+    ) {
+    // Validation errors, untouched form, or test in progress -- keep test disabled
     }
     else {
       baseButtonsState.testButton.disabled = false;
     }
 
     return baseButtonsState;
+  });
+
+  // The server name/hostname/port fields need validation checks
+  // but not xPlexToken or clientIdentifier since those come from OAuth
+  const serverFieldsValid: boolean = $derived.by(() => {
+    const errors = formValidationErrors;
+    const hasServerNameError = !!errors.serverName;
+    const hasHostnameError = !!errors.hostname;
+    const hasPortError = !!errors.port;
+    return !hasServerNameError && !hasHostnameError && !hasPortError && addServerFormState.formUpdated;
   });
 
   // Update form and validate
@@ -104,14 +127,74 @@
       [field]: value,
     };
 
-    addServerFormState.inputFocused = {
-      ...addServerFormState.inputFocused,
-      [field]: true,
-    };
+    if (field in addServerFormState.inputFocused) {
+      addServerFormState.inputFocused = {
+        ...addServerFormState.inputFocused,
+        [field]: true,
+      };
+    }
+  }
+
+  // Plex OAuth authentication flow
+  async function authenticateWithPlex(): Promise<void> {
+    authState.inProgress = true;
+    authState.authenticated = false;
+
+    try {
+      // Step 1: Request a PIN from our API
+      const pinResponse: Response = await fetch("/api/plex-auth/pin", {
+        method: "POST",
+      });
+
+      if (!pinResponse.ok) {
+        throw new Error("Failed to create Plex PIN");
+      }
+
+      const pinData: PlexPinApiResponse = await pinResponse.json();
+
+      // Store the client identifier
+      addServerFormState.formValues.clientIdentifier = pinData.clientId;
+
+      // Step 2: Open Plex auth page in a new tab
+      if (pinData.authUrl) {
+        window.open(pinData.authUrl, "_blank");
+      }
+
+      // Step 3: Poll for authentication
+      const token = await pollForToken(pinData.pinId, pinData.pinCode, pinData.clientId);
+
+      if (token) {
+        addServerFormState.formValues.xPlexToken = token;
+        authState.authenticated = true;
+        addServerFormState.formUpdated = true;
+        toaster.create({
+          title: "Authentication Successful",
+          description: "You have been authenticated with Plex",
+          type: "success",
+        });
+      }
+      else {
+        toaster.create({
+          title: "Authentication Timed Out",
+          description: "Please try again. You have 60 seconds to log in.",
+          type: "error",
+        });
+      }
+    }
+    catch {
+      toaster.create({
+        title: "Authentication Error",
+        description: "Failed to start Plex authentication",
+        type: "error",
+      });
+    }
+    finally {
+      authState.inProgress = false;
+    }
   }
 
   // Ensure our server can talk to the server defined by the user entered information
-  async function testServer() {
+  async function testServer(): Promise<void> {
     testState.testPerformed = true;
     testState.testInProgress = true;
     const response: Response = await fetch("/add-server/test-connection", {
@@ -135,12 +218,11 @@
       });
     }
     testState.testInProgress = false;
-    // Set formUpdated to false, so the test button is disabled until input is modified
     addServerFormState.formUpdated = false;
   }
 
   // Send config to the db
-  async function addServer() {
+  async function addServer(): Promise<void> {
     const response: Response = await fetch("/add-server", {
       method: "POST",
       body: JSON.stringify(addServerFormState.formValues),
@@ -198,16 +280,36 @@
           info="Plex server port (typically 32400)"
         />
 
-        <!-- X-Plex-Token -->
-        <AddServerInput
-          label="X-Plex-Token"
-          placeholder="Your Plex token"
-          field="xPlexToken"
-          errors={formValidationErrors.xPlexToken}
-          inputFocused={addServerFormState.inputFocused.xPlexToken}
-          {updateForm}
-          info="Click the info icon to learn how to get your Plex token"
-        />
+        <!-- Plex Authentication -->
+        <div class="form-field">
+          <span class="label">
+            <span class="label-text font-medium text-surface-700-300">Plex Authentication</span>
+          </span>
+
+          {#if authState.authenticated}
+            <div class="flex items-center gap-3 p-3 rounded-lg border-2 border-success-500 bg-success-500/10">
+              <span class="text-success-500 text-xl">&#10003;</span>
+              <span class="text-success-500 font-medium">Authenticated with Plex</span>
+            </div>
+          {:else if authState.inProgress}
+            <div class="flex items-center gap-3 p-3 rounded-lg border-2 border-warning-500 bg-warning-500/10">
+              <div class="animate-spin h-5 w-5 border-2 border-warning-500 border-t-transparent rounded-full"></div>
+              <span class="text-warning-500 font-medium">Waiting for authentication... Check your browser.</span>
+            </div>
+          {:else}
+            <button
+              type="button"
+              disabled={!serverFieldsValid}
+              onclick={authenticateWithPlex}
+              class="btn preset-filled-primary-500 w-full"
+            >
+              Authenticate with Plex
+            </button>
+            {#if !serverFieldsValid}
+              <p class="text-sm text-surface-500 mt-1">Fill in server details above first</p>
+            {/if}
+          {/if}
+        </div>
 
         <!-- Action Buttons -->
         <div class="flex gap-4 pt-6">
@@ -221,9 +323,9 @@
               <span class="loading loading-spinner loading-sm"></span>
               Testing...
             {:else if testState.testPerformed && testState.testSuccessful}
-              ✓ Connected
+              &#10003; Connected
             {:else if testState.testPerformed && !testState.testSuccessful}
-              ✗ Failed
+              &#10007; Failed
             {:else}
               Test Connection
             {/if}
@@ -239,20 +341,6 @@
           </button>
         </div>
       </form>
-    </div>
-
-    <!-- Help Text -->
-    <div class="text-center mt-6 text-sm text-surface-600-400">
-      <p>
-        Need help? Check
-        <a href="https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="text-primary-500 hover:text-primary-600 underline decoration-primary-400 hover:decoration-primary-500 transition-colors duration-200 font-medium">
-          Plex documentation
-        </a>
-        on how to get your Plex token.
-      </p>
     </div>
   </div>
 </div>
