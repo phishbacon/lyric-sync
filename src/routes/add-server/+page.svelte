@@ -1,14 +1,12 @@
 <script lang="ts">
-  import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, PlexPinApiResponse, PlexPollApiResponse, TestConnectionResponse } from "$lib/types";
+  import type { AddServerButtonsState, AddServerFormState, AddServerFormValues, AddServerValidationErrors, PlexPinApiResponse, TestConnectionResponse } from "$lib/types";
   import type { ZodSafeParseResult } from "zod";
 
   import { goto } from "$app/navigation";
   import AddServerInput from "$lib/components/AddServerInput.svelte";
+  import { pollForToken } from "$lib/plex-auth";
   import { insertServerSchema } from "$lib/schema";
   import { toaster } from "$lib/toaster";
-
-  const AUTH_POLL_INTERVAL_MS = 1000;
-  const AUTH_POLL_TIMEOUT_MS = 60000;
 
   // Form state
   const addServerFormState: AddServerFormState = $state({
@@ -193,33 +191,6 @@
     finally {
       authState.inProgress = false;
     }
-  }
-
-  // Poll the server for the auth token
-  async function pollForToken(pinId: number, pinCode: string, clientId: string): Promise<string | null> {
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < AUTH_POLL_TIMEOUT_MS) {
-      const params = new URLSearchParams({
-        pinId: String(pinId),
-        pinCode,
-        clientId,
-      });
-
-      const response: Response = await fetch(`/api/plex-auth/poll?${params.toString()}`);
-
-      if (response.ok) {
-        const data: PlexPollApiResponse = await response.json();
-        if (data.authenticated && data.token) {
-          return data.token;
-        }
-      }
-
-      // Wait before polling again
-      await new Promise(resolve => setTimeout(resolve, AUTH_POLL_INTERVAL_MS));
-    }
-
-    return null;
   }
 
   // Ensure our server can talk to the server defined by the user entered information

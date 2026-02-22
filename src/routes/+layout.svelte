@@ -1,7 +1,7 @@
 <script lang="ts">
   import "./layout.css";
 
-  import type { PlexPinApiResponse, PlexPollApiResponse, PlexUpdateTokenApiResponse, ReauthenticateAndRetry } from "$lib/types";
+  import type { PlexPinApiResponse, PlexUpdateTokenApiResponse, ReauthenticateAndRetry } from "$lib/types";
   import type { Snippet } from "svelte";
 
   import { CloudSync, Menu, Music, Settings, TriangleAlert, X } from "@lucide/svelte";
@@ -14,14 +14,12 @@
   import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/state";
   import { logger } from "$lib/logger";
+  import { pollForToken } from "$lib/plex-auth";
   import { toaster } from "$lib/toaster";
   import { onMount, setContext } from "svelte";
   import { fade } from "svelte/transition";
 
   import type { LayoutServerData } from "./$types";
-
-  const AUTH_POLL_INTERVAL_MS = 1000;
-  const AUTH_POLL_TIMEOUT_MS = 60000;
 
   const { data, children }: { data: LayoutServerData; children: Snippet }
     = $props();
@@ -61,31 +59,6 @@
 
   function toggleMenu(): void {
     menuOpen = !menuOpen;
-  }
-
-  async function pollForToken(pinId: number, pinCode: string, clientId: string): Promise<string | null> {
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < AUTH_POLL_TIMEOUT_MS) {
-      const params = new URLSearchParams({
-        pinId: String(pinId),
-        pinCode,
-        clientId,
-      });
-
-      const response: Response = await fetch(`/api/plex-auth/poll?${params.toString()}`);
-
-      if (response.ok) {
-        const pollData: PlexPollApiResponse = await response.json();
-        if (pollData.authenticated && pollData.token) {
-          return pollData.token;
-        }
-      }
-
-      await new Promise(resolve => setTimeout(resolve, AUTH_POLL_INTERVAL_MS));
-    }
-
-    return null;
   }
 
   // Re-authentication flow — returns true if re-auth succeeded, false otherwise
