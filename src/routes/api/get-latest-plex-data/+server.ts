@@ -7,11 +7,7 @@ import type { InferredInsertAlbumSchema, InferredInsertArtistSchema, InferredIns
 import { logger } from "$lib/logger";
 import { albums, artists, libraries, tracks } from "$lib/schema";
 import db from "$lib/server/db";
-import noPlexAlbums from "$lib/server/db/no-plex-seed/albums";
-import noPlexArtists from "$lib/server/db/no-plex-seed/artists";
-import noPlexTracks from "$lib/server/db/no-plex-seed/tracks";
 import { getAllArtistsAlbumsTracksInLibrary } from "$lib/server/db/query-utils";
-import env from "$lib/server/env";
 import { eq, sql } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
 
@@ -90,128 +86,142 @@ export const GET: RequestHandler = async () => {
         });
       }
 
-      if (env.NO_PLEX) {
-        plexLibraryArtists = noPlexArtists;
-        plexArtistAlbums = noPlexAlbums;
-        plexAlbumTracks = noPlexTracks;
+      // get artists from plex
+      const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
+      const plexAuthToken: string = `X-Plex-Token=${serverConfiguration?.xPlexToken}`;
+      const artistsResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=8&${plexAuthToken}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (artistsResponse.status === 401) {
+        logger.warn("Plex auth token is invalid or expired during data fetch");
+        return new Response(JSON.stringify({
+          message: "Plex authentication expired",
+        }), { status: 401 });
       }
-      else {
-        // get artists from plex
-        const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
-        const plexAuthToken: string = `X-Plex-Token=${serverConfiguration?.xPlexToken}`;
-        const artistsResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=8&${plexAuthToken}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
+
+      if (artistsResponse.ok) {
+        const artistsJSON: ArtistsResposne = await artistsResponse.json();
+        const plexArtists: Array<Artists> = artistsJSON.MediaContainer.Metadata;
+
+        // TODO: Use zod to validate
+        plexLibraryArtists = plexArtists.map((artist) => {
+          return {
+            title: artist.title,
+            uuid: artist.guid,
+            image: (artist.thumb ? artist.thumb : artist.art) ?? "replace-with-default-asset",
+            key: artist.key,
+            summary: artist.summary,
+            library: artistsJSON.MediaContainer.librarySectionUUID,
+          };
         });
 
-        if (artistsResponse.ok) {
-          const artistsJSON: ArtistsResposne = await artistsResponse.json();
-          const plexArtists: Array<Artists> = artistsJSON.MediaContainer.Metadata;
+        // if uuid in libaryArtists doesn't exist in plexLibraryArtists
+        // delete it
+        await Promise.all(libraryArtists.map((libraryArtist) => {
+          const doesUUIDExistInPlexLibraryArtists: InferredInsertArtistSchema | undefined = plexLibraryArtists.find(plexLibraryArtist => plexLibraryArtist.uuid === libraryArtist.uuid);
+          if (doesUUIDExistInPlexLibraryArtists) {
+            return null;
+          }
+          else {
+            return db.delete(artists).where(eq(artists.uuid, libraryArtist.uuid));
+          }
+        }));
+      }
 
-          // TODO: Use zod to validate
-          plexLibraryArtists = plexArtists.map((artist) => {
-            return {
-              title: artist.title,
-              uuid: artist.guid,
-              image: (artist.thumb ? artist.thumb : artist.art) ?? "replace-with-default-asset",
-              key: artist.key,
-              summary: artist.summary,
-              library: artistsJSON.MediaContainer.librarySectionUUID,
-            };
-          });
+      // now we get every album from plex
+      const albumsResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=9&${plexAuthToken}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
 
-          // if uuid in libaryArtists doesn't exist in plexLibraryArtists
-          // delete it
-          await Promise.all(libraryArtists.map((libraryArtist) => {
-            const doesUUIDExistInPlexLibraryArtists: InferredInsertArtistSchema | undefined = plexLibraryArtists.find(plexLibraryArtist => plexLibraryArtist.uuid === libraryArtist.uuid);
-            if (doesUUIDExistInPlexLibraryArtists) {
-              return null;
-            }
-            else {
-              return db.delete(artists).where(eq(artists.uuid, libraryArtist.uuid));
-            }
-          }));
-        }
+      if (albumsResponse.status === 401) {
+        logger.warn("Plex auth token is invalid or expired during album fetch");
+        return new Response(JSON.stringify({
+          message: "Plex authentication expired",
+        }), { status: 401 });
+      }
 
-        // now we get every album from plex
-        const albumsResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=9&${plexAuthToken}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
+      if (albumsResponse.ok) {
+        const albumsJSON: AlbumsResponse = await albumsResponse.json();
+        const plexAlbums: Array<Albums> = albumsJSON.MediaContainer.Metadata;
+
+        // TODO: Use zod to validate
+        plexArtistAlbums = plexAlbums.map((album) => {
+          return {
+            title: album.title,
+            uuid: album.guid,
+            image: album.thumb ? album.thumb : album.art,
+            key: album.key,
+            summary: album.summary,
+            library: albumsJSON.MediaContainer.librarySectionUUID,
+            artist: album.parentGuid,
+          };
         });
 
-        if (albumsResponse.ok) {
-          const albumsJSON: AlbumsResponse = await albumsResponse.json();
-          const plexAlbums: Array<Albums> = albumsJSON.MediaContainer.Metadata;
+        // if uuid in artistAlbums doesn't exist in plexArtistsAlbums
+        // delete it
+        await Promise.all(artistAlbums.map((artistAlbum) => {
+          const doesUUIDExistInPlexArtistAlbums: InferredInsertAlbumSchema | undefined = plexArtistAlbums.find(plexArtistAlbum => plexArtistAlbum.uuid === artistAlbum.uuid);
+          if (doesUUIDExistInPlexArtistAlbums) {
+            return null;
+          }
+          else {
+            return db.delete(albums).where(eq(albums.uuid, artistAlbum.uuid));
+          }
+        }));
+      }
 
-          // TODO: Use zod to validate
-          plexArtistAlbums = plexAlbums.map((album) => {
-            return {
-              title: album.title,
-              uuid: album.guid,
-              image: album.thumb ? album.thumb : album.art,
-              key: album.key,
-              summary: album.summary,
-              library: albumsJSON.MediaContainer.librarySectionUUID,
-              artist: album.parentGuid,
-            };
-          });
+      // now we get every track from plex
+      const tracksResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=10&${plexAuthToken}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
 
-          // if uuid in artistAlbums doesn't exist in plexArtistsAlbums
-          // delete it
-          await Promise.all(artistAlbums.map((artistAlbum) => {
-            const doesUUIDExistInPlexArtistAlbums: InferredInsertAlbumSchema | undefined = plexArtistAlbums.find(plexArtistAlbum => plexArtistAlbum.uuid === artistAlbum.uuid);
-            if (doesUUIDExistInPlexArtistAlbums) {
-              return null;
-            }
-            else {
-              return db.delete(albums).where(eq(albums.uuid, artistAlbum.uuid));
-            }
-          }));
-        }
+      if (tracksResponse.status === 401) {
+        logger.warn("Plex auth token is invalid or expired during track fetch");
+        return new Response(JSON.stringify({
+          message: "Plex authentication expired",
+        }), { status: 401 });
+      }
 
-        // now we get every track from plex
-        const tracksResponse: Response = await fetch(`${baseURL}/library/sections/${currentLibrary?.key}/all?type=10&${plexAuthToken}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
+      if (tracksResponse.ok) {
+        const tracksJSON: TracksResponse = await tracksResponse.json();
+        const plexTracks: Array<Tracks> = tracksJSON.MediaContainer.Metadata;
+
+        // TODO: Use zod to validate
+        plexAlbumTracks = plexTracks.map((track) => {
+          return {
+            title: track.title,
+            uuid: track.guid,
+            key: track.key,
+            path: track.Media[0].Part[0].file,
+            library: tracksJSON.MediaContainer.librarySectionUUID,
+            artist: track.grandparentGuid,
+            album: track.parentGuid,
+            duration: track.Media[0].Part[0].duration,
+            trackNumber: track.index,
+          };
         });
 
-        if (tracksResponse.ok) {
-          const tracksJSON: TracksResponse = await tracksResponse.json();
-          const plexTracks: Array<Tracks> = tracksJSON.MediaContainer.Metadata;
-
-          // TODO: Use zod to validate
-          plexAlbumTracks = plexTracks.map((track) => {
-            return {
-              title: track.title,
-              uuid: track.guid,
-              key: track.key,
-              path: track.Media[0].Part[0].file,
-              library: tracksJSON.MediaContainer.librarySectionUUID,
-              artist: track.grandparentGuid,
-              album: track.parentGuid,
-              duration: track.Media[0].Part[0].duration,
-              trackNumber: track.index,
-            };
-          });
-
-          // if uuid in albumTracks doesn't exist in plexAlbumTracks
-          // delete it
-          await Promise.all(albumTracks.map((albumTrack) => {
-            const doesUUIDExistInPlexAlbumTracks: InferredInsertTrackSchema | undefined = plexAlbumTracks.find(plexAlbumTrack => plexAlbumTrack.uuid === albumTrack.uuid);
-            if (doesUUIDExistInPlexAlbumTracks) {
-              return null;
-            }
-            else {
-              return db.delete(tracks).where(eq(tracks.uuid, albumTrack.uuid));
-            }
-          }));
-        }
+        // if uuid in albumTracks doesn't exist in plexAlbumTracks
+        // delete it
+        await Promise.all(albumTracks.map((albumTrack) => {
+          const doesUUIDExistInPlexAlbumTracks: InferredInsertTrackSchema | undefined = plexAlbumTracks.find(plexAlbumTrack => plexAlbumTrack.uuid === albumTrack.uuid);
+          if (doesUUIDExistInPlexAlbumTracks) {
+            return null;
+          }
+          else {
+            return db.delete(tracks).where(eq(tracks.uuid, albumTrack.uuid));
+          }
+        }));
       }
 
       // TODO: only update artists/albums in the db that actually differ from what plex has

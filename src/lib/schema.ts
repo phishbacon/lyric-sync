@@ -45,6 +45,9 @@ export const servers = sqliteTable("servers", {
     .notNull(),
   xPlexToken: text()
     .notNull(),
+  clientIdentifier: text()
+    .notNull()
+    .default(""),
   createdAt: integer({ mode: "timestamp_ms" })
     .$default(() => new Date()),
   updatedAt: integer({ mode: "timestamp_ms" })
@@ -61,6 +64,7 @@ export const insertServerSchema = createInsertSchema(
     hostname: schema => schema.min(1, "Hostname is required"),
     port: schema => schema.min(1, "Use a better port"),
     xPlexToken: schema => schema.min(1, "Token is required"),
+    clientIdentifier: schema => schema.min(1, "Client identifier is required"),
   },
 )
   .omit({

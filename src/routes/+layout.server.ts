@@ -1,12 +1,11 @@
 import type { Directory, Root } from "$lib/plex-api-types/library-sections";
 import type { InferredInsertLibrarySchema, InferredSelectLibrarySchema, InferredSelectServerSchema, ServerLoadValues } from "$lib/types";
 
+import { logger } from "$lib/logger";
 import { libraries } from "$lib/schema";
 import db from "$lib/server/db";
-import noPlexLibraries from "$lib/server/db/no-plex-seed/libraries";
 import { eq, sql } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
-import { env } from "node:process";
 
 import type { LayoutServerLoad } from "./$types";
 
@@ -15,6 +14,7 @@ export const load: LayoutServerLoad = async () => {
     serverConfiguration: undefined,
     libraries: [],
     currentLibrary: undefined,
+    tokenValid: true,
   };
   let databaseLibraries: Array<InferredInsertLibrarySchema> = [];
   let plexLibraries: Array<InferredInsertLibrarySchema> = [];
@@ -47,36 +47,39 @@ export const load: LayoutServerLoad = async () => {
       });
     }
 
-    if (env.NO_PLEX) {
-      plexLibraries = noPlexLibraries;
+    // Get plex libraries
+    const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
+    const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
+    const response: Response = await fetch(`${baseURL}/library/sections${plexAuthToken}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (response.status === 401) {
+      logger.warn("Plex auth token is invalid or expired");
+      defaultValues.tokenValid = false;
+      defaultValues.libraries = returned ?? [];
+      defaultValues.currentLibrary = returned?.find(library => library.currentLibrary);
+      return defaultValues;
     }
-    else {
-      // Get plex libraries
-      const baseURL: string = `${serverConfiguration?.hostname}:${serverConfiguration?.port}`;
-      const plexAuthToken: string = `?X-Plex-Token=${serverConfiguration?.xPlexToken}`;
-      const response: Response = await fetch(`${baseURL}/library/sections${plexAuthToken}`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
+
+    if (response.ok) {
+      const LibrarySectionsResponse: Root = await response.json();
+      const plexDirectories: Array<Directory> = LibrarySectionsResponse.MediaContainer.Directory.filter(e => e.type === "artist" && !e.hidden);
+
+      // TODO: Use zod to validate
+      plexLibraries = plexDirectories.map((library) => {
+        return {
+          serverName: serverConfiguration.serverName,
+          path: library.Location[0].path,
+          title: library.title,
+          uuid: library.uuid,
+          image: library.composite,
+          key: library.key,
+        };
       });
-
-      if (response.ok) {
-        const LibrarySectionsResponse: Root = await response.json();
-        const plexDirectories: Array<Directory> = LibrarySectionsResponse.MediaContainer.Directory.filter(e => e.type === "artist" && !e.hidden);
-
-        // TODO: Use zod to validate
-        plexLibraries = plexDirectories.map((library) => {
-          return {
-            serverName: serverConfiguration.serverName,
-            path: library.Location[0].path,
-            title: library.title,
-            uuid: library.uuid,
-            image: library.composite,
-            key: library.key,
-          };
-        });
-      }
     }
 
     // if uuid in databaseLibraries doesn't exist in plexLibraries

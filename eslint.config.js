@@ -9,7 +9,7 @@ export default antfu(
       semi: true,
       quotes: "double",
     },
-    ignores: ["**/migrations/*", ".github"],
+    ignores: ["**/migrations/*", ".github", "AGENTS.md"],
   },
   {
     rules: {

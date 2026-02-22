@@ -1,8 +1,7 @@
 <script lang="ts">
-  import type { AddServerFormValues, ClassIconAndTitle } from "$lib/types";
+  import type { AddServerFormValues, AddServerInputFields, ClassIconAndTitle } from "$lib/types";
 
   import { CircleCheck, CircleX, Info } from "@lucide/svelte";
-  import { PlexAuthTokenURL } from "$lib/external-links";
   import { fade } from "svelte/transition";
 
   const {
@@ -16,7 +15,7 @@
   }: {
     label: string;
     placeholder: string;
-    field: keyof AddServerFormValues;
+    field: AddServerInputFields;
     errors: string[] | undefined;
     inputFocused: boolean;
     info: string;
@@ -32,7 +31,7 @@
         updateForm(field, Number((e.target as HTMLInputElement).value))
       : (e: Event) => updateForm(field, (e.target as HTMLInputElement).value),
   );
-  // #d41976
+
   const inputClassIconAndTitle: ClassIconAndTitle = $derived.by(() => {
     if (inputFocused) {
       if (errors) {
@@ -73,31 +72,15 @@
     />
 
     <div class="icon-container">
-      {#if field === "xPlexToken"}
-        <a
-          href={PlexAuthTokenURL}
-          target="_blank"
-          rel="noopener noreferrer"
+      {#key inputClassIconAndTitle.icon}
+        <div
           title={inputClassIconAndTitle.title}
-          class="icon-link"
+          in:fade={{ duration: 200 }}
+          class="icon-display"
         >
-          {#key inputClassIconAndTitle.icon}
-            <div in:fade={{ duration: 200 }}>
-              <inputClassIconAndTitle.icon color={inputClassIconAndTitle.color} />
-            </div>
-          {/key}
-        </a>
-      {:else}
-        {#key inputClassIconAndTitle.icon}
-          <div
-            title={inputClassIconAndTitle.title}
-            in:fade={{ duration: 200 }}
-            class="icon-display"
-          >
-            <inputClassIconAndTitle.icon color={inputClassIconAndTitle.color} />
-          </div>
-        {/key}
-      {/if}
+          <inputClassIconAndTitle.icon color={inputClassIconAndTitle.color} />
+        </div>
+      {/key}
     </div>
   </div>
 </div>
@@ -157,21 +140,6 @@
   .icon-container :global(svg) {
     width: 1.25rem;
     height: 1.25rem;
-  }
-
-  .icon-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: inherit;
-    text-decoration: none;
-    border-radius: 0.375rem;
-    transition: all 0.2s ease;
-  }
-
-  .icon-link:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
   }
 
   .icon-display {
