@@ -8,12 +8,12 @@ import { eq } from "drizzle-orm";
 
 export const PATCH: RequestHandler = async ({ request }) => {
   try {
-    const { token }: { token: string } = await request.json();
+    const { token, clientIdentifier }: { token: string; clientIdentifier: string } = await request.json();
 
-    if (!token) {
+    if (!token || !clientIdentifier) {
       const response: PlexUpdateTokenApiResponse = {
         updated: false,
-        message: "Token is required",
+        message: "Token and client identifier are required",
       };
       return new Response(JSON.stringify(response), { status: 400 });
     }
@@ -29,7 +29,7 @@ export const PATCH: RequestHandler = async ({ request }) => {
     }
 
     await db.update(servers)
-      .set({ xPlexToken: token })
+      .set({ xPlexToken: token, clientIdentifier })
       .where(eq(servers.id, serverConfiguration.id));
 
     logger.info("Plex auth token updated successfully");

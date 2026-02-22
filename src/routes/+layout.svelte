@@ -90,7 +90,7 @@
         const updateResponse: Response = await fetch("/api/plex-auth/update-token", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
+          body: JSON.stringify({ token, clientIdentifier: pinData.clientId }),
         });
 
         const updateData: PlexUpdateTokenApiResponse = await updateResponse.json();
