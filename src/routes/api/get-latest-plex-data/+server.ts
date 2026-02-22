@@ -1,6 +1,6 @@
 import type { RequestHandler } from "@sveltejs/kit";
 import type { Metadata as Tracks, Root as TracksResponse } from "$lib/plex-api-types/library-sections-key-all-type-10";
-import type { Metadata as Artists, Root as ArtistsResposne } from "$lib/plex-api-types/library-sections-key-all-type-8";
+import type { Metadata as Artists, Root as ArtistsResponse } from "$lib/plex-api-types/library-sections-key-all-type-8";
 import type { Metadata as Albums, Root as AlbumsResponse } from "$lib/plex-api-types/library-sections-key-all-type-9";
 import type { InferredInsertAlbumSchema, InferredInsertArtistSchema, InferredInsertTrackSchema, InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSelectLibrarySchema, InferredSelectServerSchema, InferredSelectTrackSchema } from "$lib/types";
 
@@ -104,7 +104,7 @@ export const GET: RequestHandler = async () => {
       }
 
       if (artistsResponse.ok) {
-        const artistsJSON: ArtistsResposne = await artistsResponse.json();
+        const artistsJSON: ArtistsResponse = await artistsResponse.json();
         const plexArtists: Array<Artists> = artistsJSON.MediaContainer.Metadata;
 
         // TODO: Use zod to validate
