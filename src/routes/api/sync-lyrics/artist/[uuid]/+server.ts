@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ params }) => {
 
     if (!currentLibrary) {
       response.message = "No current library selected";
-      return new Response(JSON.stringify(response));
+      return new Response(JSON.stringify(response), { status: 404 });
     }
 
     // Get artist info
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ params }) => {
 
     if (!artist) {
       response.message = "Artist not found";
-      return new Response(JSON.stringify(response));
+      return new Response(JSON.stringify(response), { status: 404 });
     }
 
     // Get all albums for this artist
@@ -50,7 +50,7 @@ export const POST: RequestHandler = async ({ params }) => {
 
     if (!albumsForArtist || albumsForArtist.length === 0) {
       response.message = "No albums found for this artist";
-      return new Response(JSON.stringify(response));
+      return new Response(JSON.stringify(response), { status: 404 });
     }
 
     // Get all tracks for all albums
@@ -93,6 +93,7 @@ export const POST: RequestHandler = async ({ params }) => {
   catch (error: unknown) {
     logger.error(`Error syncing artist lyrics: ${error}`);
     response.message = "Error syncing artist lyrics";
+    return new Response(JSON.stringify(response), { status: 500 });
   }
 
   return new Response(JSON.stringify(response));
