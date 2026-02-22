@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ params }) => {
 
   if (!artistUUID) {
     response.message = "Artist UUID is required";
-    return new Response(JSON.stringify(response));
+    return new Response(JSON.stringify(response), { status: 400 });
   }
 
   try {

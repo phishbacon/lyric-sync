@@ -11,7 +11,7 @@ export const GET: RequestHandler = async () => {
 
     if (!serverConfiguration) {
       const response: PlexValidateApiResponse = { valid: false };
-      return new Response(JSON.stringify(response));
+      return new Response(JSON.stringify(response), { status: 500 });
     }
 
     const valid = await validateToken(
