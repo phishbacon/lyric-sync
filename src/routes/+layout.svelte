@@ -73,13 +73,18 @@
         clientId,
       });
 
-      const response: Response = await fetch(`/api/plex-auth/poll?${params.toString()}`);
+      try {
+        const response: Response = await fetch(`/api/plex-auth/poll?${params.toString()}`);
 
-      if (response.ok) {
-        const pollData: PlexPollApiResponse = await response.json();
-        if (pollData.authenticated && pollData.token) {
-          return pollData.token;
+        if (response.ok) {
+          const pollData: PlexPollApiResponse = await response.json();
+          if (pollData.authenticated && pollData.token) {
+            return pollData.token;
+          }
         }
+      }
+      catch (error) {
+        logger.error(`Plex auth poll request failed: ${error}`);
       }
 
       await new Promise(resolve => setTimeout(resolve, AUTH_POLL_INTERVAL_MS));
