@@ -4,6 +4,7 @@ import type { InferredSelectAlbumSchema, InferredSelectArtistSchema, InferredSel
 import { logger } from "$lib/logger";
 import { albums, artists, libraries, tracks } from "$lib/schema";
 import db from "$lib/server/db";
+import { syncTrack } from "$lib/server/sync-track";
 import { and, eq } from "drizzle-orm";
 
 export const POST: RequestHandler = async ({ params }) => {
@@ -63,10 +64,9 @@ export const POST: RequestHandler = async ({ params }) => {
 
     response.totalTracks = allTracks.length;
 
-    // Sync each track (calling the existing /api/sync-lyrics/track API endpoint)
+    // Sync each track using the shared utility
     for (const track of allTracks) {
       try {
-        // We need to get the album details to pass to the track sync endpoint
         const album = await db.query.albums.findFirst({
           where: and(eq(albums.uuid, track.album), eq(albums.library, currentLibrary.uuid)),
         });
@@ -76,26 +76,9 @@ export const POST: RequestHandler = async ({ params }) => {
           continue;
         }
 
-        // Call the existing track sync API endpoint
-        // We'll simulate what the endpoint expects from the track sync
-        const trackSyncData = {
-          library: currentLibrary.uuid,
-          artistName: artist.title,
-          albumName: album.title,
-          track,
-        };
+        const syncTrackResponse = await syncTrack(currentLibrary.uuid, artist.title, album.title, track);
 
-        // Fetch the track sync endpoint (this would normally be an HTTP call to the API)
-        // For now, let's call it directly via the request handler
-        const syncTrackResponse = await fetch("/api/sync-lyrics/track", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(trackSyncData),
-        });
-
-        if (syncTrackResponse.ok) {
+        if (syncTrackResponse.synced) {
           response.syncedTracks++;
         }
       }
