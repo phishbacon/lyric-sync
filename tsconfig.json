@@ -1,39 +1,43 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
+    "incremental": true,
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "esnext",
     "moduleResolution": "bundler",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
     "resolveJsonModule": true,
     "allowJs": true,
-    "checkJs": true,
     "strict": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "sourceMap": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
-    "./svelte-kit/ambient.d.ts",
-    "./svelte-kit/non-ambient.d.ts",
-    "./svelte-kit/types/**/$types.d.ts",
-    "./vite.config.js",
-    "./vite.config.ts",
-    "./tailwind.config.ts",
-    "./drizzle.config.ts",
-    "./src/**/*.js",
-    "./src/**/*.ts",
-    "./src/**/*.svelte",
-    "./tests/**/*.js",
-    "./tests/**/*.ts",
-    "./tests/**/*.svelte",
-    "src/lib/types",
-    "src/lib/plex-api-types/library-sections/type-8",
-    "src/lib/plex-api-types/library-sections/type-8"
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
-  // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
-  // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
-  //
-  // If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-  // from the referenced tsconfig.json - TypeScript does not merge them in
 }

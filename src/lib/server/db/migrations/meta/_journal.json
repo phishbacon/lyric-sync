@@ -5,78 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1735190778627,
-      "tag": "0000_deep_tiger_shark",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1735609083922,
-      "tag": "0001_loose_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1735611461148,
-      "tag": "0002_bitter_mariko_yashida",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1735745784019,
-      "tag": "0003_chunky_puppet_master",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1736095026099,
-      "tag": "0004_futuristic_clea",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1736124760344,
-      "tag": "0005_glorious_unicorn",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1736612892920,
-      "tag": "0006_cold_ravenous",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1756601340955,
-      "tag": "0007_free_eddie_brock",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "6",
-      "when": 1764547202310,
-      "tag": "0008_hot_exiles",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "6",
-      "when": 1766259409045,
-      "tag": "0009_slimy_deathstrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "6",
-      "when": 1771785156588,
-      "tag": "0010_supreme_mercury",
+      "when": 1793192978735,
+      "tag": "0000_sad_mesmero",
       "breakpoints": true
     }
   ]

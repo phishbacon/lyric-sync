@@ -1,1 +1,0 @@
-ALTER TABLE `servers` ADD `client_identifier` text DEFAULT '' NOT NULL;

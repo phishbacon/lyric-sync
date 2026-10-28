@@ -1,1 +1,0 @@
-ALTER TABLE `tracks` ADD `track_number` integer DEFAULT 0 NOT NULL;

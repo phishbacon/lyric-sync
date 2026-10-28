@@ -1,19 +1,19 @@
 # Lyric-Sync
 
-![Docker CI](https://github.com/phishbacon/lyric-sync/actions/workflows/docker-publish.yml/badge.svg)\
-![Lint](https://github.com/phishbacon/lyric-sync/actions/workflows/eslint.yml/badge.svg)
+![Docker CI badge](https://github.com/phishbacon/lyric-sync/actions/workflows/docker-publish.yml/badge.svg)\
+![Lint badge](https://github.com/phishbacon/lyric-sync/actions/workflows/eslint.yml/badge.svg)
 
 A free and open source self hosted solution for grabbing lyrics for your Plex Music Libraries.
 
 <div align="center">
   <h2>Powered By</h2>
   <a href="https://svelte.dev/">
-    <img src="https://github.com/sveltejs/branding/blob/master/svelte-horizontal.png?raw=true" width="300"/>
+    <img src="https://github.com/sveltejs/branding/blob/master/svelte-horizontal.png?raw=true" width="300" alt="Svelte"/>
   </a>
 </div>
 <div align="center">
   <a href="https://www.skeleton.dev/">
-    <img src="https://user-images.githubusercontent.com/1509726/199282306-7454adcb-b765-4618-8438-67655a7dee47.png" width="300"/>
+    <img src="https://user-images.githubusercontent.com/1509726/199282306-7454adcb-b765-4618-8438-67655a7dee47.png" width="300" alt="Skeleton UI"/>
   </a>
 </div>
 <div align="center">
@@ -21,7 +21,7 @@ A free and open source self hosted solution for grabbing lyrics for your Plex Mu
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-dark.svg">
       <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg">
-      <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg">
+      <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg" alt="Drizzle ORM"/>
     </picture>
   </a>
 </div>

@@ -1,11 +1,10 @@
 node_modules
 package-lock.json
 
-# Output
-.output
-.vercel
-/.svelte-kit
-/build
+# Next.js
+/.next/
+/out/
+next-env.d.ts
 
 # OS
 .DS_Store
@@ -15,11 +14,16 @@ Thumbs.db
 .env
 .env.*
 !.env.example
-!.env.test
-
-# Vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
 
 # SQLite
 *.db
+*.db-shm
+*.db-wal
+
+# Test
+coverage/
+test-results/
+playwright-report/
+
+# TypeScript
+*.tsbuildinfo

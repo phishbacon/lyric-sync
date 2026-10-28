@@ -1,46 +1,9 @@
-import type { Logger, LoggerOptions } from "pino";
-import type { Readable } from "svelte/store";
-
-import { browser } from "$app/environment";
+import process from "node:process";
 import pino from "pino";
-import { get, readable } from "svelte/store";
 
-const pinoLogger: Logger & {
-  setLogLevel?: (level: pino.LevelWithSilentOrString) => pino.LevelWithSilentOrString;
-} = await (async () => {
-  let pinoOptions: LoggerOptions;
-
-  let destinationStream;
-
-  if (browser) {
-    pinoOptions = {
-      browser: { asObject: false },
-      level: "info",
-    };
-  }
-  else {
-    const pretty = await import("pino-pretty");
-
-    pinoOptions = {
-      level: "info",
-    };
-    destinationStream = pretty.PinoPretty();
-  }
-  return pino(
-    pinoOptions,
-    destinationStream,
-  );
-})();
-
-pinoLogger.setLogLevel = (level: pino.LevelWithSilentOrString) => {
-  let logLevel: LoggerOptions["level"] = "info";
-  logLevel = level;
-  // eslint-disable-next-line ts/no-use-before-define
-  logger.info(`Setting log level to ${logLevel}`);
-  pinoLogger.level = logLevel;
-  return logLevel;
-};
-
-const readableLogger: Readable<Logger> = readable<Logger>(pinoLogger);
-
-export const logger: Logger = get(readableLogger);
+export const logger = pino({
+  level: process.env.LOG_LEVEL ?? "info",
+  transport: process.env.NODE_ENV === "development"
+    ? { target: "pino-pretty" }
+    : undefined,
+});

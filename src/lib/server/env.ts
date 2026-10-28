@@ -1,46 +1,23 @@
-/* eslint-disable node/no-process-env */
-
-import { config } from "dotenv";
-import { expand } from "dotenv-expand";
-import path from "node:path";
+import process from "node:process";
 import { z } from "zod";
 
-expand(config({
-  path: path.resolve(
-    process.cwd(),
-    ".env",
-  ),
-}));
+try {
+  process.loadEnvFile();
+}
+catch {
+  // No .env file present — rely on real environment variables.
+}
 
-const EnvSchema = z.object({
-  NODE_ENV: z.string().default("development"),
-  DATABASE_URL: z.string().default("file:dev.db"),
-}).superRefine((input, ctx) => {
-  if (input.NODE_ENV === "production") {
-    if (!input.DATABASE_URL) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.invalid_type,
-        expected: "string",
-        received: "undefined",
-        path: ["DATABASE_URL"],
-        message: "Must be set when NODE_ENV is 'production'",
-      });
-    }
-  }
-  else if (!input.DATABASE_URL) {
-    input.DATABASE_URL = "file:dev.db";
-  }
+const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  DATABASE_URL: z.string().default("file:lyric-sync.db"),
 });
 
-type env = z.infer<typeof EnvSchema>;
+const parsed = envSchema.safeParse(process.env);
 
-// eslint-disable-next-line ts/no-redeclare
-const { data: env, error } = EnvSchema.safeParse(process.env);
-
-if (error) {
-  console.error("❌ Invalid env:");
-  console.error(JSON.stringify(error.flatten().fieldErrors, null, 2));
+if (!parsed.success) {
+  console.error("Invalid environment variables:", z.treeifyError(parsed.error));
   process.exit(1);
 }
 
-export default env!;
+export const env = parsed.data;
