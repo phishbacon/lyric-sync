@@ -1,10 +1,10 @@
-import process from "node:process";
+/* eslint-disable node/no-process-env -- this module IS the env boundary;
+   every other module reads validated values from here. */
 import { z } from "zod";
 
 try {
   process.loadEnvFile();
-}
-catch {
+} catch {
   // No .env file present — rely on real environment variables.
 }
 
