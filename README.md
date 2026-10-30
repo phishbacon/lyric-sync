@@ -48,6 +48,23 @@ First and foremost, checkout [tranzuanthang's lrcget](https://github.com/tranxua
 
 ## Installation
 
+> **⚠️ Back up your database before upgrading.**
+>
+> This version is a ground-up rewrite with a brand-new database schema. If you are
+> upgrading from an older Lyric-Sync, the new version **will not reuse or migrate**
+> your existing `lyric-sync.db` — it initializes a fresh database at the same path,
+> discarding whatever the old version stored there.
+>
+> Before you start the new version, copy your old database somewhere safe:
+>
+> ```bash
+> cp /your-music-library/lyric-sync.db /your-music-library/lyric-sync.db.bak
+> ```
+>
+> Your music and lyric files on disk are never touched. Only the app's own database
+> (which tracks your Plex connection, libraries, and sync state) is rebuilt from
+> scratch.
+
 ### Docker
 
 Docker is the recommended way to run Lyric-Sync. It just makes things easier.

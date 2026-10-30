@@ -11,6 +11,21 @@ const POLL_TIMEOUT_MS = 60_000;
 
 type AuthState = "idle" | "waiting" | "done";
 
+/**
+ * Open the plex.tv approval page in a new tab.
+ *
+ * An anchor with rel="noopener" rather than window.open's "noopener"
+ * feature string: browsers read that feature keyword as "open nothing",
+ * which silently suppressed the tab and left the form spinning.
+ */
+function openInNewTab(url: string): void {
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  anchor.click();
+}
+
 export function SetupForm() {
   const router = useRouter();
 
@@ -32,6 +47,18 @@ export function SetupForm() {
 
   async function handleAuthenticate() {
     setMessage("");
+    // Every exit must clear "waiting": this handler sets the disabled state
+    // before its first await, so a rejected action would otherwise leave the
+    // button stuck disabled with no message explaining why.
+    try {
+      await runPlexAuth();
+    } catch {
+      setAuthState("idle");
+      setMessage("Could not reach plex.tv to start authentication — try again");
+    }
+  }
+
+  async function runPlexAuth(): Promise<void> {
     const result = await startPlexAuth();
     if (!result.success) {
       setMessage(result.message);
@@ -39,7 +66,7 @@ export function SetupForm() {
     }
     setClientIdentifier(result.clientIdentifier);
     setAuthState("waiting");
-    window.open(result.authUrl, "_blank", "noopener");
+    openInNewTab(result.authUrl);
 
     const deadline = Date.now() + POLL_TIMEOUT_MS;
     const controller = new AbortController();

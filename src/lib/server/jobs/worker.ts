@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { logger } from "@/lib/logger";
 import { db } from "@/lib/server/db";
@@ -15,13 +15,24 @@ let running = false;
  * job even if a second process sneaks in.
  */
 async function claimNextJob(): Promise<typeof jobs.$inferSelect | null> {
+  // The oldest queued id, then flip exactly that row. Filtering the subquery
+  // to queued keeps it from naming a running job, and inArray() binds the
+  // subquery as SQL — eq() would bind the builder object itself as a param.
   const claimed = await db
     .update(jobs)
     .set({ status: "running", startedAt: new Date() })
     .where(
       and(
         eq(jobs.status, "queued"),
-        eq(jobs.id, db.select({ id: jobs.id }).from(jobs).orderBy(asc(jobs.id)).limit(1).as("next")),
+        inArray(
+          jobs.id,
+          db
+            .select({ id: jobs.id })
+            .from(jobs)
+            .where(eq(jobs.status, "queued"))
+            .orderBy(asc(jobs.id))
+            .limit(1),
+        ),
       ),
     )
     .returning();
