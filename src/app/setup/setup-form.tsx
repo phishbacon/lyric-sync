@@ -11,21 +11,6 @@ const POLL_TIMEOUT_MS = 60_000;
 
 type AuthState = "idle" | "waiting" | "done";
 
-/**
- * Open the plex.tv approval page in a new tab.
- *
- * An anchor with rel="noopener" rather than window.open's "noopener"
- * feature string: browsers read that feature keyword as "open nothing",
- * which silently suppressed the tab and left the form spinning.
- */
-function openInNewTab(url: string): void {
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.target = "_blank";
-  anchor.rel = "noopener noreferrer";
-  anchor.click();
-}
-
 export function SetupForm() {
   const router = useRouter();
 
@@ -38,6 +23,9 @@ export function SetupForm() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [testedOk, setTestedOk] = useState(false);
+  // Set only when the popup was blocked, so the user still has a clickable
+  // way to reach the plex.tv approval page.
+  const [fallbackAuthUrl, setFallbackAuthUrl] = useState("");
 
   const pollAbortRef = useRef<AbortController | null>(null);
   const snapshotRef = useRef({ name, baseUrl });
@@ -47,26 +35,43 @@ export function SetupForm() {
 
   async function handleAuthenticate() {
     setMessage("");
+    setFallbackAuthUrl("");
+    // Reserve the popup synchronously, while this click is still the active
+    // user gesture. Browsers popup-block window.open (and synthetic anchor
+    // clicks) issued after an await — the transient activation has expired by
+    // then — which silently swallowed the plex.tv tab and left the button
+    // spinning with no way to approve access.
+    const popup = window.open("about:blank", "_blank");
     // Every exit must clear "waiting": this handler sets the disabled state
     // before its first await, so a rejected action would otherwise leave the
     // button stuck disabled with no message explaining why.
     try {
-      await runPlexAuth();
+      await runPlexAuth(popup);
     } catch {
+      popup?.close();
       setAuthState("idle");
       setMessage("Could not reach plex.tv to start authentication — try again");
     }
   }
 
-  async function runPlexAuth(): Promise<void> {
+  async function runPlexAuth(popup: Window | null): Promise<void> {
     const result = await startPlexAuth();
     if (!result.success) {
+      popup?.close();
       setMessage(result.message);
       return;
     }
     setClientIdentifier(result.clientIdentifier);
+
+    if (popup) {
+      popup.location.href = result.authUrl;
+    } else {
+      // Popup was blocked (strict settings / an extension): fall back to an
+      // inline link so the flow is still completable instead of spinning.
+      setFallbackAuthUrl(result.authUrl);
+    }
+
     setAuthState("waiting");
-    openInNewTab(result.authUrl);
 
     const deadline = Date.now() + POLL_TIMEOUT_MS;
     const controller = new AbortController();
@@ -196,6 +201,22 @@ export function SetupForm() {
           <span className="block text-xs text-muted">
             Opens plex.tv in a new tab — approve access there
           </span>
+          {fallbackAuthUrl !== "" && (
+            <span className="block text-xs text-muted">
+              Your browser blocked the popup —
+              {" "}
+              <a
+                href={fallbackAuthUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent underline underline-offset-2"
+              >
+                open the approval page
+              </a>
+              {" "}
+              to continue.
+            </span>
+          )}
         </div>
 
         <div className="flex gap-3 pt-2">
