@@ -1,0 +1,34 @@
+# Development stack: runs the rewrite against the real Plex server and the
+# real music files, in the same environment shape as production (identical
+# absolute path bind mount) but with a separate DB and no Traefik labels.
+#
+#   docker compose -f docker-compose.dev.yaml up --build
+#
+# App: http://localhost:3001
+services:
+  lyric-sync-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    # Source tree is mounted for hot reload; the production image copies it.
+    volumes:
+      - .:/app
+      - /app/node_modules
+      # Identical-path music mount (DATA_ROOT on both sides): Plex-reported
+      # absolute track paths resolve to the same location inside the container,
+      # so lyric writes land next to the real audio files (the core
+      # no-remapping invariant). Set DATA_ROOT to the music root (e.g. /data)
+      # in a .env file.
+      - ${DATA_ROOT}:${DATA_ROOT}
+    environment:
+      # Separate DB file, inside the same mounted music tree, so dev never
+      # touches the production lyric-sync.db that lives there too.
+      - DATABASE_URL=file:${DATA_ROOT}/lyric-sync-dev.db
+      # Overridable for quick iterations; Next standalone conventions.
+      - PORT=${PORT:-3000}
+      - HOSTNAME=${HOSTNAME:-0.0.0.0}
+    ports:
+      # 3001 on the host so dev runs alongside production (3000) and any
+      # other local services without clashing.
+      - "3001:3000"
+    # No Traefik labels: localhost access only.

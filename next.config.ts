@@ -30,6 +30,13 @@ function devOrigins(): string[] {
 const nextConfig: NextConfig = {
   output: "standalone",
   allowedDevOrigins: devOrigins(),
+  // `@libsql/client` loads its native binding from a platform-specific
+  // package (`@libsql/linux-x64-gnu`) via a runtime `require`, so Next's
+  // static trace can't see it and omits it from the standalone output —
+  // which would crash the image on the first database access. Pin it in.
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/@libsql/**/*"],
+  },
 };
 
 export default nextConfig;

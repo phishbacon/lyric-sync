@@ -1,0 +1,26 @@
+# Development image: runs the Next dev server against real Plex and the
+# real music files, in the same environment shape as production.
+FROM node:22-slim
+
+# Native build tooling: better-sqlite3/libsql and other postinstall scripts
+# compile against these in the dev container.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# Manifests first so dependency layers stay cached across source edits.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+# Dev deps + native builds are required here (unlike the prod runner).
+RUN pnpm install
+
+# Source is bind-mounted over /app at runtime; COPY only seeds the image so
+# it can start standalone if run without the mount.
+COPY . .
+
+EXPOSE 3000
+
+CMD ["pnpm", "exec", "next", "dev"]

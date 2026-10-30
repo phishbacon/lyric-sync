@@ -1,12 +1,7 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# ESLint is a tool for identifying and reporting on patterns
-# found in ECMAScript/JavaScript code.
-# More details at https://github.com/eslint/eslint
-# and https://eslint.org
-
+# Lint and test the rewrite. Adapted from the old ESLint-only workflow: the
+# repo is pnpm-managed, so the npm install step (which ignored the lockfile
+# and masked lint failures via continue-on-error) is replaced by a pinned
+# pnpm install, and Vitest runs alongside ESLint per the rewrite plan.
 name: ESLint
 
 on:
@@ -17,8 +12,8 @@ on:
     branches: [main]
 
 jobs:
-  eslint:
-    name: Run eslint scanning
+  lint-and-test:
+    name: Lint and test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,21 +23,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install ESLint
-        run: |
-          npm install eslint @microsoft/eslint-formatter-sarif --ignore-scripts
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # No version in the action: package.json "packageManager" is the
+          # single source of truth.
+          version: 11.21.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm exec tsc --noEmit
 
       - name: Run ESLint
         env:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
-        run: npx eslint .
+        run: >
+          pnpm exec eslint .
           --config eslint.config.js
           --format @microsoft/eslint-formatter-sarif
           --output-file eslint-results.sarif
-        continue-on-error: true
 
       - name: Upload analysis results to GitHub
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: eslint-results.sarif
           wait-for-processing: true
+
+      - name: Run Vitest
+        run: pnpm test
