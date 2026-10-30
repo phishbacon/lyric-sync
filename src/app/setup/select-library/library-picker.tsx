@@ -8,6 +8,7 @@ import { fetchLibraries, selectLibrary } from "./actions";
 
 interface PlexLibrary {
   uuid: string;
+  key: string;
   title: string;
   path: string;
   image: string | null;

@@ -14,7 +14,7 @@ export interface SelectLibraryResult {
 }
 
 export async function fetchLibraries(): Promise<
-  | { success: true; libraries: Array<{ uuid: string; title: string; path: string; image: string | null }> }
+  | { success: true; libraries: Array<{ uuid: string; key: string; title: string; path: string; image: string | null }> }
   | { success: false; message: string }
 > {
   const server = await db.query.servers.findFirst();
@@ -33,6 +33,9 @@ export async function fetchLibraries(): Promise<
       success: true,
       libraries: sections.map(section => ({
         uuid: section.uuid,
+        // Plex addresses sections by this short key (/library/sections/{key}),
+        // not by uuid — uuids 404 when used in a section path.
+        key: section.key,
         title: section.title,
         path: section.Location?.[0]?.path ?? "",
         image: section.composite ?? null,
@@ -48,6 +51,7 @@ export async function fetchLibraries(): Promise<
 
 export interface SelectedLibraryInput {
   uuid: string;
+  key: string;
   title: string;
   path: string;
   image: string | null;
@@ -63,6 +67,10 @@ export async function selectLibrary(input: SelectedLibraryInput): Promise<Select
     return { success: false, message: "Plex reported no filesystem path for this library" };
   }
 
+  if (input.key === "") {
+    return { success: false, message: "Plex reported no section key for this library" };
+  }
+
   await db.transaction(async (tx) => {
     await tx
       .insert(libraries)
@@ -71,7 +79,9 @@ export async function selectLibrary(input: SelectedLibraryInput): Promise<Select
         title: input.title,
         path: input.path,
         image: input.image,
-        key: `/library/sections/${input.uuid}`,
+        // The bare section key Plex uses in /library/sections/{key}; ingest
+        // builds its fetch URLs from this value.
+        key: input.key,
         serverId: server.id,
         active: true,
       })
@@ -81,6 +91,7 @@ export async function selectLibrary(input: SelectedLibraryInput): Promise<Select
           title: input.title,
           path: input.path,
           image: input.image,
+          key: input.key,
           active: true,
         },
       });

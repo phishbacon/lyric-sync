@@ -182,6 +182,9 @@ export async function fetchSectionPage<T>(
         size: z.number().optional(),
         totalSize: z.number().optional(),
         offset: z.number().optional(),
+        // Plex returns section children under Metadata; Directory/Track appear
+        // on other endpoints (Directory is used by the sections list itself).
+        Metadata: z.array(entrySchema).optional(),
         Directory: z.array(entrySchema).optional(),
         Track: z.array(entrySchema).optional(),
       })
@@ -190,7 +193,15 @@ export async function fetchSectionPage<T>(
 
   const data = containerSchema.parse(await response.json());
   const container = data.MediaContainer;
-  const items = container.Directory ?? container.Track ?? [];
+  const items = container.Metadata ?? container.Directory ?? container.Track ?? [];
+
+  if (items.length === 0 && (container.size ?? 0) > 0) {
+    // Fail loudly rather than reporting a successful empty page: silently
+    // ingesting nothing would leave the library looking synced with zero rows.
+    throw new PlexApiError(
+      `Plex returned ${container.size} items for section ${libraryKey} (type ${type}) under an unrecognized container key`,
+    );
+  }
 
   return {
     items,
