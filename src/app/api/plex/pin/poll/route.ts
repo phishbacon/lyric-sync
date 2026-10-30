@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+
 import { checkPin } from "@/lib/server/plex/auth";
 
 const pollQuerySchema = z.object({

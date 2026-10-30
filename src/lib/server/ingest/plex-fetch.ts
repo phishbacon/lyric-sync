@@ -1,0 +1,262 @@
+import { eq, inArray, sql } from "drizzle-orm";
+
+import { db } from "@/lib/server/db";
+import { albums, artists, libraries, tracks } from "@/lib/server/db/schema";
+import { findExistingLyricFile } from "@/lib/server/lyrics/disk-check";
+import {
+  fetchSectionPage,
+  type PlexAlbum,
+  type PlexArtist,
+  plexAlbumSchema,
+  plexArtistSchema,
+  plexSectionTypes,
+  type PlexServerConfig,
+  PlexApiError,
+  type PlexTrack,
+  plexTrackSchema,
+} from "@/lib/server/plex/client";
+
+const BATCH_SIZE = 500;
+
+export interface IngestProgress {
+  phase: "artists" | "albums" | "tracks" | "done";
+  done: number;
+  total: number | null;
+}
+
+export type ProgressCallback = (progress: IngestProgress) => void;
+
+export class PlexAuthExpiredError extends Error {
+  constructor() {
+    super("Plex authentication expired");
+    this.name = "PlexAuthExpiredError";
+  }
+}
+
+/**
+ * Fetch every artist/album/track of one library from Plex and reconcile the
+ * DB: incremental batch upserts, then set-based orphan deletion per level.
+ * Upserts never touch `synced`/`sync_status` for existing rows, so sync
+ * state survives a refetch. New tracks get an immediate disk-first check so
+ * hand-placed lyric files count as synced from the moment of ingestion.
+ */
+export async function ingestLibrary(
+  config: PlexServerConfig,
+  libraryUuid: string,
+  onProgress: ProgressCallback = () => {},
+): Promise<void> {
+  const library = await db.query.libraries.findFirst({
+    where: eq(libraries.uuid, libraryUuid),
+  });
+  if (!library) {
+    throw new Error(`Library ${libraryUuid} not found`);
+  }
+
+  try {
+    await ingestLevel(config, library.key, libraryUuid, plexSectionTypes.artists, "artists", onProgress);
+    await ingestLevel(config, library.key, libraryUuid, plexSectionTypes.albums, "albums", onProgress);
+    await ingestLevel(config, library.key, libraryUuid, plexSectionTypes.tracks, "tracks", onProgress);
+  } catch (cause) {
+    if (cause instanceof PlexApiError && cause.status === 401) {
+      throw new PlexAuthExpiredError();
+    }
+    throw cause;
+  }
+
+  onProgress({ phase: "done", done: 0, total: 0 });
+}
+
+async function ingestLevel(
+  config: PlexServerConfig,
+  libraryKey: string,
+  libraryUuid: string,
+  type: number,
+  level: "artists" | "albums" | "tracks",
+  onProgress: ProgressCallback,
+): Promise<void> {
+  const seenUuids: string[] = [];
+  let start = 0;
+  // Assigned at the top of every loop iteration before any read; the null
+  // initializer exists only to satisfy definite-assignment analysis.
+  // eslint-disable-next-line no-useless-assignment
+  let total: number | null = null;
+
+  for (;;) {
+    const page = await fetchSectionPage(config, libraryKey, type, start, BATCH_SIZE, entrySchemaFor(level));
+
+    total = page.totalSize;
+    onProgress({ phase: level, done: start, total });
+
+    if (page.items.length === 0) {
+      break;
+    }
+
+    if (level === "artists") {
+      await upsertArtists(libraryUuid, page.items as PlexArtist[]);
+    } else if (level === "albums") {
+      await upsertAlbums(libraryUuid, page.items as PlexAlbum[]);
+    } else {
+      await upsertTracks(libraryUuid, page.items as PlexTrack[]);
+    }
+
+    for (const item of page.items) {
+      seenUuids.push(item.guid);
+    }
+
+    start += page.items.length;
+    if (total !== null && start >= total) {
+      break;
+    }
+    if (page.items.length < BATCH_SIZE && total === null) {
+      break;
+    }
+  }
+
+  onProgress({ phase: level, done: start, total: total ?? start });
+
+  await deleteOrphans(level, libraryUuid, seenUuids);
+}
+
+function entrySchemaFor(level: "artists" | "albums" | "tracks") {
+  if (level === "artists") {
+    return plexArtistSchema;
+  }
+  return level === "albums" ? plexAlbumSchema : plexTrackSchema;
+}
+
+/**
+ * Remove rows of this level in this library that Plex no longer reports.
+ * Existing UUIDs are read in one query and diffed against the seen set in
+ * memory, then deleted in bounded chunks — no oversized NOT IN parameter
+ * lists. Empty seen set is treated as a possibly-flaky listing and skips
+ * deletion rather than nuking a whole library.
+ */
+async function deleteOrphans(
+  level: "artists" | "albums" | "tracks",
+  libraryUuid: string,
+  seenUuids: string[],
+): Promise<void> {
+  if (seenUuids.length === 0) {
+    return;
+  }
+
+  const table = level === "artists" ? artists : level === "albums" ? albums : tracks;
+  const libraryColumn = level === "artists"
+    ? artists.libraryUuid
+    : level === "albums"
+      ? albums.libraryUuid
+      : tracks.libraryUuid;
+
+  const existing = await db
+    .select({ uuid: table.uuid })
+    .from(table)
+    .where(eq(libraryColumn, libraryUuid));
+
+  const seen = new Set(seenUuids);
+  const removed = existing.map(row => row.uuid).filter(uuid => !seen.has(uuid));
+
+  for (let i = 0; i < removed.length; i += BATCH_SIZE) {
+    const chunk = removed.slice(i, i + BATCH_SIZE);
+    await db.delete(table).where(inArray(table.uuid, chunk));
+  }
+}
+
+async function upsertArtists(libraryUuid: string, items: PlexArtist[]): Promise<void> {
+  if (items.length === 0) {
+    return;
+  }
+  await db
+    .insert(artists)
+    .values(items.map(item => ({
+      uuid: item.guid,
+      title: item.title,
+      key: item.key,
+      summary: item.summary ?? null,
+      image: item.thumb ?? item.art ?? null,
+      libraryUuid,
+    })))
+    .onConflictDoUpdate({
+      target: artists.uuid,
+      set: {
+        title: sql`excluded.title`,
+        key: sql`excluded.key`,
+        summary: sql`excluded.summary`,
+        image: sql`excluded.image`,
+      },
+    });
+}
+
+async function upsertAlbums(libraryUuid: string, items: PlexAlbum[]): Promise<void> {
+  if (items.length === 0) {
+    return;
+  }
+  await db
+    .insert(albums)
+    .values(items.map(item => ({
+      uuid: item.guid,
+      title: item.title,
+      key: item.key,
+      summary: item.summary ?? null,
+      image: item.thumb ?? item.art ?? null,
+      libraryUuid,
+      artistUuid: item.parentGuid,
+    })))
+    .onConflictDoUpdate({
+      target: albums.uuid,
+      set: {
+        title: sql`excluded.title`,
+        key: sql`excluded.key`,
+        summary: sql`excluded.summary`,
+        image: sql`excluded.image`,
+        // `synced` deliberately untouched — survives refetch.
+      },
+    });
+}
+
+async function upsertTracks(libraryUuid: string, items: PlexTrack[]): Promise<void> {
+  if (items.length === 0) {
+    return;
+  }
+
+  // Disk-first reconciliation for tracks not yet in the DB: existing
+  // .lrc/.txt files count as synced with zero network requests.
+  const known = await db.query.tracks.findMany({
+    columns: { uuid: true },
+    where: inArray(tracks.uuid, items.map(item => item.guid)),
+  });
+  const knownUuids = new Set(known.map(row => row.uuid));
+
+  const values = await Promise.all(items.map(async (item) => {
+    const path = item.Media?.[0]?.Part?.[0]?.file ?? null;
+    const isNew = !knownUuids.has(item.guid);
+    const onDisk = isNew && await findExistingLyricFile(path) !== null;
+
+    return {
+      uuid: item.guid,
+      title: item.title,
+      key: item.key,
+      path,
+      duration: item.duration ?? item.Media?.[0]?.Part?.[0]?.duration ?? null,
+      trackNumber: item.index ?? 0,
+      libraryUuid,
+      artistUuid: item.grandparentGuid,
+      albumUuid: item.parentGuid,
+      ...(onDisk ? { synced: true, syncStatus: "synced" as const } : {}),
+    };
+  }));
+
+  await db
+    .insert(tracks)
+    .values(values)
+    .onConflictDoUpdate({
+      target: tracks.uuid,
+      set: {
+        title: sql`excluded.title`,
+        key: sql`excluded.key`,
+        path: sql`excluded.path`,
+        duration: sql`excluded.duration`,
+        trackNumber: sql`excluded.track_number`,
+        // `synced`/`sync_status` deliberately untouched — survives refetch.
+      },
+    });
+}

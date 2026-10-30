@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+
 import { db } from "@/lib/server/db";
+
 import { SetupForm } from "./setup-form";
 
 // Reads live DB state — must render per request, not at build time.

@@ -3,6 +3,7 @@
 import { Loader2, Plug, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+
 import { saveServer, startPlexAuth, testServerConnection } from "./actions";
 
 const POLL_INTERVAL_MS = 1000;
@@ -62,8 +63,7 @@ export function SetupForm() {
           setMessage("Plex authentication complete");
           return;
         }
-      }
-      catch {
+      } catch {
         // AbortError on unmount — silently stop polling.
         return;
       }
@@ -149,23 +149,23 @@ export function SetupForm() {
           <span className="text-sm font-medium">Plex account</span>
           {authState === "done"
             ? (
-                <div className="flex items-center gap-2 text-sm text-green-400">
-                  Authenticated
-                </div>
-              )
+              <div className="flex items-center gap-2 text-sm text-green-400">
+                Authenticated
+              </div>
+            )
             : (
-                <button
-                  type="button"
-                  onClick={handleAuthenticate}
-                  disabled={busy}
-                  className="flex items-center gap-2 rounded-md border border-border bg-surface-raised px-3 py-2 text-sm font-medium hover:bg-border disabled:opacity-50"
-                >
-                  {authState === "waiting"
-                    ? <Loader2 className="size-4 animate-spin" />
-                    : <Plug className="size-4" />}
-                  Authenticate with Plex
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleAuthenticate}
+                disabled={busy}
+                className="flex items-center gap-2 rounded-md border border-border bg-surface-raised px-3 py-2 text-sm font-medium hover:bg-border disabled:opacity-50"
+              >
+                {authState === "waiting"
+                  ? <Loader2 className="size-4 animate-spin" />
+                  : <Plug className="size-4" />}
+                Authenticate with Plex
+              </button>
+            )}
           <span className="block text-xs text-muted">
             Opens plex.tv in a new tab — approve access there
           </span>

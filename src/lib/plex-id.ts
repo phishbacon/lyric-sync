@@ -13,8 +13,7 @@ export function decodePlexId(encoded: string): string {
   const padded = b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), "=");
   try {
     return atob(padded);
-  }
-  catch {
+  } catch {
     throw new Error("Invalid Plex ID");
   }
 }

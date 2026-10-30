@@ -3,6 +3,7 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
 import { db } from "@/lib/server/db";
 import { servers } from "@/lib/server/db/schema";
 import { buildAuthUrl, createPin } from "@/lib/server/plex/auth";
@@ -37,8 +38,7 @@ export async function startPlexAuth(): Promise<
       pinId: pin.pinId,
       pinCode: pin.pinCode,
     };
-  }
-  catch (cause) {
+  } catch (cause) {
     return { success: false, message: `Failed to start Plex auth: ${String(cause)}` };
   }
 }
@@ -55,8 +55,7 @@ export async function testServerConnection(input: {
       clientIdentifier: input.clientIdentifier,
     });
     return { success: true, message: "Connection successful" };
-  }
-  catch (cause) {
+  } catch (cause) {
     const message = cause instanceof PlexApiError
       ? cause.message
       : String(cause);
