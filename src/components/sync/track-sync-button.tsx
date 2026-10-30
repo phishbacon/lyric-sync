@@ -38,9 +38,12 @@ export function TrackSyncButton({
         type="button"
         onClick={handleClick}
         disabled={pending}
-        title="Sync lyrics for this track"
-        aria-label="Sync lyrics for this track"
-        className="rounded-md p-1.5 text-muted hover:bg-surface-raised hover:text-foreground disabled:opacity-50"
+        title="Re-check this track's lyrics against lrclib"
+        aria-label="Re-check this track's lyrics against lrclib"
+        // `text-foreground/70` not `text-muted`: at muted grey an isolated
+        // icon reads as decoration, not a control. The hover lift is the
+        // affordance that says "this is a button".
+        className="rounded-md p-1.5 text-foreground/70 hover:bg-surface-raised hover:text-foreground disabled:opacity-50"
       >
         {pending
           ? <Loader2 className="size-4 animate-spin" />

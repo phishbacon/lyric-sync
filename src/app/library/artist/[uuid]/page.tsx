@@ -67,7 +67,12 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
             {" albums"}
           </p>
           {artist.summary && (
-            <p className="max-w-2xl text-sm text-muted">{artist.summary}</p>
+            // Clamped: Plex bios run to hundreds of lines and inline at full
+            // length would bury the album grid, inverting the page's
+            // artwork-forward hierarchy. The record keeps the full text.
+            <p className="line-clamp-4 max-w-2xl text-sm text-muted">
+              {artist.summary}
+            </p>
           )}
         </div>
         <SyncAllButton action={syncArtist.bind(null, artist.uuid)} />
