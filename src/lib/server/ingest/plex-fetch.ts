@@ -74,7 +74,7 @@ async function ingestLevel(
   level: "artists" | "albums" | "tracks",
   onProgress: ProgressCallback,
 ): Promise<void> {
-  const seenUuids: string[] = [];
+  const seenIds: string[] = [];
   let start = 0;
   // Assigned at the top of every loop iteration before any read; the null
   // initializer exists only to satisfy definite-assignment analysis.
@@ -100,7 +100,10 @@ async function ingestLevel(
     }
 
     for (const item of page.items) {
-      seenUuids.push(item.guid);
+      // Per-level identity: guids are unique for artists/albums, but shared
+      // across album copies for tracks — orphan cleanup diffs against the
+      // same identity the table is keyed by.
+      seenIds.push(level === "tracks" ? item.key : item.guid);
     }
 
     start += page.items.length;
@@ -114,7 +117,7 @@ async function ingestLevel(
 
   onProgress({ phase: level, done: start, total: total ?? start });
 
-  await deleteOrphans(level, libraryUuid, seenUuids);
+  await deleteOrphans(level, libraryUuid, seenIds);
 }
 
 function entrySchemaFor(level: "artists" | "albums" | "tracks") {
@@ -126,17 +129,19 @@ function entrySchemaFor(level: "artists" | "albums" | "tracks") {
 
 /**
  * Remove rows of this level in this library that Plex no longer reports.
- * Existing UUIDs are read in one query and diffed against the seen set in
- * memory, then deleted in bounded chunks — no oversized NOT IN parameter
- * lists. Empty seen set is treated as a possibly-flaky listing and skips
- * deletion rather than nuking a whole library.
+ * Existing identities are read in one query and diffed against the seen set
+ * in memory, then deleted in bounded chunks — no oversized NOT IN parameter
+ * lists. Identity is the table's own key: guid for artists/albums, ratingKey
+ * for tracks (their guids are shared across album copies). Empty seen set is
+ * treated as a possibly-flaky listing and skips deletion rather than nuking
+ * a whole library.
  */
 async function deleteOrphans(
   level: "artists" | "albums" | "tracks",
   libraryUuid: string,
-  seenUuids: string[],
+  seenIds: string[],
 ): Promise<void> {
-  if (seenUuids.length === 0) {
+  if (seenIds.length === 0) {
     return;
   }
 
@@ -146,18 +151,19 @@ async function deleteOrphans(
     : level === "albums"
       ? albums.libraryUuid
       : tracks.libraryUuid;
+  const idColumn = level === "tracks" ? tracks.key : table.uuid;
 
   const existing = await db
-    .select({ uuid: table.uuid })
+    .select({ id: idColumn })
     .from(table)
     .where(eq(libraryColumn, libraryUuid));
 
-  const seen = new Set(seenUuids);
-  const removed = existing.map(row => row.uuid).filter(uuid => !seen.has(uuid));
+  const seen = new Set(seenIds);
+  const removed = existing.map(row => row.id).filter(id => !seen.has(id));
 
   for (let i = 0; i < removed.length; i += BATCH_SIZE) {
     const chunk = removed.slice(i, i + BATCH_SIZE);
-    await db.delete(table).where(inArray(table.uuid, chunk));
+    await db.delete(table).where(inArray(idColumn, chunk));
   }
 }
 
@@ -221,14 +227,14 @@ async function upsertTracks(libraryUuid: string, items: PlexTrack[]): Promise<vo
   // Disk-first reconciliation for tracks not yet in the DB: existing
   // .lrc/.txt files count as synced with zero network requests.
   const known = await db.query.tracks.findMany({
-    columns: { uuid: true },
-    where: inArray(tracks.uuid, items.map(item => item.guid)),
+    columns: { key: true },
+    where: inArray(tracks.key, items.map(item => item.key)),
   });
-  const knownUuids = new Set(known.map(row => row.uuid));
+  const knownKeys = new Set(known.map(row => row.key));
 
   const values = await Promise.all(items.map(async (item) => {
     const path = item.Media?.[0]?.Part?.[0]?.file ?? null;
-    const isNew = !knownUuids.has(item.guid);
+    const isNew = !knownKeys.has(item.key);
     const onDisk = isNew && await findExistingLyricFile(path) !== null;
 
     return {
@@ -249,13 +255,19 @@ async function upsertTracks(libraryUuid: string, items: PlexTrack[]): Promise<vo
     .insert(tracks)
     .values(values)
     .onConflictDoUpdate({
-      target: tracks.uuid,
+      target: tracks.key,
       set: {
         title: sql`excluded.title`,
-        key: sql`excluded.key`,
+        uuid: sql`excluded.uuid`,
         path: sql`excluded.path`,
         duration: sql`excluded.duration`,
         trackNumber: sql`excluded.track_number`,
+        // Album/artist must follow the entry: rows that predate the re-key
+        // (or a moved file) can carry a stale album from another copy of the
+        // same recording.
+        libraryUuid: sql`excluded.library_uuid`,
+        artistUuid: sql`excluded.artist_uuid`,
+        albumUuid: sql`excluded.album_uuid`,
         // `synced`/`sync_status` deliberately untouched — survives refetch.
       },
     });

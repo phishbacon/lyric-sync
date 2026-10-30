@@ -78,7 +78,7 @@ export async function getAlbumsFromArtistWithCounts(
 }
 
 export interface TrackRow {
-  uuid: string;
+  key: string;
   title: string;
   path: string | null;
   duration: number | null;
@@ -93,7 +93,7 @@ export async function getTracksFromAlbum(
 ): Promise<TrackRow[]> {
   return db
     .select({
-      uuid: tracks.uuid,
+      key: tracks.key,
       title: tracks.title,
       path: tracks.path,
       duration: tracks.duration,

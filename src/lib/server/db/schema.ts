@@ -61,9 +61,15 @@ export const albums = sqliteTable("albums", {
 });
 
 export const tracks = sqliteTable("tracks", {
-  uuid: text("uuid").primaryKey(),
+  // Per-entry identity: Plex's ratingKey (/library/metadata/...), unique per
+  // library entry. The guid below is content-based and shared across albums
+  // (a compilation re-lists the same recording), and one recording can be
+  // many files — each file needs its own row, path, and lyrics.
+  key: text("key").primaryKey(),
+  // plex:// recording guid — not unique; kept as the join chain to
+  // artist/album (track.grandparentGuid === artist.guid, etc.).
+  uuid: text("uuid").notNull(),
   title: text("title").notNull(),
-  key: text("key").notNull().unique(),
   path: text("path"),
   duration: integer("duration"),
   trackNumber: integer("track_number").notNull().default(0),

@@ -99,7 +99,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
             </thead>
             <tbody>
               {tracks.map(track => (
-                <tr key={track.uuid} className="border-b border-border last:border-0">
+                <tr key={track.key} className="border-b border-border last:border-0">
                   <td className="px-4 py-3 text-muted">{track.trackNumber}</td>
                   <td className="px-4 py-3">{track.title}</td>
                   <td className="px-4 py-3 text-right text-muted">
