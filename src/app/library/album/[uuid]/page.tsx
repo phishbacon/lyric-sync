@@ -4,11 +4,16 @@ import { notFound } from "next/navigation";
 
 import { MediaArt } from "@/components/media/art";
 import { SyncStatusBadge } from "@/components/media/track-status";
+import { SyncAllButton } from "@/components/sync/sync-all-button";
+import { SyncEvents } from "@/components/sync/sync-events";
+import { TrackSyncButton } from "@/components/sync/track-sync-button";
 import { formatDuration } from "@/lib/format-duration";
 import { decodePlexId, encodePlexId } from "@/lib/plex-id";
 import { db } from "@/lib/server/db";
 import { getTracksFromAlbum } from "@/lib/server/db/queries";
 import { albums, artists, libraries } from "@/lib/server/db/schema";
+
+import { syncAlbum, syncSingleTrack } from "./actions";
 
 // Reads live DB state — must render per request, not at build time.
 export const dynamic = "force-dynamic";
@@ -49,6 +54,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
 
   return (
     <div className="space-y-6">
+      <SyncEvents uuid={album.uuid} />
       <nav className="text-sm text-muted">
         <Link href="/library" className="hover:text-foreground">
           Library
@@ -72,7 +78,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
         <div className="w-40 shrink-0 overflow-hidden rounded-xl border border-border bg-surface">
           <MediaArt src={album.image} alt={album.title} variant="square" />
         </div>
-        <div className="space-y-1">
+        <div className="flex-1 space-y-1">
           <h1 className="text-3xl font-semibold">{album.title}</h1>
           {artist && <p className="text-sm text-muted">{artist.title}</p>}
           <p className="text-sm text-muted">
@@ -80,6 +86,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
             {" tracks"}
           </p>
         </div>
+        <SyncAllButton action={syncAlbum.bind(null, album.uuid)} />
       </div>
 
       {tracks.length === 0 ? (
@@ -94,7 +101,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
                 <th className="w-12 px-4 py-3 font-medium">#</th>
                 <th className="px-4 py-3 font-medium">Title</th>
                 <th className="w-20 px-4 py-3 text-right font-medium">Length</th>
-                <th className="w-40 px-4 py-3 text-right font-medium">Lyrics</th>
+                <th className="w-56 px-4 py-3 text-right font-medium">Lyrics</th>
               </tr>
             </thead>
             <tbody>
@@ -106,7 +113,12 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
                     {formatDuration(track.duration)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <SyncStatusBadge status={track.syncStatus} />
+                    <span className="inline-flex items-center justify-end gap-3">
+                      <SyncStatusBadge status={track.syncStatus} />
+                      <TrackSyncButton
+                        action={syncSingleTrack.bind(null, track.key)}
+                      />
+                    </span>
                   </td>
                 </tr>
               ))}

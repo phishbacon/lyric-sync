@@ -3,10 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { MediaArt } from "@/components/media/art";
+import { SyncAllButton } from "@/components/sync/sync-all-button";
+import { SyncEvents } from "@/components/sync/sync-events";
 import { decodePlexId, encodePlexId } from "@/lib/plex-id";
 import { db } from "@/lib/server/db";
 import { getAlbumsFromArtistWithCounts } from "@/lib/server/db/queries";
 import { artists, libraries } from "@/lib/server/db/schema";
+
+import { syncArtist } from "./actions";
 
 // Reads live DB state — must render per request, not at build time.
 export const dynamic = "force-dynamic";
@@ -43,6 +47,7 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
 
   return (
     <div className="space-y-6">
+      <SyncEvents uuid={artist.uuid} />
       <nav className="text-sm text-muted">
         <Link href="/library" className="hover:text-foreground">
           Library
@@ -55,7 +60,7 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
         <div className="w-40 shrink-0 overflow-hidden rounded-xl border border-border bg-surface">
           <MediaArt src={artist.image} alt={artist.title} variant="square" />
         </div>
-        <div className="space-y-1">
+        <div className="flex-1 space-y-1">
           <h1 className="text-3xl font-semibold">{artist.title}</h1>
           <p className="text-sm text-muted">
             {albums.length}
@@ -65,6 +70,7 @@ export default async function ArtistPage({ params }: ArtistPageProps) {
             <p className="max-w-2xl text-sm text-muted">{artist.summary}</p>
           )}
         </div>
+        <SyncAllButton action={syncArtist.bind(null, artist.uuid)} />
       </div>
 
       {albums.length === 0 ? (

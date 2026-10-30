@@ -1,0 +1,1 @@
+ALTER TABLE `jobs` ADD `force` integer DEFAULT false NOT NULL;

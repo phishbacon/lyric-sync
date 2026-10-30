@@ -15,6 +15,13 @@
       "when": 1793342613627,
       "tag": "0001_jittery_black_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793347345787,
+      "tag": "0002_happy_chamber",
+      "breakpoints": true
     }
   ]
 }

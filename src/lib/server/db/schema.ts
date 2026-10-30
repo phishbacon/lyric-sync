@@ -108,6 +108,9 @@ export const jobs = sqliteTable("jobs", {
     .default("queued"),
   attempts: integer("attempts").notNull().default(0),
   targetUuid: text("target_uuid"),
+  // sync_track only: a manual per-track sync always re-asks lrclib, even for
+  // tracks whose .txt already counts as synced in batch runs.
+  force: integer("force", { mode: "boolean" }).notNull().default(false),
   error: text("error"),
   startedAt: integer("started_at", { mode: "timestamp" }),
   finishedAt: integer("finished_at", { mode: "timestamp" }),

@@ -10,7 +10,7 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 /** Strip the final extension: "/a/b/song.mp3" -> "/a/b/song". */
-function stripExtension(trackPath: string): string {
+export function stripExtension(trackPath: string): string {
   const dot = trackPath.lastIndexOf(".");
   const slash = trackPath.lastIndexOf("/");
   return dot > slash ? trackPath.slice(0, dot) : trackPath;
