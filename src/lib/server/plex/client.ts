@@ -11,7 +11,11 @@ export const librarySectionSchema = z.object({
 });
 
 export const librarySectionsResponseSchema = z.object({
-  Directory: z.array(librarySectionSchema).optional(),
+  MediaContainer: z
+    .object({
+      Directory: z.array(librarySectionSchema).optional(),
+    })
+    .loose(),
 });
 
 export const plexIdentitySchema = z.object({
@@ -132,7 +136,7 @@ export async function listMusicLibraries(
     );
   }
   const data = librarySectionsResponseSchema.parse(await response.json());
-  return (data.Directory ?? []).filter(
+  return (data.MediaContainer.Directory ?? []).filter(
     section => section.type === "artist" && !section.hidden,
   );
 }
