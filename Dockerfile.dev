@@ -5,7 +5,7 @@ FROM node:22-slim
 # Native build tooling: better-sqlite3/libsql and other postinstall scripts
 # compile against these in the dev container.
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ \
+  && apt-get install -y --no-install-recommends python3 make g++ libatomic1 \
   && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g pnpm

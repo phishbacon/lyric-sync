@@ -83,7 +83,7 @@ Dark-first, dense, media-library aesthetic adjacent to Plex's own web UI: near-b
 
 All FKs `onDelete: cascade`. snake_case. No dead tables (no `users`).
 
-- **`servers`** — one row: `base_url` (normalized full URL, e.g. `https://192.168.1.10:32400` — fixes today's scheme-less hostname+port concat bug), `x_plex_token`, `client_identifier`, `name`, timestamps.
+- **`servers`** — one row: `base_url` (normalized full URL, e.g. `https://plex.example.com:32400` — fixes today's scheme-less hostname+port concat bug), `x_plex_token`, `client_identifier`, `name`, timestamps.
 - **`libraries`** — `uuid` PK, `title`, `image`, `path`, `key`, `active` bool, FK `server`, timestamps.
 - **`artists`** — `uuid` PK, `title`, `image`, `summary`, `key`, FK `library`, timestamps. No `synced` column — artist progress is derived from album counts (as today).
 - **`albums`** — `uuid` PK, `title`, `image`, `summary`, `key`, `synced` bool, FKs `library`/`artist`, timestamps.

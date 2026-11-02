@@ -2,6 +2,8 @@
 .github
 .vscode
 .playwright-mcp
+test-results
+playwright-report
 .next
 node_modules
 *.db

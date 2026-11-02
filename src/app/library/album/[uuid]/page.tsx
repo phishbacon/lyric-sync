@@ -117,6 +117,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
                       <SyncStatusBadge status={track.syncStatus} />
                       <TrackSyncButton
                         action={syncSingleTrack.bind(null, track.key)}
+                        syncing={track.syncing}
                       />
                     </span>
                   </td>

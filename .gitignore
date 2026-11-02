@@ -26,5 +26,9 @@ test-results/
 playwright-report/
 .playwright-mcp/
 
+# Python-based Git privacy audit
+__pycache__/
+*.pyc
+
 # TypeScript
 *.tsbuildinfo

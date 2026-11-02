@@ -3,6 +3,11 @@
 # --- Build: compile the Next.js standalone output -------------------------
 FROM node:22-slim AS builder
 
+# pnpm 11's standalone executable links libatomic on Debian slim.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends libatomic1 \
+  && rm -rf /var/lib/apt/lists/*
+
 RUN npm install -g pnpm
 
 WORKDIR /app
@@ -22,7 +27,7 @@ RUN pnpm build
 FROM node:22-slim AS runner
 
 ENV NODE_ENV=production
-# Next.js standalone conventions; the compose contract also sets ORIGIN.
+# Next.js standalone server configuration.
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
@@ -32,8 +37,7 @@ WORKDIR /app
 # defaults to file:lyric-sync.db inside the workdir, so it must be writable;
 # when the compose file points DATABASE_URL inside the bind-mounted music
 # directory (/data), that mount is owned by the host user (also uid 1000).
-RUN useradd --system --uid 1000 --create-home node \
-  && chown -R node:node /app
+RUN chown -R node:node /app
 
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static

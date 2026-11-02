@@ -14,7 +14,7 @@ const serverFormSchema = z.object({
   baseUrl: z
     .string()
     .min(1, "Server URL is required")
-    .url("Must be a valid URL, e.g. http://192.168.1.10:32400"),
+    .url("Must be a valid URL, e.g. http://plex.example.com:32400"),
   xPlexToken: z.string().min(1, "Plex authentication is required"),
   clientIdentifier: z.string().min(1),
 });

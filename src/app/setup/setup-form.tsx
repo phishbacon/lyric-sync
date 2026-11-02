@@ -169,7 +169,7 @@ export function SetupForm() {
             type="text"
             value={baseUrl}
             onChange={e => setBaseUrl(e.target.value)}
-            placeholder="http://192.168.1.10:32400"
+            placeholder="http://plex.example.com:32400"
             className="w-full rounded-md border border-border bg-surface-raised px-3 py-2 text-sm outline-none focus:border-accent"
           />
           <span className="block text-xs text-muted">

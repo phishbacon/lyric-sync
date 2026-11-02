@@ -1,154 +1,123 @@
 # Lyric-Sync
 
-![Docker CI badge](https://github.com/phishbacon/lyric-sync/actions/workflows/docker-publish.yml/badge.svg)\
+![Docker CI badge](https://github.com/phishbacon/lyric-sync/actions/workflows/docker-publish.yml/badge.svg)
 ![Lint badge](https://github.com/phishbacon/lyric-sync/actions/workflows/eslint.yml/badge.svg)
 
-A free and open source self hosted solution for grabbing lyrics for your Plex Music Libraries.
+Lyric-Sync is a free, open-source, self-hosted app that finds lyrics for tracks in your Plex music library and saves them alongside your music files. It uses [LRCLIB](https://lrclib.net/) as its lyric source.
 
-<div align="center">
-  <h2>Powered By</h2>
-  <a href="https://svelte.dev/">
-    <img src="https://github.com/sveltejs/branding/blob/master/svelte-horizontal.png?raw=true" width="300" alt="Svelte"/>
-  </a>
-</div>
-<div align="center">
-  <a href="https://www.skeleton.dev/">
-    <img src="https://user-images.githubusercontent.com/1509726/199282306-7454adcb-b765-4618-8438-67655a7dee47.png" width="300" alt="Skeleton UI"/>
-  </a>
-</div>
-<div align="center">
-  <a href="https://orm.drizzle.team/">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg">
-      <img src="https://raw.githubusercontent.com/drizzle-team/drizzle-orm/refs/heads/main/misc/readme/logo-github-sq-light.svg" alt="Drizzle ORM"/>
-    </picture>
-  </a>
-</div>
+This `rewrite` branch uses **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS 4**, **Drizzle ORM**, and **SQLite via libSQL**. The published `ghcr.io/phishbacon/lyric-sync:main` image follows the `main` branch; build this branch locally to try the rewrite until it is released.
 
-## Inspiration
-
-First and foremost, checkout [tranzuanthang's lrcget](https://github.com/tranxuanthang/lrcget) this was the main inspiration behind Lyric-Sync. If you're looking for an offline solution, then [lrcget](https://github.com/tranxuanthang/lrcget) is your answer.
-[tranxuanthang](https://github.com/tranxuanthang) is also the individual behind [lrclib.net](https://lrclib.net/) which is currently the only lyric source that Lyric-Synce supports (more to come in the future)
+Inspired by [lrcget](https://github.com/tranxuanthang/lrcget), a desktop alternative for downloading lyrics. Its creator also runs LRCLIB.
 
 ## Features
 
-- Connect with your personal Plex Server
-  ![Server configuration page](showcase/server-configuration.png)
-- Grab lyrics for multiple music libraries
-  ![Library select page](showcase/library-select.png)
-- View all library Artists and their sync progress
-  ![All artists page](showcase/artists-view.png)
-- View all Albums by a specific artist
-  ![Artist's Album page](showcase/albums-view.png)
-- View an Album and all of its tracks
-  ![Album's Tracks page](showcase/tracks-view.png)
-- Sync individual tracks with the click of a button
-  ![Tracks synced](showcase/song-synced.png)
+- Connect a Plex Media Server through Plex account authentication and select a music library.
+- Browse artists, albums, and tracks with lyric sync status.
+- Import and refresh library metadata from Plex in background jobs.
+- Sync an individual track, album, or artist; view progress as jobs finish.
+- Save synchronized lyrics as `.lrc` files or plain lyrics as `.txt` files beside the audio file. Existing lyric files are recognized when importing tracks.
 
-## Installation
+## Before upgrading from the older app
 
-> **⚠️ Back up your database before upgrading.**
->
-> This version is a ground-up rewrite with a brand-new database schema. If you are
-> upgrading from an older Lyric-Sync, the new version **will not reuse or migrate**
-> your existing `lyric-sync.db` — it initializes a fresh database at the same path,
-> discarding whatever the old version stored there.
->
-> Before you start the new version, copy your old database somewhere safe:
->
-> ```bash
-> cp /your-music-library/lyric-sync.db /your-music-library/lyric-sync.db.bak
-> ```
->
-> Your music and lyric files on disk are never touched. Only the app's own database
-> (which tracks your Plex connection, libraries, and sync state) is rebuilt from
-> scratch.
+**Back up both the application database and your music directory before switching versions.** The Next.js rewrite uses a different database schema, and **there is no automatic migration of the old SvelteKit database**. Do not point the rewrite at an old `lyric-sync.db`: the new schema migrations may fail or conflict with existing tables. Instead, keep the old database and configure a **new** database file for the rewrite; reconnect Plex and reimport your library. Previously saved `.lrc` and `.txt` files are discovered during import.
 
-### Docker
+Lyric-Sync **writes lyric files beside your music tracks**. Keep backups and make sure the service has write permission to those directories.
 
-Docker is the recommended way to run Lyric-Sync. It just makes things easier.
+## Docker (Next.js rewrite)
 
-Lyric-Sync must have access to your Plex Music library and the root directory must be named exactly the same. If Plex says song2 is at path `/music/artist/song2.flac`, then Lyric-Sync should see it there as well, otherwise Lyric-Sync won't be able to find music where Plex is telling it to.
+Docker is the recommended deployment method. The app must see every track at **the same absolute path Plex reports**. For example, if Plex reports `/music/Artist/Album/song.flac`, mount your music so that exact path exists inside Lyric-Sync; mounting it only at `/data/music` will not work. The container must be able to write to the music directory and its database directory (the image runs as UID 1000).
 
-Here is a sample docker-compose.yml
+To build this branch, create a `compose.yaml` alongside the repository's `Dockerfile`:
 
 ```yaml
 services:
   lyric-sync:
-    image: ghcr.io/phishbacon/lyric-sync:main
-    container_name: lyric-sync
-    environment:
-      - ORIGIN=http://where-lyric-sync-is-running:3000
-      - DATABASE_URL=file:/your-music-library/lyric-sync.db
-    volumes:
-      - /your-music-library:/your-music-library
+    build: .
     ports:
-      - "3000:3000" # lyric sync runs on port 3000
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:/app/data/lyric-sync.db
+    volumes:
+      - ./data:/app/data
+      # Change BOTH paths to the absolute path Plex uses for your tracks.
+      - /music:/music
     restart: unless-stopped
 ```
 
-`docker-compose up -d` and you're on your way.
-
-Or the old fashioned way
+Create the database directory, then start the service:
 
 ```bash
-# grab the latest image
-docker pull ghcr.io/phishbacon/lyric-sync:main
-
-# and run
-docker run -p 3000:3000 \
-  -e ORIGIN=http://where-lyric-sync-is-running:3000 \
-  -e DATABASE_URL=file:/your-music-library/lyric-sync.db \
-  --volume /your-music-library:/your-music-library \
-  --name lyric-sync \
-  -i ghcr.io/phishbacon/lyric-sync:main
+mkdir -p data
+docker compose up -d --build
 ```
 
-### Building and Running Locally
+The container runs as UID 1000, which needs write access to `data/` and the mounted music tree. If your host user has a different UID, adjust the directory permissions accordingly. For a **new, empty** `data/` directory, `sudo chown 1000:1000 data` is one option; you do not need to change ownership of your entire music library.
 
-You can also build Lyric-Sync yourself if you don't wish to run it in a container.
+Open `http://localhost:3000` (or your server's address), authenticate with Plex, test the connection, and select a library. The database migrations run when the Node.js server starts. Keep `data/` persistent across container replacements.
+
+If you use a reverse proxy, forward requests to port `3000` and preserve the request host and protocol. The old SvelteKit `ORIGIN` setting is no longer used.
+
+## Run locally
+
+Requires **Node.js 22 or later** and **pnpm 11.21.0** (the version declared by `packageManager`).
 
 ```bash
-# clone this repo
-git clone git@github.com:phishbacon/lyric-sync.git
-
-# cd into the project directory
+git clone https://github.com/phishbacon/lyric-sync.git
 cd lyric-sync
-
-# install dependencies
-pnpm install
-
-# copy the .env.example file and rename it to .env
+git checkout rewrite
+corepack enable
+pnpm install --frozen-lockfile
 cp .env.example .env
-
-# build it
-pnpm build
-
-# start Lyric-Sync
-node build
 ```
 
-## Contributing
-
-Lyric-Sync is an open source project, it is made possible with contributors like you.
-
-The best way to start contributing to Lyric-Sync is by having access to an instance of Plex. This way, you can populate the database with real data and get real responses back from Plex.
+The sample `.env` sets `DATABASE_URL=file:lyric-sync.db`. Set it to a separate file if an older installation is present, such as `DATABASE_URL=file:lyric-sync-next.db`. Run a development server:
 
 ```bash
-# clone this repo
-git clone git@github.com:phishbacon/lyric-sync.git
-
-# cd into the project directory
-cd lyric-sync
-
-# install dependencies
-pnpm install
-
-# copy the .env.example file and rename it to .env
-cp .env.example .env
-
-# start the project
 pnpm dev
 ```
-Open an issue!
+
+For a production-style local build:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Both listen on port `3000` by default. A separate development Docker stack is also provided in `docker-compose.dev.yaml`; set `DATA_ROOT` to the absolute Plex music root in a `.env` file (for example, `DATA_ROOT=/music`), then run `docker compose -f docker-compose.dev.yaml up --build`. It listens on host port `3001` and uses its own `lyric-sync-dev.db`. **That stack mounts the real music tree and can write lyric files to it.**
+
+### Preview with an isolated music mirror
+
+To develop against an imported Plex library without writing lyrics to the real music directory, run the Next.js dev server on the host with a separate database and two music-mirror environment variables:
+
+```bash
+DATABASE_URL=file:/absolute/path/to/preview.db \
+LYRIC_SYNC_MUSIC_SOURCE_ROOT=/path/to/plex/music \
+LYRIC_SYNC_MUSIC_MIRROR_ROOT=/absolute/path/to/mirror/music \
+pnpm dev --hostname 0.0.0.0 --port 3003
+```
+
+Replace all `/absolute/path/...` and `/path/to/...` placeholders with paths on your machine. `LYRIC_SYNC_MUSIC_SOURCE_ROOT` is the absolute prefix in the Plex track paths, and `LYRIC_SYNC_MUSIC_MIRROR_ROOT` is a writable directory containing only preview lyric files and directory structure. Configure **both** variables together. Disk checks, `.lrc`/`.txt` writes, and newly created album directories use the mirror; paths outside the configured source prefix are rejected. The mirror does not need copies of the audio files. Keep the preview database separate from production, and do not mount the production music tree into this preview.
+
+## Development and contributing
+
+This project uses Next.js App Router with server components, server actions, and a background job worker. SQLite database migrations live under `src/lib/server/db/migrations` and run at server startup. If you change the schema, generate the matching migration with `pnpm db:generate` and review it before committing.
+
+Enable the repository's privacy hooks once per clone:
+
+```bash
+git config --local core.hooksPath .githooks
+```
+
+The `pre-commit` hook audits staged Git blobs. The `pre-push` hook checks all blobs introduced by outgoing commits, including files deleted in a subsequent commit. Both block suspicious credentials, private host addresses, personal home paths, and sensitive file types. Only file paths and rule names are reported; suspected secret values are never printed. These checks use Python 3, are deliberately conservative, and cannot guarantee that all private information is detected. Keep real credentials and machine-specific configuration outside Git.
+
+```bash
+pnpm check      # TypeScript
+pnpm lint       # ESLint
+pnpm test       # Vitest unit tests
+pnpm test:e2e   # Playwright browser tests (installs Chromium separately)
+pnpm build      # Production Next.js build
+```
+
+For browser tests, install Chromium once with `pnpm exec playwright install chromium` (CI also installs browser system dependencies). E2E tests use a temporary SQLite database and a local fake Plex server, so they never need your Plex account or production music library.
+
+Contributions and bug reports are welcome through GitHub issues and pull requests.

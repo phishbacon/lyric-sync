@@ -1,7 +1,7 @@
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "./index";
-import { albums, artists, tracks } from "./schema";
+import { albums, artists, jobs, tracks } from "./schema";
 
 export interface ArtistWithCounts {
   uuid: string;
@@ -85,13 +85,14 @@ export interface TrackRow {
   trackNumber: number;
   synced: boolean;
   syncStatus: "pending" | "synced" | "no_lyrics" | "error";
+  syncing: boolean;
 }
 
 export async function getTracksFromAlbum(
   libraryUuid: string,
   albumUuid: string,
 ): Promise<TrackRow[]> {
-  return db
+  const rows = await db
     .select({
       key: tracks.key,
       title: tracks.title,
@@ -104,4 +105,23 @@ export async function getTracksFromAlbum(
     .from(tracks)
     .where(sql`${tracks.libraryUuid} = ${libraryUuid} AND ${tracks.albumUuid} = ${albumUuid}`)
     .orderBy(asc(tracks.trackNumber));
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  // Track sync_status records the last result; the jobs table holds the
+  // current activity. Include queued jobs so an entire "Sync All" batch
+  // shows spinners, even before the worker reaches each track.
+  const activeJobs = await db
+    .select({ trackKey: jobs.targetUuid })
+    .from(jobs)
+    .where(and(
+      eq(jobs.kind, "sync_track"),
+      inArray(jobs.status, ["queued", "running"]),
+      inArray(jobs.targetUuid, rows.map(row => row.key)),
+    ));
+  const activeKeys = new Set(activeJobs.map(job => job.trackKey));
+
+  return rows.map(row => ({ ...row, syncing: activeKeys.has(row.key) }));
 }

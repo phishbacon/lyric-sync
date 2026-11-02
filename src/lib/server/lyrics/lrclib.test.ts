@@ -1,7 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   type LyricsRecord,
+  fetchLyrics,
+  LrclibUnavailableError,
   normalizeText,
   pickBestMatch,
 } from "./lrclib";
@@ -25,6 +27,45 @@ const query = {
   albumName: "blink-182",
   durationSec: 174,
 };
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
+
+describe("fetchLyrics", () => {
+  it("falls back to search when exact lookup returns 503", async () => {
+    vi.useFakeTimers();
+    const request = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname === "/api/get") {
+        return new Response(JSON.stringify({ name: "ServerOverloaded" }), { status: 503 });
+      }
+      return Response.json([record({})]);
+    });
+
+    const result = fetchLyrics(query);
+    await vi.advanceTimersByTimeAsync(20_000);
+    await expect(result).resolves.toMatchObject({ trackName: "Feeling This" });
+    expect(request).toHaveBeenCalledTimes(4);
+    expect(new URL(String(request.mock.calls[3][0])).pathname).toBe("/api/search");
+  });
+
+  it("does not claim no lyrics when exact lookup failed and search found no match", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = new URL(String(input));
+      return url.pathname === "/api/get"
+        ? new Response("{}", { status: 503 })
+        : Response.json([]);
+    });
+
+    const result = fetchLyrics(query);
+    const assertion = expect(result).rejects.toBeInstanceOf(LrclibUnavailableError);
+    await vi.advanceTimersByTimeAsync(20_000);
+    await assertion;
+  });
+});
 
 describe("normalizeText", () => {
   it("is case- and punctuation-insensitive", () => {

@@ -6,10 +6,9 @@ name: ESLint
 
 on:
   push:
-    branches: [main]
+    branches: [main, rewrite]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [main]
+    branches: [main, rewrite]
 
 jobs:
   lint-and-test:
@@ -22,6 +21,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify privacy audit rules and committed content
+        run: |
+          python3 -m unittest discover -s tests/security -p 'test_*.py'
+          python3 scripts/privacy_audit.py staged
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -60,3 +64,32 @@ jobs:
 
       - name: Run Vitest
         run: pnpm test
+
+  e2e:
+    name: Playwright browser tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright against local Plex and LRCLIB fixtures
+        run: pnpm test:e2e

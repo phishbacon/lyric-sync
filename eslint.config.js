@@ -24,6 +24,8 @@ export default tseslint.config(
       "node_modules/**",
       ".next/**",
       "coverage/**",
+      "test-results/**",
+      "playwright-report/**",
       "src/lib/server/db/migrations/**",
       "pnpm-lock.yaml",
     ],

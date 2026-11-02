@@ -1,13 +1,17 @@
 import { and, eq } from "drizzle-orm";
-import { writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { access, mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 
 import { db } from "@/lib/server/db";
 import { albums, artists, tracks } from "@/lib/server/db/schema";
+import { env } from "@/lib/server/env";
 import {
   findExistingLyricFile,
   stripExtension,
 } from "@/lib/server/lyrics/disk-check";
 import { fetchLyrics } from "@/lib/server/lyrics/lrclib";
+import { resolveLyricPath } from "@/lib/server/lyrics/music-path";
 
 export type SyncTrackResult = "synced" | "no_lyrics";
 
@@ -33,6 +37,7 @@ export async function syncTrack(
   if (!track.path) {
     throw new Error(`Track has no file path: ${track.title} (${trackKey})`);
   }
+  const lyricPath = resolveLyricPath(track.path);
 
   // Disk-first: an .lrc is the best possible outcome, for batch and manual
   // alike. A .txt satisfies batch runs; force falls through to upgrade it.
@@ -40,6 +45,19 @@ export async function syncTrack(
   if (existing !== null && (existing.endsWith(".lrc") || !force)) {
     await markSynced(trackKey, track.albumUuid);
     return "synced";
+  }
+
+  // A mirror contains lyric files and album directories, not the audio itself.
+  // Create new album directories as Plex discovers them. For ordinary runs,
+  // keep requiring the real audio directory to exist and be writable.
+  try {
+    if (env.LYRIC_SYNC_MUSIC_MIRROR_ROOT) {
+      await mkdir(dirname(lyricPath), { recursive: true });
+    }
+    await access(dirname(lyricPath), constants.W_OK);
+  } catch {
+    await markError(trackKey);
+    throw new Error(`Cannot write lyrics beside ${lyricPath}: check music directory permissions`);
   }
 
   const [artist, album] = await Promise.all([
@@ -65,10 +83,7 @@ export async function syncTrack(
     // Transient lrclib failure — surface it on the track (not just the job)
     // so the badge reads "Error" rather than a misleading "Pending", and the
     // row stays eligible for the next batch retry.
-    await db
-      .update(tracks)
-      .set({ synced: false, syncStatus: "error" })
-      .where(eq(tracks.key, trackKey));
+    await markError(trackKey);
     throw cause;
   }
 
@@ -77,16 +92,22 @@ export async function syncTrack(
     return "no_lyrics";
   }
 
-  const stem = stripExtension(track.path);
-  if (record.syncedLyrics?.trim()) {
-    await writeFile(`${stem}.lrc`, record.syncedLyrics, "utf8");
-  } else if (record.plainLyrics?.trim()) {
-    // Only reached when no lyric file exists yet (the .lrc case short-
-    // circuits above): a plain .txt never replaces synced lyrics.
-    await writeFile(`${stem}.txt`, record.plainLyrics, "utf8");
-  } else {
+  const stem = stripExtension(lyricPath);
+  if (!record.syncedLyrics?.trim() && !record.plainLyrics?.trim()) {
     await markNoLyrics(trackKey);
     return "no_lyrics";
+  }
+
+  try {
+    if (record.syncedLyrics?.trim()) {
+      await writeFile(`${stem}.lrc`, record.syncedLyrics, "utf8");
+    } else if (record.plainLyrics?.trim()) {
+      // A plain .txt never replaces synced lyrics.
+      await writeFile(`${stem}.txt`, record.plainLyrics, "utf8");
+    }
+  } catch (cause) {
+    await markError(trackKey);
+    throw cause;
   }
 
   await markSynced(trackKey, track.albumUuid);
@@ -116,5 +137,12 @@ async function markNoLyrics(trackKey: string): Promise<void> {
   await db
     .update(tracks)
     .set({ synced: false, syncStatus: "no_lyrics" })
+    .where(eq(tracks.key, trackKey));
+}
+
+async function markError(trackKey: string): Promise<void> {
+  await db
+    .update(tracks)
+    .set({ synced: false, syncStatus: "error" })
     .where(eq(tracks.key, trackKey));
 }

@@ -16,12 +16,15 @@ interface SyncOutcome {
  */
 export function TrackSyncButton({
   action,
+  syncing,
 }: {
   action: () => Promise<SyncOutcome>;
+  syncing: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const busy = pending || syncing;
 
   function handleClick() {
     startTransition(async () => {
@@ -37,15 +40,16 @@ export function TrackSyncButton({
       <button
         type="button"
         onClick={handleClick}
-        disabled={pending}
-        title="Re-check this track's lyrics against lrclib"
-        aria-label="Re-check this track's lyrics against lrclib"
+        disabled={busy}
+        aria-busy={busy}
+        title={busy ? "Checking for existing lyrics or fetching lyrics" : "Re-check this track's lyrics against lrclib"}
+        aria-label={busy ? "Syncing lyrics for this track" : "Re-check this track's lyrics against lrclib"}
         // `text-foreground/70` not `text-muted`: at muted grey an isolated
         // icon reads as decoration, not a control. The hover lift is the
         // affordance that says "this is a button".
         className="rounded-md p-1.5 text-foreground/70 hover:bg-surface-raised hover:text-foreground disabled:opacity-50"
       >
-        {pending
+        {busy
           ? <Loader2 className="size-4 animate-spin" />
           : <RefreshCw className="size-4" />}
       </button>

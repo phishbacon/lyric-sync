@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { env } from "@/lib/server/env";
+
 /**
  * lrclib.net client.
  *
@@ -17,7 +19,6 @@ import { z } from "zod";
  * milliseconds, converted by the caller.
  */
 
-const LRCLIB_BASE = "https://lrclib.net";
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [1_000, 3_000];
 /** lrclib's stated courtesy limit: at most one request per second. */
@@ -199,7 +200,7 @@ function parseSearchResults(body: unknown): LyricsRecord[] | null {
  * Throws LrclibUnavailableError on transient failure.
  */
 export async function fetchLyrics(query: LyricsQuery): Promise<LyricsRecord | null> {
-  const getUrl = new URL(`${LRCLIB_BASE}/api/get`);
+  const getUrl = new URL("/api/get", env.LRCLIB_BASE_URL);
   getUrl.searchParams.set("artist_name", query.artistName);
   getUrl.searchParams.set("track_name", query.trackName);
   if (query.albumName !== null) {
@@ -209,16 +210,29 @@ export async function fetchLyrics(query: LyricsQuery): Promise<LyricsRecord | nu
     getUrl.searchParams.set("duration", String(query.durationSec));
   }
 
-  const exact = await fetchValidated(getUrl.toString(), parseRecord);
+  // A busy /api/get must not prevent a successful /api/search lookup.
+  // Keep the error if search also has no acceptable result: an unavailable
+  // endpoint is not evidence that a track has no lyrics.
+  let exactFailure: LrclibUnavailableError | null = null;
+  let exact: LyricsRecord | null = null;
+  try {
+    exact = await fetchValidated(getUrl.toString(), parseRecord);
+  } catch (cause) {
+    if (!(cause instanceof LrclibUnavailableError)) {
+      throw cause;
+    }
+    exactFailure = cause;
+  }
   if (exact !== null && !exact.instrumental && hasLyrics(exact)) {
     return exact;
   }
 
-  const searchUrl = new URL(`${LRCLIB_BASE}/api/search`);
+  const searchUrl = new URL("/api/search", env.LRCLIB_BASE_URL);
   searchUrl.searchParams.set("q", `${query.artistName} ${query.trackName}`);
   const results = await fetchValidated(searchUrl.toString(), parseSearchResults);
-  if (results === null) {
-    return null;
+  const match = results === null ? null : pickBestMatch(results, query);
+  if (match === null && exactFailure !== null) {
+    throw exactFailure;
   }
-  return pickBestMatch(results, query);
+  return match;
 }

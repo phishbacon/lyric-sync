@@ -1,5 +1,7 @@
 import { stat } from "node:fs/promises";
 
+import { resolveLyricPath } from "@/lib/server/lyrics/music-path";
+
 async function fileExists(path: string): Promise<boolean> {
   try {
     const info = await stat(path);
@@ -28,7 +30,7 @@ export async function findExistingLyricFile(
     return null;
   }
 
-  const stem = stripExtension(trackPath);
+  const stem = stripExtension(resolveLyricPath(trackPath));
 
   const lrcPath = `${stem}.lrc`;
   if (await fileExists(lrcPath)) {
