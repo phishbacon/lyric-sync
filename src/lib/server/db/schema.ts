@@ -19,6 +19,15 @@ export const servers = sqliteTable("servers", {
   ...timestamps,
 });
 
+/** One global configuration for the LrcMux lyrics API. */
+export const lyricSettings = sqliteTable("lyric_settings", {
+  id: integer("id").primaryKey(),
+  baseUrl: text("base_url").notNull(),
+  preferSynced: integer("prefer_synced", { mode: "boolean" }).notNull(),
+  enabledSources: text("enabled_sources").notNull(),
+  ...timestamps,
+});
+
 export const libraries = sqliteTable("libraries", {
   uuid: text("uuid").primaryKey(),
   title: text("title").notNull(),
@@ -49,6 +58,7 @@ export const albums = sqliteTable("albums", {
   title: text("title").notNull(),
   image: text("image"),
   summary: text("summary"),
+  year: integer("year"),
   key: text("key").notNull().unique(),
   synced: integer("synced", { mode: "boolean" }).notNull().default(false),
   libraryUuid: text("library_uuid")
@@ -96,6 +106,16 @@ export const tracks = sqliteTable("tracks", {
   ...timestamps,
 });
 
+/** A single visible task for a batch of track-sync jobs. */
+export const taskBatches = sqliteTable("task_batches", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  scope: text("scope", { enum: ["album", "artist", "library"] }).notNull(),
+  targetUuid: text("target_uuid").notNull(),
+  title: text("title").notNull(),
+  dismissedAt: integer("dismissed_at", { mode: "timestamp" }),
+  ...timestamps,
+});
+
 export const jobs = sqliteTable("jobs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   kind: text("kind", {
@@ -108,7 +128,9 @@ export const jobs = sqliteTable("jobs", {
     .default("queued"),
   attempts: integer("attempts").notNull().default(0),
   targetUuid: text("target_uuid"),
-  // sync_track only: a manual per-track sync always re-asks lrclib, even for
+  batchId: integer("batch_id").references(() => taskBatches.id),
+  dismissedAt: integer("dismissed_at", { mode: "timestamp" }),
+  // sync_track only: a manual per-track sync always re-asks LrcMux, even for
   // tracks whose .txt already counts as synced in batch runs.
   force: integer("force", { mode: "boolean" }).notNull().default(false),
   error: text("error"),
@@ -123,3 +145,4 @@ export type Artist = typeof artists.$inferSelect;
 export type Album = typeof albums.$inferSelect;
 export type Track = typeof tracks.$inferSelect;
 export type Job = typeof jobs.$inferSelect;
+export type TaskBatch = typeof taskBatches.$inferSelect;

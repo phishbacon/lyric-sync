@@ -18,7 +18,7 @@ export async function syncAlbum(albumUuid: string): Promise<SyncActionResult> {
   };
 }
 
-/** Per-track sync: always forces a fresh lrclib attempt (txt → lrc upgrade). */
+/** Per-track sync: always forces a fresh LrcMux attempt (txt → lrc upgrade). */
 export async function syncSingleTrack(trackKey: string): Promise<SyncActionResult> {
   const jobId = await enqueueSyncTrack(trackKey, true);
   return {

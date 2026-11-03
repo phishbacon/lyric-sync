@@ -2,7 +2,10 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { LibraryHeading } from "@/components/library/library-heading";
+import { LibrarySyncAll } from "@/components/library/library-sync-all";
 import { MediaArt } from "@/components/media/art";
+import { SyncEvents } from "@/components/sync/sync-events";
 import { encodePlexId } from "@/lib/plex-id";
 import { db } from "@/lib/server/db";
 import { getArtistsWithCounts } from "@/lib/server/db/queries";
@@ -23,14 +26,9 @@ export default async function LibraryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">{activeLibrary.title}</h1>
-        <p className="text-sm text-muted">
-          {artists.length}
-          {" "}
-          artists
-        </p>
-      </div>
+      <SyncEvents />
+      <LibraryHeading title={activeLibrary.title} count={artists.length} noun="artists" />
+      <div className="flex justify-end"><LibrarySyncAll kind="artists" /></div>
 
       {artists.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-10 text-center">
@@ -53,10 +51,10 @@ export default async function LibraryPage() {
                 <div className="space-y-0.5">
                   <p className="truncate text-sm font-medium">{artist.title}</p>
                   <p className="text-xs text-muted">
-                    {artist.syncedAlbums}
+                    {artist.syncedTracks}
                     {" / "}
-                    {artist.albumCount}
-                    {" albums synced"}
+                    {artist.trackCount}
+                    {" tracks synced"}
                   </p>
                 </div>
               </Link>

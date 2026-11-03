@@ -8,8 +8,8 @@ export interface ArtistWithCounts {
   title: string;
   image: string | null;
   summary: string | null;
-  albumCount: number;
-  syncedAlbums: number;
+  trackCount: number;
+  syncedTracks: number;
 }
 
 export async function getArtistsWithCounts(
@@ -21,19 +21,22 @@ export async function getArtistsWithCounts(
       title: artists.title,
       image: artists.image,
       summary: artists.summary,
-      albumCount: sql<number>`count(${albums.uuid})`,
-      syncedAlbums: sql<number>`coalesce(sum(case when ${albums.synced} then 1 else 0 end), 0)`,
+      trackCount: sql<number>`count(${tracks.key})`,
+      syncedTracks: sql<number>`coalesce(sum(case when ${tracks.synced} then 1 else 0 end), 0)`,
     })
     .from(artists)
-    .leftJoin(albums, eq(albums.artistUuid, artists.uuid))
+    .leftJoin(tracks, and(
+      eq(tracks.artistUuid, artists.uuid),
+      eq(tracks.libraryUuid, artists.libraryUuid),
+    ))
     .where(eq(artists.libraryUuid, libraryUuid))
     .groupBy(artists.uuid)
     .orderBy(asc(sql`lower(${artists.title})`));
 
   return rows.map(row => ({
     ...row,
-    albumCount: Number(row.albumCount),
-    syncedAlbums: Number(row.syncedAlbums),
+    trackCount: Number(row.trackCount),
+    syncedTracks: Number(row.syncedTracks),
   }));
 }
 

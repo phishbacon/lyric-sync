@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import Link from "next/link";
 
+import { TaskQueue } from "@/components/tasks/task-queue";
+
 import "./globals.css";
 
 export const metadata = {
@@ -19,7 +21,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               Lyric
               <span className="text-accent">-Sync</span>
             </Link>
-            <nav>
+            <nav className="flex items-center gap-4">
+              <TaskQueue />
               <Link
                 href="/settings"
                 className="text-sm text-muted hover:text-foreground"

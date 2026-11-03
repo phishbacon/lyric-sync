@@ -10,14 +10,14 @@ import {
   findExistingLyricFile,
   stripExtension,
 } from "@/lib/server/lyrics/disk-check";
-import { fetchLyrics } from "@/lib/server/lyrics/lrclib";
+import { fetchLyrics } from "@/lib/server/lyrics/fetch-lyrics";
 import { resolveLyricPath } from "@/lib/server/lyrics/music-path";
 
 export type SyncTrackResult = "synced" | "no_lyrics";
 
 /**
  * Sync one track (identified by its Plex `key`, the jobs.targetUuid of a
- * sync_track job): disk-first check, then lrclib, then write the lyric file
+ * sync_track job): disk-first check, then lyric providers, then write the file
  * next to the audio. User files are never deleted or overwritten — an
  * existing .lrc may carry hand-tuned timestamps and always wins.
  *
@@ -80,7 +80,7 @@ export async function syncTrack(
       durationSec: track.duration === null ? null : Math.round(track.duration / 1000),
     });
   } catch (cause) {
-    // Transient lrclib failure — surface it on the track (not just the job)
+    // Transient provider failure — surface it on the track (not just the job)
     // so the badge reads "Error" rather than a misleading "Pending", and the
     // row stays eligible for the next batch retry.
     await markError(trackKey);

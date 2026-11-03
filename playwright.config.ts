@@ -14,6 +14,8 @@ process.env.LYRIC_SYNC_E2E_ROOT = testRoot;
 
 const appUrl = "http://127.0.0.1:39377";
 const mockUrl = "http://127.0.0.1:39378";
+// Use an existing production build to test while another dev server holds .next/dev.
+const useProductionBuild = process.env.LYRIC_SYNC_E2E_USE_BUILD === "1";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -37,13 +39,13 @@ export default defineConfig({
       env: { LYRIC_SYNC_E2E_ROOT: testRoot },
     },
     {
-      command: "pnpm exec next dev --hostname 127.0.0.1 --port 39377",
+      command: `pnpm exec next ${useProductionBuild ? "start" : "dev"} --hostname 127.0.0.1 --port 39377`,
       url: `${appUrl}/setup`,
       reuseExistingServer: false,
       timeout: 120_000,
       env: {
         DATABASE_URL: `file:${join(testRoot, "e2e.db")}`,
-        LRCLIB_BASE_URL: mockUrl,
+        LRCMUX_BASE_URL: mockUrl,
         LYRIC_SYNC_MUSIC_SOURCE_ROOT: join(testRoot, "music"),
         LYRIC_SYNC_MUSIC_MIRROR_ROOT: join(testRoot, "mirror"),
       },

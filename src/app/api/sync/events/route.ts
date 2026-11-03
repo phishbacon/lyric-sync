@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/server/db";
 import { tracks } from "@/lib/server/db/schema";
-import { onJobEvent, type JobEvent } from "@/lib/server/jobs/events";
+import { onJobEvent, onTaskChange, type JobEvent } from "@/lib/server/jobs/events";
 
 // One long-lived stream per browser — never prerendered or cached.
 export const dynamic = "force-dynamic";
@@ -58,12 +58,18 @@ export async function GET(request: Request): Promise<Response> {
           send(`data: ${JSON.stringify(event)}\n\n`);
         })();
       });
+      // Global subscribers receive history changes; scoped sync-page
+      // subscribers only care about their existing job events.
+      const unsubscribeTasks = uuid === null
+        ? onTaskChange(() => send("event: tasks\ndata: {}\n\n"))
+        : () => {};
 
       const heartbeat = setInterval(() => send(": ping\n\n"), HEARTBEAT_MS);
 
       cleanup = () => {
         closed = true;
         unsubscribe();
+        unsubscribeTasks();
         clearInterval(heartbeat);
         try {
           controller.close();

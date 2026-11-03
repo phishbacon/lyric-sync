@@ -3,7 +3,7 @@
 ![Docker CI badge](https://github.com/phishbacon/lyric-sync/actions/workflows/docker-publish.yml/badge.svg)
 ![Lint badge](https://github.com/phishbacon/lyric-sync/actions/workflows/eslint.yml/badge.svg)
 
-Lyric-Sync is a free, open-source, self-hosted app that finds lyrics for tracks in your Plex music library and saves them alongside your music files. It uses [LRCLIB](https://lrclib.net/) as its lyric source.
+Lyric-Sync is a free, open-source, self-hosted app that finds lyrics for tracks in your Plex music library and saves them alongside your music files. It queries [LrcMux](https://lrcmux.dev/), which aggregates multiple lyric sources.
 
 This `rewrite` branch uses **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS 4**, **Drizzle ORM**, and **SQLite via libSQL**. The published `ghcr.io/phishbacon/lyric-sync:main` image follows the `main` branch; build this branch locally to try the rewrite until it is released.
 
@@ -16,6 +16,11 @@ Inspired by [lrcget](https://github.com/tranxuanthang/lrcget), a desktop alterna
 - Import and refresh library metadata from Plex in background jobs.
 - Sync an individual track, album, or artist; view progress as jobs finish.
 - Save synchronized lyrics as `.lrc` files or plain lyrics as `.txt` files beside the audio file. Existing lyric files are recognized when importing tracks.
+- Configure the LrcMux instance, available sources, and synchronized lyric preference in Settings.
+
+Lyrics are fetched exclusively through LrcMux's native `/get` endpoint. The Settings page lets you enable one or more sources provided by LrcMux, customize its API URL, test the connection, and opt in to synchronized lyrics (off by default). With synchronization enabled, LrcMux prefers word timing, then line timing, then plain text; otherwise lyrics are saved as plain `.txt`. LrcMux decides source ranking. The app checks `/sources` and skips sources unavailable on the configured instance. For example, LRCLIB may be available as an LrcMux source on some instances, but the app does not contact LRCLIB directly.
+
+Artist, title, and duration must match before a file is saved. Provider outages remain retryable instead of marking a track as permanently missing lyrics. Changing settings makes previously missing lyrics eligible for later batch syncs; it does not immediately start jobs or overwrite existing lyric files. Restore Defaults fills in the form and requires Save Changes. `LRCMUX_BASE_URL` sets the initial/default endpoint (default: `https://api.lrcmux.dev`); saved Settings take precedence.
 
 ## Before upgrading from the older app
 
@@ -118,6 +123,6 @@ pnpm test:e2e   # Playwright browser tests (installs Chromium separately)
 pnpm build      # Production Next.js build
 ```
 
-For browser tests, install Chromium once with `pnpm exec playwright install chromium` (CI also installs browser system dependencies). E2E tests use a temporary SQLite database and a local fake Plex server, so they never need your Plex account or production music library.
+For browser tests, install Chromium once with `pnpm exec playwright install chromium` (CI also installs browser system dependencies). E2E tests use a temporary SQLite database, a local fake Plex server, and mock lyrics providers, so they never need your Plex account or production music library. If another Next.js dev server is running from the same checkout, run `pnpm build` followed by `LYRIC_SYNC_E2E_USE_BUILD=1 pnpm test:e2e` to test against that build without stopping the dev server.
 
 Contributions and bug reports are welcome through GitHub issues and pull requests.

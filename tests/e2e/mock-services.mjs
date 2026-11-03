@@ -1,4 +1,4 @@
-// A local fixture for Plex's JSON API and LRCLIB. No external requests.
+// A local fixture for Plex's JSON API and the native LrcMux API. No external requests.
 import { createServer } from "node:http";
 import { join } from "node:path";
 
@@ -51,21 +51,32 @@ const server = createServer(async (req, res) => {
   } else if (url.pathname === "/library/sections/1/all") {
     const items = dataByType[url.searchParams.get("type")] ?? [];
     body = { MediaContainer: { size: items.length, totalSize: items.length, Metadata: items } };
-  } else if (url.pathname === "/api/get") {
+  } else if (url.pathname === "/sources") {
+    body = [{ id: "deezer", name: "Deezer", level: "word" }];
+  } else if (url.pathname === "/get") {
     // Make the background fetch observable so the UI test can verify the
     // track spinner persists beyond the server action's quick enqueue.
     await new Promise(resolve => setTimeout(resolve, 1_500));
+    if (url.searchParams.get("format") === "lrc") {
+      res.writeHead(200, {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Source": "deezer",
+        "X-Sync-Level": "word",
+      });
+      res.end("[00:01.00]<00:01.00>Fixture lyric line");
+      return;
+    }
     body = {
-      trackName: "Example Track",
-      artistName: "Fixture Artist",
-      albumName: "Fixture Album",
-      duration: 180,
-      instrumental: false,
-      syncedLyrics: "[00:01.00]Fixture lyric line",
-      plainLyrics: "Fixture lyric line",
+      track: {
+        title: "Example Track", artist: "Fixture Artist",
+        album: "Fixture Album", duration: 180,
+      },
+      meta: {
+        level: url.searchParams.get("level") === "word" ? "word" : "none",
+        source: { id: "deezer" },
+      },
+      lines: [{ text: "Fixture lyric line", start: 1000 }],
     };
-  } else if (url.pathname === "/api/search") {
-    body = [];
   } else {
     status = 404;
     body = { error: "Unknown fixture endpoint" };

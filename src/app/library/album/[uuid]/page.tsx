@@ -106,7 +106,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
             </thead>
             <tbody>
               {tracks.map(track => (
-                <tr key={track.key} className="border-b border-border last:border-0">
+                <tr id={`track-${encodePlexId(track.key)}`} key={track.key} className="scroll-mt-8 border-b border-border last:border-0 target:bg-surface-raised">
                   <td className="px-4 py-3 text-muted">{track.trackNumber}</td>
                   <td className="px-4 py-3">{track.title}</td>
                   <td className="px-4 py-3 text-right text-muted">
@@ -118,6 +118,7 @@ export default async function AlbumPage({ params }: AlbumPageProps) {
                       <TrackSyncButton
                         action={syncSingleTrack.bind(null, track.key)}
                         syncing={track.syncing}
+                        synced={track.synced}
                       />
                     </span>
                   </td>

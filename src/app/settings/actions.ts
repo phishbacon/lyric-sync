@@ -5,13 +5,73 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/lib/server/db";
-import { libraries, servers } from "@/lib/server/db/schema";
+import { libraries, lyricSettings, servers, tracks } from "@/lib/server/db/schema";
 import { enqueuePlexFetch } from "@/lib/server/jobs/worker";
+import { getAvailableSources } from "@/lib/server/lyrics/lrcmux";
 import { PlexApiError, testConnection } from "@/lib/server/plex/client";
+import {
+  getLrcmuxSettings,
+  lrcmuxSettingsSchema,
+  type LrcmuxSettings,
+} from "@/lib/server/settings/lrcmux";
 
 export interface SettingsResult {
   success: boolean;
   message: string;
+}
+
+export async function saveLrcmuxSettings(input: LrcmuxSettings): Promise<SettingsResult> {
+  const parsed = lrcmuxSettingsSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: parsed.error.issues.map(issue => issue.message).join("; "),
+    };
+  }
+
+  const previous = await getLrcmuxSettings();
+  const next = parsed.data;
+  const changed = JSON.stringify(previous) !== JSON.stringify(next);
+  if (changed) {
+    await db.insert(lyricSettings).values({
+      id: 1,
+      baseUrl: next.baseUrl,
+      preferSynced: next.preferSynced,
+      enabledSources: JSON.stringify(next.enabledSources),
+    }).onConflictDoUpdate({
+      target: lyricSettings.id,
+      set: {
+        baseUrl: next.baseUrl,
+        preferSynced: next.preferSynced,
+        enabledSources: JSON.stringify(next.enabledSources),
+      },
+    });
+
+    // Existing lyric files remain untouched. Missing tracks become eligible
+    // for the next batch, but saving settings does not create new jobs.
+    await db.update(tracks).set({ syncStatus: "pending" })
+      .where(eq(tracks.syncStatus, "no_lyrics"));
+  }
+
+  revalidatePath("/settings");
+  return { success: true, message: changed ? "LrcMux settings saved" : "No changes to save" };
+}
+
+export interface LrcmuxConnectionResult extends SettingsResult {
+  sources?: string[];
+}
+
+export async function testLrcmuxConnection(baseUrl: string): Promise<LrcmuxConnectionResult> {
+  const parsed = lrcmuxSettingsSchema.shape.baseUrl.safeParse(baseUrl);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues.map(issue => issue.message).join("; ") };
+  }
+  try {
+    const sources = await getAvailableSources(parsed.data);
+    return { success: true, message: `Connected — ${sources.length} active sources`, sources };
+  } catch (cause) {
+    return { success: false, message: String(cause) };
+  }
 }
 
 /**

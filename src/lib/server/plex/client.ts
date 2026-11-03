@@ -39,6 +39,7 @@ export const plexAlbumSchema = z.object({
   guid: z.string(),
   parentGuid: z.string(),
   title: z.string(),
+  year: z.number().optional(),
   summary: z.string().optional(),
   thumb: z.string().optional(),
   art: z.string().optional(),

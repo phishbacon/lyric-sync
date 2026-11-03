@@ -2,7 +2,8 @@ import { and, asc, eq, inArray, ne } from "drizzle-orm";
 
 import { logger } from "@/lib/logger";
 import { db } from "@/lib/server/db";
-import { jobs, tracks } from "@/lib/server/db/schema";
+import { eligibleTrackSelection, type ListingFilters, type ListingKind } from "@/lib/server/db/library-listings";
+import { albums, artists, jobs, taskBatches, tracks } from "@/lib/server/db/schema";
 import { ingestLibrary, PlexAuthExpiredError } from "@/lib/server/ingest/plex-fetch";
 import { emitJobEvent } from "@/lib/server/jobs/events";
 import { syncTrack } from "@/lib/server/lyrics/sync-track";
@@ -121,6 +122,14 @@ export async function startJobWorker(): Promise<void> {
     return;
   }
   running = true;
+  // A previous process may have died while a job was in progress. Requeue it;
+  // syncTrack checks the disk first, so already written files are skipped.
+  const recovered = await db.update(jobs).set({
+    status: "queued", startedAt: null, finishedAt: null,
+  }).where(eq(jobs.status, "running")).returning({ id: jobs.id, kind: jobs.kind, targetUuid: jobs.targetUuid });
+  for (const job of recovered) {
+    emitJobEvent({ jobId: job.id, kind: job.kind, status: "queued", targetUuid: job.targetUuid });
+  }
   logger.info("Job worker started");
 
   for (;;) {
@@ -149,6 +158,7 @@ export async function enqueuePlexFetch(libraryUuid: string): Promise<number> {
     .insert(jobs)
     .values({ kind: "plex_fetch", targetUuid: libraryUuid })
     .returning({ id: jobs.id });
+  emitJobEvent({ jobId: row.id, kind: "plex_fetch", status: "queued", targetUuid: libraryUuid });
   return row.id;
 }
 
@@ -164,7 +174,7 @@ export async function getActiveJobCount(): Promise<number> {
 
 /**
  * Queue a sync for one track. `force` is a manual per-track sync: it always
- * re-asks lrclib even when a .txt already counts as synced for batches.
+ * re-asks lyric providers even when a .txt counts as synced for batches.
  * Dedupes against an already-queued job for the same track; a manual sync
  * upgrades a queued batch job to force rather than stacking a second one.
  */
@@ -243,12 +253,26 @@ export async function enqueueSyncBatch(
     return 0;
   }
 
-  const inserted = await db
-    .insert(jobs)
-    .values(
-      fresh.map(key => ({ kind: "sync_track" as const, targetUuid: key })),
-    )
-    .returning({ id: jobs.id, targetUuid: jobs.targetUuid });
+  const isAlbum = "albumUuid" in scope;
+  const targetUuid = isAlbum ? scope.albumUuid : scope.artistUuid;
+  const target = isAlbum
+    ? await db.query.albums.findFirst({ where: eq(albums.uuid, targetUuid), columns: { title: true } })
+    : await db.query.artists.findFirst({ where: eq(artists.uuid, targetUuid), columns: { title: true } });
+  const [batch] = await db.insert(taskBatches).values({
+    scope: isAlbum ? "album" : "artist",
+    targetUuid,
+    title: target?.title ?? (isAlbum ? "Album" : "Artist"),
+  }).returning({ id: taskBatches.id });
+
+  let inserted: Array<{ id: number; targetUuid: string | null }>;
+  try {
+    inserted = await db.insert(jobs)
+      .values(fresh.map(key => ({ kind: "sync_track" as const, targetUuid: key, batchId: batch.id })))
+      .returning({ id: jobs.id, targetUuid: jobs.targetUuid });
+  } catch (cause) {
+    await db.delete(taskBatches).where(eq(taskBatches.id, batch.id));
+    throw cause;
+  }
   for (const row of inserted) {
     emitJobEvent({
       jobId: row.id,
@@ -258,4 +282,38 @@ export async function enqueueSyncBatch(
     });
   }
   return inserted.length;
+}
+
+/** Capture all eligible tracks for the selected library view at click time. */
+export async function enqueueLibrarySelection(
+  libraryUuid: string, kind: ListingKind, filters: ListingFilters,
+): Promise<number> {
+  const candidates = await eligibleTrackSelection(libraryUuid, kind, filters);
+  if (candidates.length === 0) return 0;
+
+  const [batch] = await db.insert(taskBatches).values({
+    scope: "library",
+    targetUuid: libraryUuid,
+    title: kind === "artists" ? "All artists" : `${kind === "albums" ? "Albums" : "Tracks"} selection`,
+  }).returning({ id: taskBatches.id });
+
+  let insertedCount = 0;
+  try {
+    // SQLite limits bound parameters; a large selection must be chunked.
+    for (let offset = 0; offset < candidates.length; offset += 150) {
+      const chunk = candidates.slice(offset, offset + 150);
+      const inserted = await db.insert(jobs).values(chunk.map(row => ({
+        kind: "sync_track" as const, targetUuid: row.key, batchId: batch.id,
+      }))).returning({ id: jobs.id, targetUuid: jobs.targetUuid });
+      insertedCount += inserted.length;
+      for (const row of inserted) emitJobEvent({
+        jobId: row.id, kind: "sync_track", status: "queued", targetUuid: row.targetUuid,
+      });
+    }
+  } catch (cause) {
+    // Preserve an already-started batch for the worker and queue UI to finish.
+    if (insertedCount === 0) await db.delete(taskBatches).where(eq(taskBatches.id, batch.id));
+    throw cause;
+  }
+  return insertedCount;
 }

@@ -12,7 +12,7 @@ try {
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: z.string().default("file:lyric-sync.db"),
-  LRCLIB_BASE_URL: z.url().default("https://lrclib.net"),
+  LRCMUX_BASE_URL: z.url().default("https://api.lrcmux.dev"),
   LYRIC_SYNC_MUSIC_SOURCE_ROOT: z.string().refine(isAbsolute, "Must be an absolute path").optional(),
   LYRIC_SYNC_MUSIC_MIRROR_ROOT: z.string().refine(isAbsolute, "Must be an absolute path").optional(),
 }).refine(

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, RefreshCw } from "lucide-react";
+import { CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -11,15 +11,17 @@ interface SyncOutcome {
 
 /**
  * Per-track sync button: the page passes syncSingleTrack.bind(null, key),
- * which always forces a fresh lrclib attempt (upgrading a .txt to .lrc
+ * which always forces a fresh provider lookup (upgrading a .txt to .lrc
  * alongside it). Live status arrives via the page's SSE stream.
  */
 export function TrackSyncButton({
   action,
   syncing,
+  synced = false,
 }: {
   action: () => Promise<SyncOutcome>;
   syncing: boolean;
+  synced?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -42,8 +44,8 @@ export function TrackSyncButton({
         onClick={handleClick}
         disabled={busy}
         aria-busy={busy}
-        title={busy ? "Checking for existing lyrics or fetching lyrics" : "Re-check this track's lyrics against lrclib"}
-        aria-label={busy ? "Syncing lyrics for this track" : "Re-check this track's lyrics against lrclib"}
+        title={busy ? "Checking for existing lyrics or fetching lyrics" : "Re-check this track's lyrics"}
+        aria-label={busy ? "Syncing lyrics for this track" : "Re-check this track's lyrics"}
         // `text-foreground/70` not `text-muted`: at muted grey an isolated
         // icon reads as decoration, not a control. The hover lift is the
         // affordance that says "this is a button".
@@ -51,7 +53,7 @@ export function TrackSyncButton({
       >
         {busy
           ? <Loader2 className="size-4 animate-spin" />
-          : <RefreshCw className="size-4" />}
+          : synced ? <CheckCircle2 className="size-4 text-accent" /> : <RefreshCw className="size-4" />}
       </button>
     </span>
   );

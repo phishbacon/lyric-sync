@@ -201,6 +201,7 @@ async function upsertAlbums(libraryUuid: string, items: PlexAlbum[]): Promise<vo
     .values(items.map(item => ({
       uuid: item.guid,
       title: item.title,
+      year: item.year ?? null,
       key: item.key,
       summary: item.summary ?? null,
       image: item.thumb ?? item.art ?? null,
@@ -211,6 +212,7 @@ async function upsertAlbums(libraryUuid: string, items: PlexAlbum[]): Promise<vo
       target: albums.uuid,
       set: {
         title: sql`excluded.title`,
+        year: sql`excluded.year`,
         key: sql`excluded.key`,
         summary: sql`excluded.summary`,
         image: sql`excluded.image`,

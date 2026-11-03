@@ -5,8 +5,4 @@ export const logger = pino({
   // even when env.ts aborts the process).
   // eslint-disable-next-line node/no-process-env
   level: process.env.LOG_LEVEL ?? "info",
-  // eslint-disable-next-line node/no-process-env
-  transport: process.env.NODE_ENV === "development"
-    ? { target: "pino-pretty" }
-    : undefined,
 });

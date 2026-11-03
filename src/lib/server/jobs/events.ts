@@ -27,6 +27,16 @@ export function emitJobEvent(event: JobEvent): void {
   emitter.emit("job", event);
 }
 
+/** Changes to task history and grouping also need to reach other tabs. */
+export function emitTaskChange(): void {
+  emitter.emit("tasks", undefined);
+}
+
+export function onTaskChange(listener: () => void): () => void {
+  emitter.on("tasks", listener);
+  return () => emitter.off("tasks", listener);
+}
+
 /** Subscribe; returns an unsubscribe function. */
 export function onJobEvent(
   listener: (event: JobEvent) => void,
